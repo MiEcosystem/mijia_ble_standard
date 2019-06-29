@@ -58,11 +58,11 @@
  **************************************************************************************************/
 
 #ifndef MAX_ADVERTISERS
-#define MAX_ADVERTISERS 1
+#define MAX_ADVERTISERS 2
 #endif
 
 #ifndef MAX_CONNECTIONS
-#define MAX_CONNECTIONS 4
+#define MAX_CONNECTIONS 1
 #endif
 
 uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];

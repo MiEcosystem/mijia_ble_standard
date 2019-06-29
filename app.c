@@ -43,7 +43,13 @@ void appMain(gecko_configuration_t *pconfig)
   initLog();
 
   /* Initialize stack */
-  gecko_init(pconfig);
+  gecko_stack_init(pconfig);
+  gecko_bgapi_class_system_init();
+  gecko_bgapi_class_le_gap_init();
+  gecko_bgapi_class_le_connection_init();
+  gecko_bgapi_class_gatt_server_init();
+  gecko_bgapi_class_hardware_init();
+  gecko_bgapi_class_flash_init();
 
   while (1) {
     /* Event pointer for handling events */
