@@ -38,6 +38,8 @@
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.floatingpoint.type.1547551189" name="Floating-Point ABI" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.floatingpoint.type" value="floatingpoint.type.softfp" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.983134708" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/platform/radio/rail_lib/common}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/mijia_ble_api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/mijia_ble_libs}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/platform/Device/SiliconLabs/EFR32BG13P/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/platform/emlib/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/hardware/kit/common/halconfig}&quot;"/>
@@ -65,8 +67,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/platform/bootloader}&quot;"/>
 								</option>
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.def.symbols.2012842330" name="Defined symbols (-D)" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.def.symbols" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="__HEAP_SIZE=0xD00"/>
-									<listOptionValue builtIn="false" value="__STACK_SIZE=0x800"/>
+									<listOptionValue builtIn="false" value="__HEAP_SIZE=0x800"/>
+									<listOptionValue builtIn="false" value="CUSTOMIZED_MI_CONFIG_FILE=&lt;custom_mi_config.h&gt;"/>
+									<listOptionValue builtIn="false" value="__STACK_SIZE=0x2000"/>
 									<listOptionValue builtIn="false" value="__StackLimit=0x20000000"/>
 									<listOptionValue builtIn="false" value="HAL_CONFIG=1"/>
 									<listOptionValue builtIn="false" value="EFR32BG13P632F512GM48=1"/>
@@ -105,8 +108,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/platform/bootloader}&quot;"/>
 								</option>
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.as.def.symbols.1226419702" name="Defined symbols (-D)" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.as.def.symbols" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="__HEAP_SIZE=0xD00"/>
-									<listOptionValue builtIn="false" value="__STACK_SIZE=0x800"/>
+									<listOptionValue builtIn="false" value="CUSTOMIZED_MI_CONFIG_FILE=&lt;custom_mi_config.h&gt;"/>
+									<listOptionValue builtIn="false" value="__HEAP_SIZE=0x800"/>
+									<listOptionValue builtIn="false" value="__STACK_SIZE=0x2000"/>
 									<listOptionValue builtIn="false" value="__StackLimit=0x20000000"/>
 									<listOptionValue builtIn="false" value="HAL_CONFIG=1"/>
 									<listOptionValue builtIn="false" value="EFR32BG13P632F512GM48=1"/>
@@ -120,11 +124,11 @@
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/protocol/bluetooth/lib/EFR32BG13P/GCC/libmbedtls.a}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/protocol/bluetooth/lib/EFR32BG13P/GCC/libbluetooth.a}"/>
 								</option>
-								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type.693057882" name="Floating-Point ABI" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type" value="floatingpoint.type.softfp" valueType="enumerated"/>
+								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type.693057882" name="Floating-Point ABI" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type" value="floatingpoint.type.hard" valueType="enumerated"/>
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.circulardependency.807991565" name="Use library file circular dependency" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.circulardependency" value="true" valueType="boolean"/>
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.nostdlibs.1397574805" name="No startup or default libs (-nostdlib)" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.nostdlibs" value="false" valueType="boolean"/>
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.clibs.1447319290" name="C Library" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.clibs" value="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.nanospec" valueType="enumerated"/>
-								<option id="gnu.c.link.option.libs.1114668541" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs"/>
+								<option id="gnu.c.link.option.libs.1114668541" name="Libraries (-l)" superClass="gnu.c.link.option.libs"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1801181643" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -147,12 +151,16 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
 	</storageModule>
-	<storageModule generalProj.esf.protocolIds="com.silabs.sdk.stack.super:2.6.0._1914562655.com.silabs.stack.ble:2.12.0.0_134876927" generalProj.esf.protocolNames="ble" moduleId="com.silabs.ss.framework.ide.project.core.cpp" project.generation="360" projectCommon.boardIds="brd4104a:0.0.0.A00" projectCommon.partId="mcu.arm.efr32.bg13.efr32bg13p632f512gm48" projectCommon.sdkId="com.silabs.sdk.stack.super:2.6.0._1914562655"/>
+	<storageModule generalProj.esf.protocolIds="com.silabs.sdk.stack.super:2.6.0._1914562655.com.silabs.stack.ble:2.12.0.0_134876927" generalProj.esf.protocolNames="ble" moduleId="com.silabs.ss.framework.ide.project.core.cpp" project.generation="370" projectCommon.boardIds="brd4104a:0.0.0.A00" projectCommon.partId="mcu.arm.efr32.bg13.efr32bg13p632f512gm48" projectCommon.sdkId="com.silabs.sdk.stack.super:2.6.0._1914562655"/>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="mijia_ble_standard.com.silabs.ss.framework.ide.project.core.cdt.cdtMbsProjectType.280214106" name="SLS CDT Project" projectType="com.silabs.ss.framework.ide.project.core.cdt.cdtMbsProjectType"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="GNU ARM v7.2.1 - Default">
+			<resource resourceType="PROJECT" workspacePath="/mijia_ble_standard"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="com.silabs.ss.framework.project.toolchain.core.default#com.silabs.ss.tool.ide.arm.toolchain.gnu.cdt:7.2.1.20170904;com.silabs.ss.framework.project.toolchain.core.default#com.silabs.ss.tool.ide.arm.toolchain.gnu.cdt:7.2.1.20170904.;com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base.608983999;com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.input.717848275">

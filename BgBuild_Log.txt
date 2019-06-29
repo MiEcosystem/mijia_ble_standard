@@ -6,4 +6,7 @@ Executing: bgbuild (/Applications/Simplicity Studio.app/Contents/Eclipse/develop
 Standard output
 ALL OK
 
+Error/Warning output
+WARNING: 2a00 max length attribute is 20 but actual value length is 13. 20 will be used.
+
 
