@@ -8,5 +8,5 @@
 #define CUSTOM_MI_CONFIG_H
 
 #define MI_BLE_ENABLED
-#define HAVE_MSC            1
+#define HAVE_MSC            0
 #endif
