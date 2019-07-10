@@ -47,9 +47,8 @@
 #include "mible_api.h"
 #include "mible_trace.h"
 #include "common/mible_beacon.h"
-#include "secure_auth/mible_secure_auth.h"
+#include "standard_auth/mible_standard_auth.h"
 #include "mijia_profiles/mi_service_server.h"
-#include "mijia_profiles/lock_service_server.h"
 
 #undef  MI_LOG_MODULE_NAME
 #define MI_LOG_MODULE_NAME __FILE__
@@ -254,12 +253,7 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
 
     mi_service_init();
 
-    mible_libs_config_t lib_cfg = {
-            .msc_onoff = msc_pwr_manage,
-            .p_msc_iic_config = &msc_iic_config,
-    };
-
-    mi_scheduler_init(10, mi_schd_event_handler, &lib_cfg);
+    mi_scheduler_init(10, mi_schd_event_handler, NULL);
     mi_scheduler_start(SYS_KEY_RESTORE);
 }
 
@@ -294,9 +288,7 @@ static void process_external_signal(struct gecko_cmd_packet *evt)
     }
 
     if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB1_SHORT_PRESS) {
-        MI_LOG_DEBUG("MSC Self test.\n");
-        mi_scheduler_start(SYS_MSC_SELF_TEST);
-
+        // TODO
     }
 }
 
@@ -375,7 +367,7 @@ int main()
             if (pair_code_num == PAIRCODE_NUMS) {
                 pair_code_num = 0;
                 need_kbd_input = false;
-                mi_input_oob(pair_code, sizeof(pair_code));
+                mi_schd_oob_rsp(pair_code, sizeof(pair_code));
             }
         }
 
