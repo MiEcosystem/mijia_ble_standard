@@ -224,22 +224,6 @@ void mi_schd_event_handler(schd_evt_t *p_event)
     }
 }
 
-static bool m_allow_sleep = true;
-static int msc_pwr_manage(bool power_stat)
-{
-    if (power_stat == 1) {
-        GPIO_PinModeSet(gpioPortA, 0, gpioModeWiredAndPullUp, 1);
-        GPIO_PinOutSet(gpioPortA, 0);
-        m_allow_sleep = false;
-    } else {
-        GPIO_PinOutClear(gpioPortA, 0);
-        GPIO_PinModeSet(gpioPortA, 0, gpioModeDisabled, 0);
-        m_allow_sleep = true;
-    }
-    return 0;
-}
-
-
 static void process_system_boot(struct gecko_cmd_packet *evt)
 {
 
@@ -372,12 +356,7 @@ int main()
         }
 
         /* Enter low power mode */
-        if (m_allow_sleep == true){
-            /* Go to sleep. Sleeping will be avoided if there isn't enough time to sleep */
-            gecko_sleep_for_ms(gecko_can_sleep_ms());
-        } else {
-            /* Block EM2/3/4 entry, because of I2C master driver only work in EM0/1. */
-        }
+        gecko_sleep_for_ms(gecko_can_sleep_ms());
     }
 }
 
@@ -393,8 +372,6 @@ static void advertising_init(uint8_t solicite_bind)
     };
 
     mibeacon_capability_t cap = {
-            .connectable = 1,
-            .encryptable = 1,
             .bondAbility = 1
     };
 
@@ -410,7 +387,7 @@ static void advertising_init(uint8_t solicite_bind)
             .pid = PRODUCT_ID,
             .p_mac = &dev_mac,
             .p_capability = &cap,
-            .p_cap_sub_IO = &io,
+//            .p_cap_sub_IO = &io,
     };
 
     uint8_t service_data[31];
@@ -439,7 +416,7 @@ static void advertising_start(void)
 {
     MI_LOG_INFO("advertising start...\n");
     mible_gap_adv_param_t adv_param =(mible_gap_adv_param_t){
-        .adv_type = MIBLE_ADV_TYPE_CONNECTABLE_UNDIRECTED,
+                .adv_type = MIBLE_ADV_TYPE_CONNECTABLE_UNDIRECTED,
                 .adv_interval_min = MSEC_TO_UNITS(200, 625),
                 .adv_interval_max = MSEC_TO_UNITS(200, 625),
     };

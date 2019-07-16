@@ -74,6 +74,7 @@
 									<listOptionValue builtIn="false" value="__StackLimit=0x20000000"/>
 									<listOptionValue builtIn="false" value="HAL_CONFIG=1"/>
 									<listOptionValue builtIn="false" value="EFR32BG13P632F512GM48=1"/>
+									<listOptionValue builtIn="false" value="MI_LOG_ENABLED=1"/>
 									<listOptionValue builtIn="false" value="MI_ASSERT=1"/>
 									<listOptionValue builtIn="false" value="CUSTOMIZED_MI_CONFIG_FILE=&lt;custom_mi_config.h&gt;"/>
 								</option>
