@@ -49,6 +49,7 @@
 #include "common/mible_beacon.h"
 #include "standard_auth/mible_standard_auth.h"
 #include "mijia_profiles/mi_service_server.h"
+#include "mijia_profiles/stdio_service_server.h"
 
 #undef  MI_LOG_MODULE_NAME
 #define MI_LOG_MODULE_NAME __FILE__
@@ -205,7 +206,7 @@ static void enqueue_new_objs()
 }
 
 
-void mi_schd_event_handler(schd_evt_t *p_event)
+static void mi_schd_event_handler(schd_evt_t *p_event)
 {
     MI_LOG_INFO("USER CUSTOM CALLBACK RECV EVT ID %d\n", p_event->id);
     switch(p_event->id) {
@@ -224,6 +225,18 @@ void mi_schd_event_handler(schd_evt_t *p_event)
     }
 }
 
+static void stdio_rx_handler(uint8_t* data, uint8_t len)
+{
+    int errno;
+    /* RX plain text (It has been decrypted.) */
+    MI_LOG_INFO("RX plain data\n");
+    MI_LOG_HEXDUMP(data, len);
+
+    /* TX plain text (It will be encrypted before send out.) */
+    errno = stdio_tx(data, len);
+    MI_ERR_CHECK(errno);
+}
+
 static void process_system_boot(struct gecko_cmd_packet *evt)
 {
 
@@ -236,6 +249,7 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     advertising_start();
 
     mi_service_init();
+    stdio_service_init(stdio_rx_handler);
 
     mi_scheduler_init(10, mi_schd_event_handler, NULL);
     mi_scheduler_start(SYS_KEY_RESTORE);
@@ -276,7 +290,7 @@ static void process_external_signal(struct gecko_cmd_packet *evt)
     }
 }
 
-void user_stack_event_handler(struct gecko_cmd_packet* evt)
+static void user_stack_event_handler(struct gecko_cmd_packet* evt)
 {
     /* Handle events */
     switch (BGLIB_MSG_ID(evt->header)) {

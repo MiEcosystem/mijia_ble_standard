@@ -94,6 +94,13 @@ void initMcu(void)
   RMU->CTRL = (RMU->CTRL & ~_RMU_CTRL_SYSRMODE_MASK) | RMU_CTRL_SYSRMODE_DEFAULT;
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_1_CONFIG_3)
+  /* xG13 devices have two RTCCs, one for the stack and another for the application.
+   * The clock for RTCC needs to be enabled in application code. In xG12 RTCC init
+   * is handled by the stack */
+  CMU_ClockEnable(cmuClock_RTCC, true);
+#endif
+
 }
 
 static void initMcu_clocks(void)

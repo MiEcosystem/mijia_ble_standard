@@ -20,5 +20,7 @@ extern const struct bg_gattdb_def bg_gattdb_data;
 #define gattdb_std_auth                        15
 #define gattdb_ota_ctrlp                       18
 #define gattdb_ota_data                        21
+#define gattdb_rx                              25
+#define gattdb_tx                              27
 
 #endif
