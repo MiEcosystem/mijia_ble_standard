@@ -86,14 +86,13 @@
 #include "mible_log.h"
 #include "nRF5_evt.h"
 #include "common/mible_beacon.h"
-#include "secure_auth/mible_secure_auth.h"
+#include "standard_auth/mible_standard_auth.h"
 #include "mijia_profiles/mi_service_server.h"
-#include "mijia_profiles/lock_service_server.h"
 #include "mijia_profiles/stdio_service_server.h"
 #include "mi_config.h"
 
-#define DEVICE_NAME                     "secure_demo"                       /**< Name of device. Will be included in the advertising data. */
-#define MANUFACTURER_NAME               "Xiaomi Inc."                   /**< Manufacturer. Will be passed to Device Information Service. */
+#define DEVICE_NAME                     "standard_demo"                         /**< Name of device. Will be included in the advertising data. */
+#define MANUFACTURER_NAME               "Xiaomi Inc."                           /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO           3                                       /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG            1                                       /**< A tag identifying the SoftDevice BLE configuration. */
@@ -504,7 +503,7 @@ static void bsp_event_handler(bsp_event_t event)
             break;
 
         case BSP_EVENT_KEY_1:
-            mi_scheduler_start(SYS_MSC_SELF_TEST);
+            
             break;
 
         default:
@@ -515,18 +514,16 @@ static void bsp_event_handler(bsp_event_t event)
 
 /**@brief Function for initializing the Advertising functionality.
  */
-static void advertising_init(bool need_bind_confirm)
+static void advertising_init(bool solicite_bind)
 {
     MI_LOG_INFO("advertising init...\n");
     mibeacon_frame_ctrl_t frame_ctrl = {
-        .secure_auth    = 1,
+        .auth_mode      = 2,
         .version        = 5,
-        .bond_confirm   = need_bind_confirm,
+        .solicite       = solicite_bind,
     };
 
-    mibeacon_capability_t cap = {.connectable = 1,
-                                 .encryptable = 1,
-                                 .bondAbility = 1};
+    mibeacon_capability_t cap = {.bondAbility = 1};
     mibeacon_cap_sub_io_t IO = {.in_digits = 1};
     mible_addr_t dev_mac;
     mible_gap_address_get(dev_mac);
@@ -664,22 +661,11 @@ static void poll_timer_handler(void * p_context)
 
 void time_init(struct tm * time_ptr);
 
-
-#define PAIRCODE_NUMS 6
-static bool need_kbd_input;
-static uint8_t pair_code_num;
-static uint8_t pair_code[PAIRCODE_NUMS];
 static uint8_t qr_code[16] = {
 0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,
 };
 
-int scan_keyboard(uint8_t *pdata, uint8_t len)
-{
-    if (pdata == NULL)
-        return 0;
 
-    return SEGGER_RTT_ReadNoLock(0, pdata, len);
-}
 
 void flush_keyboard_buffer(void)
 {
@@ -695,14 +681,8 @@ void mi_schd_event_handler(schd_evt_t *p_event)
     case SCHD_EVT_OOB_REQUEST:
         MI_LOG_INFO("App selected IO cap is 0x%04X\n", p_event->data.IO_capability);
         switch (p_event->data.IO_capability) {
-        case 0x0001:
-            need_kbd_input = true;
-            flush_keyboard_buffer();
-            MI_LOG_INFO(MI_LOG_COLOR_GREEN "Please input your pair code ( MUST be 6 digits ) : \n");
-            break;
-
         case 0x0080:
-            mi_input_oob(qr_code, 16);
+            mi_schd_oob_rsp(qr_code, 16);
             MI_LOG_INFO(MI_LOG_COLOR_GREEN "Please scan device QR code.\n");
             break;
 
@@ -722,72 +702,6 @@ void mi_schd_event_handler(schd_evt_t *p_event)
     }
 }
 
-#ifdef NRF52840_XXAA
-#define MSC_PWR_PIN                     20
-const iic_config_t iic_config = {
-        .scl_pin  = 21,
-        .sda_pin  = 22,
-        .freq = HAVE_MSC == 1 ? IIC_100K : IIC_400K,
-};
-#else
-#define MSC_PWR_PIN                     23
-const iic_config_t iic_config = {
-        .scl_pin  = 24,
-        .sda_pin  = 25,
-        .freq = HAVE_MSC == 1 ? IIC_100K : IIC_400K,
-};
-#endif
-
-
-int mijia_secure_chip_power_manage(bool power_stat)
-{
-    if (power_stat == 1) {
-        nrf_gpio_cfg_output(MSC_PWR_PIN);
-        nrf_gpio_pin_set(MSC_PWR_PIN);
-    } else {
-        nrf_gpio_pin_clear(MSC_PWR_PIN);
-    }
-    return 0;
-}
-
-
-void ble_lock_ops_handler(uint8_t opcode)
-{
-    int errno;
-    switch(opcode) {
-    case 0:
-        MI_LOG_INFO(" unlock \n");
-        bsp_board_led_off(1);
-        bsp_board_led_off(2);
-        break;
-
-    case 1:
-        MI_LOG_INFO(" lock \n");
-        bsp_board_led_on(1);
-        break;
-
-    case 2:
-        MI_LOG_INFO(" bolt \n");
-        bsp_board_led_on(2);
-        break;
-
-    default:
-        MI_LOG_ERROR("lock opcode error %d", opcode);
-    }
-
-    lock_event_t obj_lock_event;
-    obj_lock_event.action = opcode;
-    obj_lock_event.method = 0;
-    obj_lock_event.user_id= get_mi_key_id();
-    obj_lock_event.time   = time(NULL);
-
-    mibeacon_obj_enque(MI_EVT_LOCK, sizeof(obj_lock_event), &obj_lock_event);
-            
-    reply_lock_stat(opcode);
-    errno = send_lock_log(MI_EVT_LOCK, sizeof(obj_lock_event), &obj_lock_event);
-    MI_ERR_CHECK(errno);
-}
-
 void stdio_rx_handler(uint8_t* p, uint8_t l)
 {
     int errno;
@@ -804,11 +718,11 @@ void stdio_rx_handler(uint8_t* p, uint8_t l)
  */
 int main(void)
 {
-
     // Initialize.
     log_init();
     timers_init();
-    MI_LOG_INFO(RTT_CTRL_CLEAR"Compiled  %s %s\n", (uint32_t)__DATE__, (uint32_t)__TIME__);
+    MI_LOG_INFO(RTT_CTRL_CLEAR);
+    MI_LOG_INFO("Compiled  %s %s\n", (uint32_t)__DATE__, (uint32_t)__TIME__);
     buttons_leds_init();
     power_management_init();
     ble_stack_init();
@@ -820,21 +734,11 @@ int main(void)
 
     time_init(NULL);
 
-    mible_libs_config_t config = {
-        .msc_onoff        = mijia_secure_chip_power_manage,
-        .p_msc_iic_config = (void*)&iic_config
-    };
-
     /* <!> mi_scheduler_init() must be called after ble_stack_init(). */
-    mi_scheduler_init(10, mi_schd_event_handler, &config);
+    mi_scheduler_init(10, mi_schd_event_handler, NULL);
     mi_scheduler_start(SYS_KEY_RESTORE);
 
     mi_service_init();
-
-    lock_init_t lock_config;
-    lock_config.opcode_handler = ble_lock_ops_handler;
-    lock_service_init(&lock_config);
-
     stdio_service_init(stdio_rx_handler);
     
     // Start execution.
@@ -843,18 +747,6 @@ int main(void)
     
     // Enter main loop.
     for (;;) {
-        // Scan keyboard.
-        if (need_kbd_input) {
-            if (pair_code_num < PAIRCODE_NUMS) {
-                pair_code_num += scan_keyboard(pair_code + pair_code_num, PAIRCODE_NUMS - pair_code_num);
-            }
-            if (pair_code_num == PAIRCODE_NUMS) {
-                pair_code_num = 0;
-                need_kbd_input = false;
-                mi_input_oob(pair_code, sizeof(pair_code));
-            }
-        }
-
 #if (MI_SCHD_PROCESS_IN_MAIN_LOOP==1)
         // Process mi scheduler
         mi_schd_process();
