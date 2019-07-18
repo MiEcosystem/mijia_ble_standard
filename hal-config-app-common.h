@@ -25,6 +25,7 @@
 #include "hal-config-ioexp.h"
 #endif
 
+#define HAL_DCDC_BYPASS                               (1)
 #define HAL_EXTFLASH_FREQUENCY                        (1000000)
 
 #define HAL_PA_ENABLE                                 (1)

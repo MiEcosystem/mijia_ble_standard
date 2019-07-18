@@ -42,6 +42,8 @@
 #include "bspconfig.h"
 #endif
 
+#include "bsp_trace.h"
+
 /* Mijia BLE API and Middleware */
 #include "efr32_api.h"
 #include "mible_api.h"
@@ -211,9 +213,11 @@ static void mi_schd_event_handler(schd_evt_t *p_event)
     MI_LOG_INFO("USER CUSTOM CALLBACK RECV EVT ID %d\n", p_event->id);
     switch(p_event->id) {
     case SCHD_EVT_OOB_REQUEST:
-        need_kbd_input = true;
-        flush_keyboard_buffer();
-        MI_LOG_INFO(MI_LOG_COLOR_GREEN "Please input your pair code ( MUST be 6 digits ) : \n");
+        MI_LOG_INFO(MI_LOG_COLOR_GREEN "Please scan QR code. \n");
+        const uint8_t qr_code[16] = {
+                0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xa0,0xaa,0xab,0xac,0xad,0xae,0xaf,
+        };
+        mi_schd_oob_rsp(qr_code, 16);
         break;
 
     case SCHD_EVT_REG_SUCCESS:
@@ -323,6 +327,9 @@ int main()
     // Initialize application
     initApp();
 
+    // Setup SWD for code correlation
+    BSP_TraceSwoSetup();
+
     MI_LOG_INFO(RTT_CTRL_CLEAR"\n");
     MI_LOG_INFO("Compiled %s %s\n", __DATE__, __TIME__);
     MI_LOG_INFO("system clock %d Hz\n", SystemCoreClockGet());
@@ -381,7 +388,6 @@ static void advertising_init(uint8_t solicite_bind)
 
     mibeacon_frame_ctrl_t frame_ctrl = {
             .auth_mode    = 2,
-            .version      = 5,
             .solicite     = solicite_bind
     };
 
@@ -393,7 +399,7 @@ static void advertising_init(uint8_t solicite_bind)
     mible_gap_address_get(dev_mac);
 
     mibeacon_cap_sub_io_t io = {
-            .in_digits   = 1,
+            .out_image   = 1,
     };
 
     mibeacon_config_t mibeacon_cfg = {

@@ -31,11 +31,12 @@
 
 // Custom macros
 #define BRD4104A  1
+#define CUSTOMIZED -1
 
 #ifdef EMBER_AF_BOARD_TYPE
 #undef EMBER_AF_BOARD_TYPE
 #endif
-#define EMBER_AF_BOARD_TYPE BRD4104A
+#define EMBER_AF_BOARD_TYPE CUSTOMIZED
 
 // Select antenna path on EFR32xG2x devices:
 //   - RF2G2_IO1: 0
