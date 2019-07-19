@@ -110,20 +110,6 @@ static gecko_configuration_t config = {
   .max_timers = 8,
 };
 
-static const iic_config_t msc_iic_config = {
-        .scl_pin = BSP_I2C0_SCL_PIN,
-        .scl_port = BSP_I2C0_SCL_PORT,
-        .scl_extra_conf = BSP_I2C0_SCL_LOC,
-        .sda_pin = BSP_I2C0_SDA_PIN,
-        .sda_port = BSP_I2C0_SDA_PORT,
-        .sda_extra_conf = BSP_I2C0_SDA_LOC,
-        .freq = HAVE_MSC==1 ? IIC_100K : IIC_400K,
-};
-
-#define PAIRCODE_NUMS 6
-bool need_kbd_input;
-uint8_t pair_code_num;
-uint8_t pair_code[PAIRCODE_NUMS];
 /// button press timestamp for very long/long/short Push Button 0 press detection
 static uint32 pb0_press, pb1_press;
 
@@ -214,7 +200,7 @@ static void mi_schd_event_handler(schd_evt_t *p_event)
     switch(p_event->id) {
     case SCHD_EVT_OOB_REQUEST:
         MI_LOG_INFO(MI_LOG_COLOR_GREEN "Please scan QR code. \n");
-        const uint8_t qr_code[16] = {
+        uint8_t qr_code[16] = {
                 0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xa0,0xaa,0xab,0xac,0xad,0xae,0xaf,
         };
         mi_schd_oob_rsp(qr_code, 16);
@@ -222,7 +208,7 @@ static void mi_schd_event_handler(schd_evt_t *p_event)
 
     case SCHD_EVT_REG_SUCCESS:
         // start periodic advertise objects.
-        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(600), TIMER_ID_OBJ_PERIOD_ADV, 0);
+        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(5), TIMER_ID_OBJ_PERIOD_ADV, 0);
         break;
     default:
         break;
@@ -243,7 +229,6 @@ static void stdio_rx_handler(uint8_t* data, uint8_t len)
 
 static void process_system_boot(struct gecko_cmd_packet *evt)
 {
-
     struct gecko_msg_system_boot_evt_t boot_info = evt->data.evt_system_boot;
     MI_LOG_INFO("system stack %d.%0d.%0d-%d, heap %d bytes\n", boot_info.major, boot_info.minor, boot_info.patch, boot_info.build,sizeof(bluetooth_stack_heap));
 
@@ -257,6 +242,9 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
 
     mi_scheduler_init(10, mi_schd_event_handler, NULL);
     mi_scheduler_start(SYS_KEY_RESTORE);
+
+    // start periodic advertise objects.
+    gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(5), TIMER_ID_OBJ_PERIOD_ADV, 0);
 }
 
 
@@ -363,18 +351,6 @@ int main()
 
         /* Process mi scheduler */
         mi_schd_process();
-
-        /* Scan keyboard */
-        if (need_kbd_input) {
-            if (pair_code_num < PAIRCODE_NUMS) {
-                pair_code_num += scan_keyboard(pair_code + pair_code_num, PAIRCODE_NUMS - pair_code_num);
-            }
-            if (pair_code_num == PAIRCODE_NUMS) {
-                pair_code_num = 0;
-                need_kbd_input = false;
-                mi_schd_oob_rsp(pair_code, sizeof(pair_code));
-            }
-        }
 
         /* Enter low power mode */
         gecko_sleep_for_ms(gecko_can_sleep_ms());
