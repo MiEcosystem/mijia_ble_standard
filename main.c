@@ -519,7 +519,6 @@ static void advertising_init(bool solicite_bind)
     MI_LOG_INFO("advertising init...\n");
     mibeacon_frame_ctrl_t frame_ctrl = {
         .auth_mode      = 2,
-        .version        = 5,
         .solicite       = solicite_bind,
     };
 
@@ -664,15 +663,6 @@ void time_init(struct tm * time_ptr);
 static uint8_t qr_code[16] = {
 0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,
 };
-
-
-
-void flush_keyboard_buffer(void)
-{
-    uint8_t tmp[16];
-    while(SEGGER_RTT_ReadNoLock(0, tmp, 16));
-}
-
 
 void mi_schd_event_handler(schd_evt_t *p_event)
 {
