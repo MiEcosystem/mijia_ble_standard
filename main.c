@@ -59,6 +59,8 @@
 
 #include "mi_config.h"
 
+
+#define DEVICE_NAME                    "stand_demo"
 #ifndef MAX_CONNECTIONS
 #define MAX_CONNECTIONS                1
 #endif
@@ -188,9 +190,10 @@ void button_init(void)
 
 static void enqueue_new_objs()
 {
-    // get your battery
-    int8_t  battery = 100;
-    mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery);
+    static int8_t  battery;
+
+    battery = battery < 100 ? battery + 1 : 0;
+    mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery, 0);
 }
 
 
@@ -199,17 +202,24 @@ static void mi_schd_event_handler(schd_evt_t *p_event)
     MI_LOG_INFO("USER CUSTOM CALLBACK RECV EVT ID %d\n", p_event->id);
     switch(p_event->id) {
     case SCHD_EVT_OOB_REQUEST:
-        MI_LOG_INFO(MI_LOG_COLOR_GREEN "Please scan QR code. \n");
-        uint8_t qr_code[16] = {
+        MI_LOG_INFO(MI_LOG_COLOR_GREEN " scan QR code. \n");
+        const uint8_t qr_code[16] = {
                 0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xa0,0xaa,0xab,0xac,0xad,0xae,0xaf,
         };
         mi_schd_oob_rsp(qr_code, 16);
         break;
 
     case SCHD_EVT_REG_SUCCESS:
-        // start periodic advertise objects.
-        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(5), TIMER_ID_OBJ_PERIOD_ADV, 0);
+        // set register bit.
+        advertising_init(0);
+        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(60), TIMER_ID_OBJ_PERIOD_ADV, 0);
         break;
+
+    case SCHD_EVT_KEY_DEL_SUCC:
+        // clear register bit.
+        advertising_init(0);
+        break;
+
     default:
         break;
     }
@@ -233,9 +243,6 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     MI_LOG_INFO("system stack %d.%0d.%0d-%d, heap %d bytes\n", boot_info.major, boot_info.minor, boot_info.patch, boot_info.build,sizeof(bluetooth_stack_heap));
 
     gecko_cmd_system_set_tx_power(0);
-    /* Start general advertising and enable connections. */
-    advertising_init(0);
-    advertising_start();
 
     mi_service_init();
     stdio_service_init(stdio_rx_handler);
@@ -243,8 +250,12 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     mi_scheduler_init(10, mi_schd_event_handler, NULL);
     mi_scheduler_start(SYS_KEY_RESTORE);
 
+    /* Start general advertising and enable connections. */
+    advertising_init(0);
+    advertising_start();
+
     // start periodic advertise objects.
-    gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(5), TIMER_ID_OBJ_PERIOD_ADV, 0);
+    gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(60), TIMER_ID_OBJ_PERIOD_ADV, 0);
 }
 
 
@@ -266,9 +277,13 @@ static void process_softtimer(struct gecko_cmd_packet *evt)
 static void process_external_signal(struct gecko_cmd_packet *evt)
 {
     if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB0_SHORT_PRESS) {
-        MI_LOG_DEBUG("Set bind confirm bit in mibeacon.\n");
-        advertising_init(1);
-        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(10), TIMER_ID_CLEAR_BIND_CFM, 1);
+        if(get_mi_reg_stat()) {
+            enqueue_new_objs();
+        } else {
+            MI_LOG_DEBUG("Set bind confirm bit in mibeacon.\n");
+            advertising_init(1);
+            gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(10), TIMER_ID_CLEAR_BIND_CFM, 1);
+        }
     }
 
     if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB0_LONG_PRESS) {
@@ -357,69 +372,26 @@ int main()
     }
 }
 
-
 static void advertising_init(uint8_t solicite_bind)
 {
     MI_LOG_INFO("advertising init...\n");
 
-    mibeacon_frame_ctrl_t frame_ctrl = {
-            .auth_mode    = 2,
-            .solicite     = solicite_bind
-    };
+    // add user customized adv struct : complete local name
+    uint8_t user_data[31], user_dlen;
+    user_data[0] = 1 + strlen(DEVICE_NAME);
+    user_data[1] = 9;  // complete local name
+    strcpy((char*)&user_data[2], DEVICE_NAME);
+    user_dlen = 2 + strlen(DEVICE_NAME);
 
-    mibeacon_capability_t cap = {
-            .bondAbility = 1
-    };
-
-    mible_addr_t dev_mac;
-    mible_gap_address_get(dev_mac);
-
-    mibeacon_cap_sub_io_t io = {
-            .out_image   = 1,
-    };
-
-    mibeacon_config_t mibeacon_cfg = {
-            .frame_ctrl = frame_ctrl,
-            .pid = PRODUCT_ID,
-            .p_mac = &dev_mac,
-            .p_capability = &cap,
-//            .p_cap_sub_IO = &io,
-    };
-
-    uint8_t service_data[31];
-    uint8_t service_data_len = 0;
-
-    if(MI_SUCCESS != mible_service_data_set(&mibeacon_cfg, service_data, &service_data_len)){
+    if(MI_SUCCESS != mibeacon_adv_data_set(solicite_bind, 0, user_data, user_dlen)){
         MI_LOG_ERROR("mibeacon_data_set failed. \r\n");
-        return;
     }
-
-    uint8_t adv_data[31] = {2, 1, 6};
-    uint8_t adv_len = 3;
-
-    memcpy(adv_data+3, service_data, service_data_len);
-    adv_len += service_data_len;
-
-    MI_LOG_INFO("adv_data:\n");
-    MI_LOG_HEXDUMP(adv_data, adv_len);
-
-    mible_gap_adv_data_set(adv_data, adv_len, adv_data, 0);
-    return;
 }
 
 
 static void advertising_start(void)
 {
     MI_LOG_INFO("advertising start...\n");
-    mible_gap_adv_param_t adv_param =(mible_gap_adv_param_t){
-                .adv_type = MIBLE_ADV_TYPE_CONNECTABLE_UNDIRECTED,
-                .adv_interval_min = MSEC_TO_UNITS(200, 625),
-                .adv_interval_max = MSEC_TO_UNITS(200, 625),
-    };
-
-    if(MI_SUCCESS != mible_gap_adv_start(&adv_param)){
-        MI_LOG_ERROR("mible_gap_adv_start failed. \r\n");
-        return;
-    }
+    mibeacon_adv_start(300);
 }
 
