@@ -336,9 +336,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--diag_suppress=550</MiscControls>
-              <Define>MI_BLE_ENABLED HAVE_MSC=1 MI_ASSERT MI_LOG_ENABLED BLE_STACK_SUPPORT_REQD NRF51422 BOARD_PCA10028 S130 NRF_SD_BLE_API_VERSION=2 NRF51 SOFTDEVICE_PRESENT SWI_DISABLE0</Define>
+              <Define>CUSTOMIZED_MI_CONFIG_FILE=&lt;custom_mi_config.h&gt; MI_ASSERT MI_LOG_ENABLED BLE_STACK_SUPPORT_REQD NRF51422 BOARD_PCA10028 S130 NRF_SD_BLE_API_VERSION=2 NRF51 SOFTDEVICE_PRESENT SWI_DISABLE0</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\config;..\..\..\..\..\..\components;..\..\..\..\..\..\components\ble\ble_advertising;..\..\..\..\..\..\components\ble\ble_dtm;..\..\..\..\..\..\components\ble\ble_racp;..\..\..\..\..\..\components\ble\ble_services\ble_ancs_c;..\..\..\..\..\..\components\ble\ble_services\ble_ans_c;..\..\..\..\..\..\components\ble\ble_services\ble_bas;..\..\..\..\..\..\components\ble\ble_services\ble_bas_c;..\..\..\..\..\..\components\ble\ble_services\ble_cscs;..\..\..\..\..\..\components\ble\ble_services\ble_cts_c;..\..\..\..\..\..\components\ble\ble_services\ble_dfu;..\..\..\..\..\..\components\ble\ble_services\ble_dis;..\..\..\..\..\..\components\ble\ble_services\ble_gls;..\..\..\..\..\..\components\ble\ble_services\ble_hids;..\..\..\..\..\..\components\ble\ble_services\ble_hrs;..\..\..\..\..\..\components\ble\ble_services\ble_hrs_c;..\..\..\..\..\..\components\ble\ble_services\ble_hts;..\..\..\..\..\..\components\ble\ble_services\ble_ias;..\..\..\..\..\..\components\ble\ble_services\ble_ias_c;..\..\..\..\..\..\components\ble\ble_services\ble_lbs;..\..\..\..\..\..\components\ble\ble_services\ble_lbs_c;..\..\..\..\..\..\components\ble\ble_services\ble_lls;..\..\..\..\..\..\components\ble\ble_services\ble_nus;..\..\..\..\..\..\components\ble\ble_services\ble_nus_c;..\..\..\..\..\..\components\ble\ble_services\ble_rscs;..\..\..\..\..\..\components\ble\ble_services\ble_rscs_c;..\..\..\..\..\..\components\ble\ble_services\ble_tps;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\ble\nrf_ble_qwr;..\..\..\..\..\..\components\ble\peer_manager;..\..\..\..\..\..\components\boards;..\..\..\..\..\..\components\drivers_nrf\adc;..\..\..\..\..\..\components\drivers_nrf\clock;..\..\..\..\..\..\components\drivers_nrf\common;..\..\..\..\..\..\components\drivers_nrf\comp;..\..\..\..\..\..\components\drivers_nrf\delay;..\..\..\..\..\..\components\drivers_nrf\gpiote;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\drivers_nrf\i2s;..\..\..\..\..\..\components\drivers_nrf\lpcomp;..\..\..\..\..\..\components\drivers_nrf\pdm;..\..\..\..\..\..\components\drivers_nrf\power;..\..\..\..\..\..\components\drivers_nrf\ppi;..\..\..\..\..\..\components\drivers_nrf\pwm;..\..\..\..\..\..\components\drivers_nrf\qdec;..\..\..\..\..\..\components\drivers_nrf\rng;..\..\..\..\..\..\components\drivers_nrf\rtc;..\..\..\..\..\..\components\drivers_nrf\saadc;..\..\..\..\..\..\components\drivers_nrf\spi_master;..\..\..\..\..\..\components\drivers_nrf\spi_slave;..\..\..\..\..\..\components\drivers_nrf\swi;..\..\..\..\..\..\components\drivers_nrf\timer;..\..\..\..\..\..\components\drivers_nrf\twi_master;..\..\..\..\..\..\components\drivers_nrf\twis_slave;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\drivers_nrf\usbd;..\..\..\..\..\..\components\drivers_nrf\wdt;..\..\..\..\..\..\components\libraries\bsp;..\..\..\..\..\..\components\libraries\button;..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\components\libraries\crc32;..\..\..\..\..\..\components\libraries\csense;..\..\..\..\..\..\components\libraries\csense_drv;..\..\..\..\..\..\components\libraries\experimental_section_vars;..\..\..\..\..\..\components\libraries\fds;..\..\..\..\..\..\components\libraries\fifo;..\..\..\..\..\..\components\libraries\fstorage;..\..\..\..\..\..\components\libraries\gpiote;..\..\..\..\..\..\components\libraries\hardfault;..\..\..\..\..\..\components\libraries\hci;..\..\..\..\..\..\components\libraries\led_softblink;..\..\..\..\..\..\components\libraries\log;..\..\..\..\..\..\components\libraries\log\src;..\..\..\..\..\..\components\libraries\low_power_pwm;..\..\..\..\..\..\components\libraries\mem_manager;..\..\..\..\..\..\components\libraries\pwm;..\..\..\..\..\..\components\libraries\queue;..\..\..\..\..\..\components\libraries\scheduler;..\..\..\..\..\..\components\libraries\slip;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\libraries\twi;..\..\..\..\..\..\components\libraries\uart;..\..\..\..\..\..\components\libraries\usbd;..\..\..\..\..\..\components\libraries\usbd\class\audio;..\..\..\..\..\..\components\libraries\usbd\class\cdc;..\..\..\..\..\..\components\libraries\usbd\class\cdc\acm;..\..\..\..\..\..\components\libraries\usbd\class\hid;..\..\..\..\..\..\components\libraries\usbd\class\hid\generic;..\..\..\..\..\..\components\libraries\usbd\class\hid\kbd;..\..\..\..\..\..\components\libraries\usbd\class\hid\mouse;..\..\..\..\..\..\components\libraries\usbd\class\msc;..\..\..\..\..\..\components\libraries\usbd\config;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\softdevice\s130\headers;..\..\..\..\..\..\components\softdevice\s130\headers\nrf51;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\..\external\segger_rtt;..\config;..\..\..\mijia_ble_api;..\..\..\mijia_ble_libs</IncludePath>
+              <IncludePath>..\..\..\config;..\..\..\..\..\..\components;..\..\..\..\..\..\components\ble\ble_advertising;..\..\..\..\..\..\components\ble\ble_dtm;..\..\..\..\..\..\components\ble\ble_racp;..\..\..\..\..\..\components\ble\ble_services\ble_ancs_c;..\..\..\..\..\..\components\ble\ble_services\ble_ans_c;..\..\..\..\..\..\components\ble\ble_services\ble_bas;..\..\..\..\..\..\components\ble\ble_services\ble_bas_c;..\..\..\..\..\..\components\ble\ble_services\ble_cscs;..\..\..\..\..\..\components\ble\ble_services\ble_cts_c;..\..\..\..\..\..\components\ble\ble_services\ble_dfu;..\..\..\..\..\..\components\ble\ble_services\ble_dis;..\..\..\..\..\..\components\ble\ble_services\ble_gls;..\..\..\..\..\..\components\ble\ble_services\ble_hids;..\..\..\..\..\..\components\ble\ble_services\ble_hrs;..\..\..\..\..\..\components\ble\ble_services\ble_hrs_c;..\..\..\..\..\..\components\ble\ble_services\ble_hts;..\..\..\..\..\..\components\ble\ble_services\ble_ias;..\..\..\..\..\..\components\ble\ble_services\ble_ias_c;..\..\..\..\..\..\components\ble\ble_services\ble_lbs;..\..\..\..\..\..\components\ble\ble_services\ble_lbs_c;..\..\..\..\..\..\components\ble\ble_services\ble_lls;..\..\..\..\..\..\components\ble\ble_services\ble_nus;..\..\..\..\..\..\components\ble\ble_services\ble_nus_c;..\..\..\..\..\..\components\ble\ble_services\ble_rscs;..\..\..\..\..\..\components\ble\ble_services\ble_rscs_c;..\..\..\..\..\..\components\ble\ble_services\ble_tps;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\ble\nrf_ble_qwr;..\..\..\..\..\..\components\ble\peer_manager;..\..\..\..\..\..\components\boards;..\..\..\..\..\..\components\drivers_nrf\adc;..\..\..\..\..\..\components\drivers_nrf\clock;..\..\..\..\..\..\components\drivers_nrf\common;..\..\..\..\..\..\components\drivers_nrf\comp;..\..\..\..\..\..\components\drivers_nrf\delay;..\..\..\..\..\..\components\drivers_nrf\gpiote;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\drivers_nrf\i2s;..\..\..\..\..\..\components\drivers_nrf\lpcomp;..\..\..\..\..\..\components\drivers_nrf\pdm;..\..\..\..\..\..\components\drivers_nrf\power;..\..\..\..\..\..\components\drivers_nrf\ppi;..\..\..\..\..\..\components\drivers_nrf\pwm;..\..\..\..\..\..\components\drivers_nrf\qdec;..\..\..\..\..\..\components\drivers_nrf\rng;..\..\..\..\..\..\components\drivers_nrf\rtc;..\..\..\..\..\..\components\drivers_nrf\saadc;..\..\..\..\..\..\components\drivers_nrf\spi_master;..\..\..\..\..\..\components\drivers_nrf\spi_slave;..\..\..\..\..\..\components\drivers_nrf\swi;..\..\..\..\..\..\components\drivers_nrf\timer;..\..\..\..\..\..\components\drivers_nrf\twi_master;..\..\..\..\..\..\components\drivers_nrf\twis_slave;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\drivers_nrf\usbd;..\..\..\..\..\..\components\drivers_nrf\wdt;..\..\..\..\..\..\components\libraries\bsp;..\..\..\..\..\..\components\libraries\button;..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\components\libraries\crc32;..\..\..\..\..\..\components\libraries\csense;..\..\..\..\..\..\components\libraries\csense_drv;..\..\..\..\..\..\components\libraries\experimental_section_vars;..\..\..\..\..\..\components\libraries\fds;..\..\..\..\..\..\components\libraries\fifo;..\..\..\..\..\..\components\libraries\fstorage;..\..\..\..\..\..\components\libraries\gpiote;..\..\..\..\..\..\components\libraries\hardfault;..\..\..\..\..\..\components\libraries\hci;..\..\..\..\..\..\components\libraries\led_softblink;..\..\..\..\..\..\components\libraries\log;..\..\..\..\..\..\components\libraries\log\src;..\..\..\..\..\..\components\libraries\low_power_pwm;..\..\..\..\..\..\components\libraries\mem_manager;..\..\..\..\..\..\components\libraries\pwm;..\..\..\..\..\..\components\libraries\queue;..\..\..\..\..\..\components\libraries\scheduler;..\..\..\..\..\..\components\libraries\slip;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\libraries\twi;..\..\..\..\..\..\components\libraries\uart;..\..\..\..\..\..\components\libraries\usbd;..\..\..\..\..\..\components\libraries\usbd\class\audio;..\..\..\..\..\..\components\libraries\usbd\class\cdc;..\..\..\..\..\..\components\libraries\usbd\class\cdc\acm;..\..\..\..\..\..\components\libraries\usbd\class\hid;..\..\..\..\..\..\components\libraries\usbd\class\hid\generic;..\..\..\..\..\..\components\libraries\usbd\class\hid\kbd;..\..\..\..\..\..\components\libraries\usbd\class\hid\mouse;..\..\..\..\..\..\components\libraries\usbd\class\msc;..\..\..\..\..\..\components\libraries\usbd\config;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\softdevice\s130\headers;..\..\..\..\..\..\components\softdevice\s130\headers\nrf51;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\..\external\segger_rtt;..\config;..\..\..\mijia_ble_api;..\..\..\mijia_ble_libs;..\..\..\</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -500,9 +500,9 @@
               </FileOption>
             </File>
             <File>
-              <FileName>mi_config.h</FileName>
+              <FileName>custom_mi_config.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\mi_config.h</FilePath>
+              <FilePath>..\..\..\custom_mi_config.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1930,12 +1930,12 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>mijia_ble_libs/secure_auth</GroupName>
+          <GroupName>mijia_ble_libs/stand_auth</GroupName>
           <Files>
             <File>
-              <FileName>mible_secure_auth.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\secure_auth\mible_secure_auth.c</FilePath>
+              <FileName>stand-auth-cortex-m0plus.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\standard_auth\stand-auth-cortex-m0plus.lib</FilePath>
             </File>
           </Files>
         </Group>
@@ -1953,9 +1953,9 @@
               <FilePath>..\..\..\mijia_ble_libs\cryptography\mi_crypto_backend_mbedtls.c</FilePath>
             </File>
             <File>
-              <FileName>mi_crypto_backend_msc.c</FileName>
+              <FileName>mi_crypto_backend_uECC.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\cryptography\mi_crypto_backend_msc.c</FilePath>
+              <FilePath>..\..\..\mijia_ble_libs\cryptography\mi_crypto_backend_uECC.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1978,6 +1978,11 @@
               <FilePath>..\..\..\mijia_ble_libs\third_party\mbedtls\ccm.c</FilePath>
             </File>
             <File>
+              <FileName>micro_ecc_m0p_le.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\third_party\micro-ecc\micro_ecc_m0p_le.lib</FilePath>
+            </File>
+            <File>
               <FileName>sha256_hkdf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\third_party\mbedtls\sha256_hkdf.c</FilePath>
@@ -1988,14 +1993,14 @@
           <GroupName>mijia_ble_libs/mijia_profiles</GroupName>
           <Files>
             <File>
-              <FileName>lock_service_server.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\mijia_profiles\lock_service_server.c</FilePath>
-            </File>
-            <File>
               <FileName>mi_service_server.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\mijia_profiles\mi_service_server.c</FilePath>
+            </File>
+            <File>
+              <FileName>stdio_service_server.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\mijia_profiles\stdio_service_server.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2016,7 +2021,7 @@
         <TargetCommonOption>
           <Device>nRF51422_xxAC</Device>
           <Vendor>Nordic Semiconductor</Vendor>
-          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.8.12.0</PackID>
+          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.8.24.1</PackID>
           <PackURL>http://developer.nordicsemi.com/nRF5_SDK/pieces/nRF_DeviceFamilyPack/</PackURL>
           <Cpu>IROM(0x00000000,0x40000) IRAM(0x20000000,0x8000) CPUTYPE("Cortex-M0") CLOCK(16000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -2398,9 +2403,9 @@
               <FilePath>..\..\..\main.c</FilePath>
             </File>
             <File>
-              <FileName>mi_config.h</FileName>
+              <FileName>custom_mi_config.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\mi_config.h</FilePath>
+              <FilePath>..\..\..\custom_mi_config.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -3828,12 +3833,12 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>mijia_ble_libs/secure_auth</GroupName>
+          <GroupName>mijia_ble_libs/stand_auth</GroupName>
           <Files>
             <File>
-              <FileName>mible_secure_auth.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\secure_auth\mible_secure_auth.c</FilePath>
+              <FileName>stand-auth-cortex-m0plus.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\standard_auth\stand-auth-cortex-m0plus.lib</FilePath>
             </File>
           </Files>
         </Group>
@@ -3851,9 +3856,9 @@
               <FilePath>..\..\..\mijia_ble_libs\cryptography\mi_crypto_backend_mbedtls.c</FilePath>
             </File>
             <File>
-              <FileName>mi_crypto_backend_msc.c</FileName>
+              <FileName>mi_crypto_backend_uECC.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\cryptography\mi_crypto_backend_msc.c</FilePath>
+              <FilePath>..\..\..\mijia_ble_libs\cryptography\mi_crypto_backend_uECC.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3876,6 +3881,11 @@
               <FilePath>..\..\..\mijia_ble_libs\third_party\mbedtls\ccm.c</FilePath>
             </File>
             <File>
+              <FileName>micro_ecc_m0p_le.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\third_party\micro-ecc\micro_ecc_m0p_le.lib</FilePath>
+            </File>
+            <File>
               <FileName>sha256_hkdf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\third_party\mbedtls\sha256_hkdf.c</FilePath>
@@ -3886,14 +3896,14 @@
           <GroupName>mijia_ble_libs/mijia_profiles</GroupName>
           <Files>
             <File>
-              <FileName>lock_service_server.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\mijia_profiles\lock_service_server.c</FilePath>
-            </File>
-            <File>
               <FileName>mi_service_server.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\mijia_profiles\mi_service_server.c</FilePath>
+            </File>
+            <File>
+              <FileName>stdio_service_server.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\mijia_profiles\stdio_service_server.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4076,8 +4086,8 @@
           <targetInfo name="nrf51422_xxac"/>
         </targetInfos>
       </component>
-      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.17.0" condition="nRF51 Series and CMSIS">
-        <package license="License\license.txt" name="nRF_DeviceFamilyPack" schemaVersion="1.3" url="http://developer.nordicsemi.com/nRF5_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.17.0"/>
+      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.24.1" condition="nRF51 Series and CMSIS">
+        <package license="License\license.txt" name="nRF_DeviceFamilyPack" schemaVersion="1.3" url="http://developer.nordicsemi.com/nRF5_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.24.1"/>
         <targetInfos>
           <targetInfo name="flash_s130_nrf51_2.0.1_softdevice"/>
         </targetInfos>

@@ -103,7 +103,7 @@
         <bEvRecOn>1</bEvRecOn>
         <bSchkAxf>0</bSchkAxf>
         <bTchkAxf>0</bTchkAxf>
-        <nTsel>3</nTsel>
+        <nTsel>4</nTsel>
         <sDll></sDll>
         <sDllPa></sDllPa>
         <sDlgDll></sDlgDll>
@@ -513,8 +513,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\mijia_ble_libs\mi_config.h</PathWithFileName>
-      <FilenameWithoutPath>mi_config.h</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\custom_mi_config.h</PathWithFileName>
+      <FilenameWithoutPath>custom_mi_config.h</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1077,7 +1077,7 @@
   </Group>
 
   <Group>
-    <GroupName>mijia_ble_libs/secure_auth</GroupName>
+    <GroupName>mijia_ble_libs/stand_auth</GroupName>
     <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
@@ -1085,12 +1085,12 @@
     <File>
       <GroupNumber>13</GroupNumber>
       <FileNumber>44</FileNumber>
-      <FileType>1</FileType>
+      <FileType>4</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\mijia_ble_libs\secure_auth\mible_secure_auth.c</PathWithFileName>
-      <FilenameWithoutPath>mible_secure_auth.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\mijia_ble_libs\standard_auth\stand-auth-cortex-m0plus.lib</PathWithFileName>
+      <FilenameWithoutPath>stand-auth-cortex-m0plus.lib</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1133,8 +1133,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\mijia_ble_libs\cryptography\mi_crypto_backend_msc.c</PathWithFileName>
-      <FilenameWithoutPath>mi_crypto_backend_msc.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\mijia_ble_libs\cryptography\mi_crypto_backend_uECC.c</PathWithFileName>
+      <FilenameWithoutPath>mi_crypto_backend_uECC.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1185,6 +1185,18 @@
     <File>
       <GroupNumber>15</GroupNumber>
       <FileNumber>51</FileNumber>
+      <FileType>4</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\..\..\mijia_ble_libs\third_party\micro-ecc\micro_ecc_m0p_le.lib</PathWithFileName>
+      <FilenameWithoutPath>micro_ecc_m0p_le.lib</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>15</GroupNumber>
+      <FileNumber>52</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1204,18 +1216,6 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>16</GroupNumber>
-      <FileNumber>52</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\mijia_ble_libs\mijia_profiles\lock_service_server.c</PathWithFileName>
-      <FilenameWithoutPath>lock_service_server.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>16</GroupNumber>
       <FileNumber>53</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
@@ -1223,6 +1223,18 @@
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\..\mijia_ble_libs\mijia_profiles\mi_service_server.c</PathWithFileName>
       <FilenameWithoutPath>mi_service_server.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>16</GroupNumber>
+      <FileNumber>54</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\..\..\mijia_ble_libs\mijia_profiles\stdio_service_server.c</PathWithFileName>
+      <FilenameWithoutPath>stdio_service_server.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
