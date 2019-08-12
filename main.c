@@ -84,6 +84,7 @@
 #include <time.h>
 #include "SEGGER_RTT.h"
 #include "mible_log.h"
+#include "mible_api.h"
 #include "nRF5_evt.h"
 #include "common/mible_beacon.h"
 #include "standard_auth/mible_standard_auth.h"
@@ -91,7 +92,7 @@
 #include "mijia_profiles/stdio_service_server.h"
 #include "mi_config.h"
 
-#define DEVICE_NAME                     "standard_demo"                         /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "stand_demo"                            /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "Xiaomi Inc."                           /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO           3                                       /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -102,7 +103,7 @@
 #define SLAVE_LATENCY                   0                                       /**< Slave latency. */
 #define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(900,  UNIT_10_MS)         /**< Connection supervisory timeout (0.9 s). */
 
-#define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(30000)                   /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
+#define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(30000)                  /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(60000)                  /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                       /**< Number of attempts before giving up the connection parameter negotiation. */
 
@@ -112,7 +113,7 @@
 NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                                         /**< Context for the Queued Write module.*/
 APP_TIMER_DEF(m_poll_timer);
-APP_TIMER_DEF(m_bindconfirm_timer);
+APP_TIMER_DEF(m_solicited_timer);
 
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        /**< Handle of the current connection. */
 
@@ -124,7 +125,7 @@ static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        
 static void advertising_init(bool need_bind_confirm);
 static void advertising_start(void);
 static void poll_timer_handler(void * p_context);
-static void bind_confirm_timeout(void * p_context);
+static void solicited_timeout(void * p_context);
 /**@brief Callback function for asserts in the SoftDevice.
  *
  * @details This function will be called in case of an assert in the SoftDevice.
@@ -164,7 +165,7 @@ static void timers_init(void)
     err_code = app_timer_create(&m_poll_timer, APP_TIMER_MODE_REPEATED, poll_timer_handler);
     MI_ERR_CHECK(err_code);
 
-    err_code = app_timer_create(&m_bindconfirm_timer, APP_TIMER_MODE_SINGLE_SHOT, bind_confirm_timeout);
+    err_code = app_timer_create(&m_solicited_timer, APP_TIMER_MODE_SINGLE_SHOT, solicited_timeout);
     MI_ERR_CHECK(err_code);
 }
 
@@ -417,6 +418,12 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             APP_ERROR_CHECK(err_code);
         } break;
 
+        case BLE_GAP_EVT_PHY_UPDATE:
+            NRF_LOG_INFO("PHY update tx %dM rx %dM",
+                p_ble_evt->evt.gap_evt.params.phy_update.tx_phy,
+                p_ble_evt->evt.gap_evt.params.phy_update.rx_phy);
+            break;
+
         case BLE_GATTC_EVT_TIMEOUT:
             // Disconnect on GATT Client timeout event.
             NRF_LOG_DEBUG("GATT Client Timeout.");
@@ -468,6 +475,13 @@ static void ble_stack_init(void)
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
 }
 
+static void enqueue_new_objs()
+{
+    static int8_t  battery;
+
+    battery = battery < 100 ? battery + 1 : 0;
+    mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery, 0);
+}
 
 /**@brief Function for handling events from the BSP module.
  *
@@ -492,18 +506,20 @@ static void bsp_event_handler(bsp_event_t event)
             }
             break; // BSP_EVENT_DISCONNECT
 
-        case BSP_EVENT_RESET:
-            mi_scheduler_start(SYS_KEY_DELETE);
-            advertising_init(0);
-            break;
-
-        case BSP_EVENT_BOND:
-            app_timer_start(m_bindconfirm_timer, APP_TIMER_TICKS(5000), NULL);
+        case BSP_EVENT_KEY_0:
+            app_timer_start(m_solicited_timer, APP_TIMER_TICKS(5000), NULL);
             advertising_init(1);
             break;
 
         case BSP_EVENT_KEY_1:
-            
+            if (get_mi_reg_stat()) {
+                enqueue_new_objs();
+            }
+            break;
+
+        case BSP_EVENT_KEY_2:
+            mi_scheduler_start(SYS_KEY_DELETE);
+            advertising_init(0);
             break;
 
         default:
@@ -517,46 +533,15 @@ static void bsp_event_handler(bsp_event_t event)
 static void advertising_init(bool solicite_bind)
 {
     MI_LOG_INFO("advertising init...\n");
-    mibeacon_frame_ctrl_t frame_ctrl = {
-        .auth_mode      = 2,
-        .solicite       = solicite_bind,
-    };
 
-    mibeacon_capability_t cap = {.bondAbility = 1};
-    mibeacon_cap_sub_io_t IO = {.in_digits = 1};
-    mible_addr_t dev_mac;
-    mible_gap_address_get(dev_mac);
-
-    mibeacon_config_t mibeacon_cfg = {
-        .frame_ctrl = frame_ctrl,
-        .pid = PRODUCT_ID,
-        .p_mac = (mible_addr_t*)dev_mac, 
-        .p_capability = &cap,
-        .p_cap_sub_IO = &IO,
-        .p_obj = NULL,
-    };
-
-    uint8_t adv_data[31];
-    uint8_t adv_len;
-
-    // ADV Struct: Flags: LE General Discoverable Mode + BR/EDR Not supported.
-    adv_data[0] = 0x02;
-    adv_data[1] = 0x01;
-    adv_data[2] = 0x06;
-    adv_len     = 3;
-    
-    uint8_t service_data_len;
-    if(MI_SUCCESS != mible_service_data_set(&mibeacon_cfg, adv_data+3, &service_data_len)){
-        MI_LOG_ERROR("encode service data failed. \r\n");
-        return;
+    uint8_t user_data[31], user_dlen;
+    user_data[0] = 1 + strlen(DEVICE_NAME);
+    user_data[1] = 9;  // complete local name
+    strcpy((char*)&user_data[2], DEVICE_NAME);
+    user_dlen = 2 + strlen(DEVICE_NAME);
+    if (MI_SUCCESS != mibeacon_adv_data_set(solicite_bind, 0, user_data, user_dlen)) {
+        MI_LOG_ERROR("encode mibeacon data failed. \r\n");
     }
-    adv_len += service_data_len;
-    
-    MI_LOG_HEXDUMP(adv_data, adv_len);
-
-    mible_gap_adv_data_set(adv_data, adv_len, adv_data, 0);
-
-    return;
 }
 
 /**@brief Function for initializing buttons and leds.
@@ -569,22 +554,22 @@ static void buttons_leds_init()
     err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
     APP_ERROR_CHECK(err_code);
 
-    /* assign BUTTON 2 to initate MSC_SELF_TEST, for more details to check bsp_event_handler()*/
+    /* assign BUTTON 1 to set solicite bit in mibeacon, for more details to check bsp_event_handler()*/
+    err_code = bsp_event_to_button_action_assign(0,
+                                             BSP_BUTTON_ACTION_PUSH,
+                                             BSP_EVENT_KEY_0);
+    APP_ERROR_CHECK(err_code);
+
+    /* assign BUTTON 2 to initate mibeacon object, for more details to check bsp_event_handler()*/
     err_code = bsp_event_to_button_action_assign(1,
                                              BSP_BUTTON_ACTION_PUSH,
                                              BSP_EVENT_KEY_1);
     APP_ERROR_CHECK(err_code);
 
-    /* assign BUTTON 3 to clear KEYINFO in the FLASH, for more details to check bsp_event_handler()*/
+    /* assign BUTTON 3 to delete KEYINFO, for more details to check bsp_event_handler()*/
     err_code = bsp_event_to_button_action_assign(2,
                                              BSP_BUTTON_ACTION_LONG_PUSH,
-                                             BSP_EVENT_RESET);
-    APP_ERROR_CHECK(err_code);
-
-    /* assign BUTTON 4 to set the bind confirm bit in mibeacon, for more details to check bsp_event_handler()*/
-    err_code = bsp_event_to_button_action_assign(3,
-                                             BSP_BUTTON_ACTION_PUSH,
-                                             BSP_EVENT_BOND);
+                                             BSP_EVENT_KEY_2);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -627,21 +612,14 @@ static void idle_state_handle(void)
  */
 static void advertising_start(void)
 {
-    mible_gap_adv_param_t adv_param =(mible_gap_adv_param_t){
-        .adv_type = MIBLE_ADV_TYPE_CONNECTABLE_UNDIRECTED, 
-        .adv_interval_min = MSEC_TO_UNITS(200, UNIT_0_625_MS),
-        .adv_interval_max = MSEC_TO_UNITS(300, UNIT_0_625_MS),
-    };
-    uint32_t err_code = mible_gap_adv_start(&adv_param);
-    if(MI_SUCCESS != err_code){
-        MI_LOG_ERROR("adv failed. %d \n", err_code);
-    }
+    uint32_t errno = mibeacon_adv_start(300);
+    MI_ERR_CHECK(errno);
 }
 
 
-static void bind_confirm_timeout(void * p_context)
+static void solicited_timeout(void * p_context)
 {
-    MI_LOG_WARNING("bind confirm bit clear.\n");
+    MI_LOG_WARNING("solicte bit clear.\n");
     advertising_init(0);
 }
 
@@ -651,17 +629,16 @@ static void poll_timer_handler(void * p_context)
     time_t utc_time = time(NULL);
     MI_LOG_INFO("%s", ctime(&utc_time));
 
-    // if device has been registered, it could boardcast mibeacon objects.
+    // if device has been registered, it will advertise the mibeacon contains object.
     if (get_mi_reg_stat()) {
-        uint8_t battery_stat = 100;
-        mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery_stat), &battery_stat);
+        enqueue_new_objs();
     }
 }
 
 void time_init(struct tm * time_ptr);
 
 static uint8_t qr_code[16] = {
-0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,
+0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xa0,0xaa,0xab,0xac,0xad,0xae,0xaf,
 };
 
 void mi_schd_event_handler(schd_evt_t *p_event)
@@ -673,7 +650,7 @@ void mi_schd_event_handler(schd_evt_t *p_event)
         switch (p_event->data.IO_capability) {
         case 0x0080:
             mi_schd_oob_rsp(qr_code, 16);
-            MI_LOG_INFO(MI_LOG_COLOR_GREEN "Please scan device QR code.\n");
+            MI_LOG_INFO(MI_LOG_COLOR_GREEN "Please scan QR code label.\n");
             break;
 
         default:
@@ -704,24 +681,23 @@ void stdio_rx_handler(uint8_t* p, uint8_t l)
     MI_ERR_CHECK(errno);
 }
 
+
 /**@brief Function for application main entry.
  */
 int main(void)
 {
     // Initialize.
     log_init();
-    timers_init();
     MI_LOG_INFO(RTT_CTRL_CLEAR);
     MI_LOG_INFO("Compiled  %s %s\n", (uint32_t)__DATE__, (uint32_t)__TIME__);
+    timers_init();
     buttons_leds_init();
     power_management_init();
     ble_stack_init();
     gap_params_init();
     gatt_init();
-    advertising_init(0);
     services_init();
     conn_params_init();
-
     time_init(NULL);
 
     /* <!> mi_scheduler_init() must be called after ble_stack_init(). */
@@ -730,10 +706,12 @@ int main(void)
 
     mi_service_init();
     stdio_service_init(stdio_rx_handler);
+
+    advertising_init(0);
     
     // Start execution.
-    application_timers_start();
     advertising_start();
+    application_timers_start();
     
     // Enter main loop.
     for (;;) {
