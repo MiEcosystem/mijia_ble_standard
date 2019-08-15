@@ -36,7 +36,7 @@
 #ifdef EMBER_AF_BOARD_TYPE
 #undef EMBER_AF_BOARD_TYPE
 #endif
-#define EMBER_AF_BOARD_TYPE CUSTOMIZED
+#define EMBER_AF_BOARD_TYPE BRD4104A
 
 // Select antenna path on EFR32xG2x devices:
 //   - RF2G2_IO1: 0
