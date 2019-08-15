@@ -3237,11 +3237,6 @@
           <GroupName>mijia_ble_libs/common</GroupName>
           <Files>
             <File>
-              <FileName>crc32.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\common\crc32.c</FilePath>
-            </File>
-            <File>
               <FileName>mible_beacon.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\common\mible_beacon.c</FilePath>
@@ -3260,11 +3255,6 @@
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\common\queue.c</FilePath>
-            </File>
-            <File>
-              <FileName>tlv.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\common\tlv.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -6479,11 +6469,6 @@
           <GroupName>mijia_ble_libs/common</GroupName>
           <Files>
             <File>
-              <FileName>crc32.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\common\crc32.c</FilePath>
-            </File>
-            <File>
               <FileName>mible_beacon.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\common\mible_beacon.c</FilePath>
@@ -6502,11 +6487,6 @@
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\common\queue.c</FilePath>
-            </File>
-            <File>
-              <FileName>tlv.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\mijia_ble_libs\common\tlv.c</FilePath>
             </File>
           </Files>
         </Group>

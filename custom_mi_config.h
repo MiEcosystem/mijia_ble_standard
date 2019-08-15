@@ -77,7 +77,7 @@
 /* DEBUG */
 #ifndef DEBUG_MIBLE
 #define DEBUG_MIBLE            0
-#define TIME_PROFILE           1
+#define TIME_PROFILE           0
 #endif
 
 
