@@ -10,4 +10,4 @@ nRF52硬件请参考 [nordic 分支](https://github.com/MiEcosystem/mijia_ble_st
 2. 进入到文件目录 SDK_12.3.0\examples\ble_peripheral\
 3. 运行 git clone --recursive https://github.com/MiEcosystem/mijia_ble_standard.git -b nordic_legacy
 
-更多信息请参考[**米家标准BLE产品接入指南**](https://github.com/MiEcosystem/miio_open/blob/develop/ble/04-米家标准BLE产品接入指南.md)
+更多信息请参考 [**米家标准BLE产品接入指南**](https://github.com/MiEcosystem/miio_open/blob/master/ble/02-标准BLE接入开发.md)
