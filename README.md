@@ -7,7 +7,7 @@
 1. 运行 git clone --recursive https://github.com/MiEcosystem/mijia_ble_standard.git -b silabs
 2. 将工程导入Simiplicity Studio IDE
 
-更多信息请参考 [**米家标准 BLE 产品接入指南**](https://github.com/MiEcosystem/miio_open/blob/develop/ble/04-米家标准BLE产品接入指南.md)
+更多信息请参考 [**米家标准 BLE 产品接入指南**](https://github.com/MiEcosystem/miio_open/blob/master/ble/02-标准BLE接入开发.md)
 
 ## 参考资料
 * [UG103.14: BLE Fundamentals](https://www.silabs.com/documents/login/user-guides/ug103-14-fundamentals-ble.pdf)
