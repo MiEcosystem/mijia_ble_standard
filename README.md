@@ -1,9 +1,11 @@
-简介
-====
+## 支持的硬件平台
 
-本仓库包含米家标准 BLE 接入参考工程, 每个 SoC 平台对应一个独立分支。
+- DA14585
 
-* [silicon labs](https://github.com/MiEcosystem/mijia_ble_standard/tree/silabs)
-* [nordic 51 series](https://github.com/MiEcosystem/mijia_ble_standard/tree/nordic_legacy)
-* [nordic 52 series](https://github.com/MiEcosystem/mijia_ble_standard/tree/nordic)
-* [telink](https://github.com/MiEcosystem/mijia_ble_standard/tree/telink)
+## 使用说明
+
+1. 获取DA14585_SDK 实例工程使用SDK版本号6.0.6.427 
+2. 进入到文件目录 DA14585_SDK\6.0.6.427\projects\target_apps\ble_examples\
+3. 执行 git clone --recursive https://github.com/MiEcosystem/mijia_ble_standard.git -b Dialog
+
+更多信息请参考 [**米家标准BLE产品接入指南**](https://github.com/MiEcosystem/miio_open/blob/master/ble/02-标准BLE接入开发.md)
