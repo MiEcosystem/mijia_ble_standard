@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Wed Sep 04 14:39:11 2019
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Thu Sep 05 11:15:53 2019
 ;VERSION 0.2
 ;FILE adc.o
 adc_calibrate <= USED 0
@@ -234,12 +234,13 @@ micro_ecc_verify <= USED 0
 mible_gattc_event_callback <= USED 0
 mible_gattc_register <= USED 0
 ;FILE mible_beacon.o
+mibeacon_adv_stop <= USED 0
 mibeacon_obj_enque <= USED 0
 ;FILE mible_crypto.o
 mi_session_decrypt <= USED 0
 mi_session_encrypt <= USED 0
 ;FILE mible_rxfer.o
-;FILE mible_standard_auth.o
+;FILE mible_standard_auth.c.o
 get_mi_authorization <= USED 0
 get_mi_device_id <= USED 0
 get_mi_reg_stat <= USED 0
@@ -314,9 +315,6 @@ spi_read_flash_memory_man_and_dev_id <= USED 0
 spi_read_flash_unique_id <= USED 0
 ;FILE sps.o
 ;FILE sps_task.o
-;FILE stdio_service_server.o
-stdio_service_init <= USED 0
-stdio_tx <= USED 0
 ;FILE sw_aes.o
 AES_cbc_decrypt <= USED 0
 AES_cbc_encrypt <= USED 0
@@ -353,7 +351,6 @@ app_button_enable <= USED 0
 ;FILE user_default_handlers.o
 app_on_update_params_rejected <= USED 0
 ;FILE user_mijia_ble.o
-stdio_rx_handler <= USED 0
 ;FILE user_periph_setup.o
 ;FILE wkupct_quadec.o
 quad_decoder_disable_irq <= USED 0

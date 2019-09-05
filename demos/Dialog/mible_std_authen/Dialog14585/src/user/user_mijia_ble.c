@@ -5,11 +5,14 @@
 #include "arch_console.h"
 #include "app_easy_timer.h"
 
-#include "common/mible_beacon.h"
+#include "common/mible_beacon_internal.h"
 #include "standard_auth/mible_standard_auth.h"
 #include "mijia_profiles/mi_service_server.h"
 #include "mijia_profiles/stdio_service_server.h"
 #include "mi_config.h"
+
+#define DEVICE_NAME                     "stand_demo"                            /**< Name of device. Will be included in the advertising data. */
+#define MANUFACTURER_NAME               "Xiaomi Inc."                           /**< Manufacturer. Will be passed to Device Information Service. */
 
 enum
 {
@@ -29,6 +32,7 @@ static uint8_t qr_code[16] = {
 0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,
 };
 
+extern mible_status_t mible_service_data_set(mibeacon_config_t const * const config, uint8_t *p_output, uint8_t *p_output_len);
 /**@brief Function for initializing the Advertising functionality.
  */
 void advertising_init(bool solicite_bind)
@@ -38,6 +42,7 @@ void advertising_init(bool solicite_bind)
         .auth_mode      = 2,
         .version        = 5,
         .solicite       = solicite_bind,
+			  .registered     = 0,
     };
 
     mibeacon_capability_t cap = {.bondAbility = 1};
@@ -128,21 +133,21 @@ void mi_schd_event_handler(schd_evt_t *p_event)
     }
 }
 
-void stdio_rx_handler(uint8_t* p, uint8_t l)
-{
-    int errno;
-    /* RX plain text (It has been decrypted) */
-    MI_LOG_INFO("RX raw data\n");
-    MI_LOG_HEXDUMP(p, l);
+//void stdio_rx_handler(uint8_t* p, uint8_t l)
+//{
+//    int errno;
+//    /* RX plain text (It has been decrypted) */
+//    MI_LOG_INFO("RX raw data\n");
+//    MI_LOG_HEXDUMP(p, l);
 
-    /* TX plain text (It will be encrypted before send out.) */
-    errno = stdio_tx(p, l);
-    MI_ERR_CHECK(errno);
-}
+//    /* TX plain text (It will be encrypted before send out.) */
+//    errno = stdio_tx(p, l);
+//    MI_ERR_CHECK(errno);
+//}
 
 void simulation_miserver_test(void)
 {
-    MI_LOG_INFO("simulation_miserver_test debug0903001\n");
+    MI_LOG_INFO("mible standard auth demo\r\n");
 
     /* <!> mi_scheduler_init() must be called after ble_stack_init(). */
     mi_scheduler_init(10, mi_schd_event_handler, NULL);

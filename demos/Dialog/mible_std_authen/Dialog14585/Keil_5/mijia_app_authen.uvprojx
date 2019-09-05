@@ -888,9 +888,9 @@
 mijia_ble_libs/standard_auth</GroupName>
           <Files>
             <File>
-              <FileName>mible_standard_auth.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\mijia_ble_libs\standard_auth\mible_standard_auth.c</FilePath>
+              <FileName>stand-auth-cortex-m0plus.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\..\..\mijia_ble_libs\standard_auth\stand-auth-cortex-m0plus.lib</FilePath>
             </File>
           </Files>
         </Group>
@@ -1023,9 +1023,9 @@ mijia_ble_libs/standard_auth</GroupName>
               <FilePath>..\..\..\..\..\mijia_ble_libs\mijia_profiles\mi_service_server.c</FilePath>
             </File>
             <File>
-              <FileName>stdio_service_server.c</FileName>
+              <FileName>mi_config.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\mijia_ble_libs\mijia_profiles\stdio_service_server.c</FilePath>
+              <FilePath>..\..\..\..\..\mijia_ble_libs\mi_config.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2672,9 +2672,9 @@ mijia_ble_libs/standard_auth</GroupName>
 mijia_ble_libs/standard_auth</GroupName>
           <Files>
             <File>
-              <FileName>mible_standard_auth.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\mijia_ble_libs\standard_auth\mible_standard_auth.c</FilePath>
+              <FileName>stand-auth-cortex-m0plus.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\..\..\mijia_ble_libs\standard_auth\stand-auth-cortex-m0plus.lib</FilePath>
             </File>
           </Files>
         </Group>
@@ -3149,9 +3149,9 @@ mijia_ble_libs/standard_auth</GroupName>
               <FilePath>..\..\..\..\..\mijia_ble_libs\mijia_profiles\mi_service_server.c</FilePath>
             </File>
             <File>
-              <FileName>stdio_service_server.c</FileName>
+              <FileName>mi_config.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\mijia_ble_libs\mijia_profiles\stdio_service_server.c</FilePath>
+              <FilePath>..\..\..\..\..\mijia_ble_libs\mi_config.c</FilePath>
             </File>
           </Files>
         </Group>

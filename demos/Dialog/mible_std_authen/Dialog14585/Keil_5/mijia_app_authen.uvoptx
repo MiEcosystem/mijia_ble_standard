@@ -119,6 +119,10 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>DLGUARM</Key>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>ARMRTXEVENTFLAGS</Key>
           <Name>-L70 -Z18 -C0 -M0 -T1</Name>
         </SetRegEntry>
@@ -147,25 +151,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>104</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>133970050</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\src\user_app_authen.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\mijia_app_authen\../src/user_app_authen.c\104</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
           <LineNumber>48</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>133987776</Address>
+          <Address>133983988</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -175,22 +163,6 @@
           <Filename>..\..\..\..\..\mijia_ble_libs\cryptography\mi_crypto_backend_uECC.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\mijia_app_authen\../../../../../mijia_ble_libs/cryptography/mi_crypto_backend_uECC.c\48</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>171</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\..\..\portable\da14585_api.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression></Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -1757,12 +1729,12 @@ mijia_ble_libs/standard_auth</GroupName>
     <File>
       <GroupNumber>12</GroupNumber>
       <FileNumber>91</FileNumber>
-      <FileType>1</FileType>
+      <FileType>4</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\mijia_ble_libs\standard_auth\mible_standard_auth.c</PathWithFileName>
-      <FilenameWithoutPath>mible_standard_auth.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\..\..\mijia_ble_libs\standard_auth\stand-auth-cortex-m0plus.lib</PathWithFileName>
+      <FilenameWithoutPath>stand-auth-cortex-m0plus.lib</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -2061,8 +2033,8 @@ mijia_ble_libs/standard_auth</GroupName>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\mijia_ble_libs\mijia_profiles\stdio_service_server.c</PathWithFileName>
-      <FilenameWithoutPath>stdio_service_server.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\..\..\mijia_ble_libs\mi_config.c</PathWithFileName>
+      <FilenameWithoutPath>mi_config.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
