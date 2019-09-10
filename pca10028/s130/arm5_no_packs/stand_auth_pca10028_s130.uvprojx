@@ -1917,6 +1917,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\common\queue.c</FilePath>
             </File>
+            <File>
+              <FileName>mi_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\mi_config.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3809,6 +3814,11 @@
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\common\queue.c</FilePath>
+            </File>
+            <File>
+              <FileName>mi_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\mi_config.c</FilePath>
             </File>
           </Files>
         </Group>

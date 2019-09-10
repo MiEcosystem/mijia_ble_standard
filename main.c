@@ -87,24 +87,6 @@ static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;
 APP_TIMER_DEF(poll_timer);
 APP_TIMER_DEF(m_solicited_timer);
 
-
-#if defined(BOARD_PCA10028)
-#define MSC_PWR_PIN 25
-const iic_config_t iic_config = {
-        .scl_pin  = 28,
-        .sda_pin  = 29,
-        .freq = IIC_100K
-};
-#elif defined(BOARD_PCA10040)
-#define MSC_PWR_PIN 23
-const iic_config_t iic_config = {
-        .scl_pin  = 24,
-        .sda_pin  = 25,
-        .freq = IIC_100K
-};
-#endif
-
-
 static void advertising_init(bool);
 static void poll_timer_handler(void * p_context);
 static void solicited_timeout(void * p_context);
