@@ -3256,15 +3256,20 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\common\queue.c</FilePath>
             </File>
+            <File>
+              <FileName>mi_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\mi_config.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>mijia_ble_libs/standard_auth</GroupName>
           <Files>
             <File>
-              <FileName>..\..\nRF5_SDK_15.2.0\examples\ble_peripheral\mijia_ble_standard\mijia_ble_libs\standard_auth\stand-auth-cortex-m4f.lib</FileName>
+              <FileName>stand-auth-cortex-m4f.lib</FileName>
               <FileType>4</FileType>
-              <FilePath>$TC_ROOT$\..\..\nRF5_SDK_15.2.0\examples\ble_peripheral\mijia_ble_standard\mijia_ble_libs\standard_auth\stand-auth-cortex-m4f.lib</FilePath>
+              <FilePath>..\..\..\mijia_ble_libs\standard_auth\stand-auth-cortex-m4f.lib</FilePath>
             </File>
           </Files>
         </Group>
@@ -6488,15 +6493,20 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\mijia_ble_libs\common\queue.c</FilePath>
             </File>
+            <File>
+              <FileName>mi_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mijia_ble_libs\mi_config.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>mijia_ble_libs/standard_auth</GroupName>
           <Files>
             <File>
-              <FileName>..\..\nRF5_SDK_15.2.0\examples\ble_peripheral\mijia_ble_standard\mijia_ble_libs\standard_auth\stand-auth-cortex-m4f.lib</FileName>
+              <FileName>stand-auth-cortex-m4f.lib</FileName>
               <FileType>4</FileType>
-              <FilePath>$TC_ROOT$\..\..\nRF5_SDK_15.2.0\examples\ble_peripheral\mijia_ble_standard\mijia_ble_libs\standard_auth\stand-auth-cortex-m4f.lib</FilePath>
+              <FilePath>..\..\..\mijia_ble_libs\standard_auth\stand-auth-cortex-m4f.lib</FilePath>
             </File>
           </Files>
         </Group>
