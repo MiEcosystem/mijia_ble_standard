@@ -8,3 +8,4 @@
 * [nordic 52 series](https://github.com/MiEcosystem/mijia_ble_standard/tree/nordic)
 * [telink](https://github.com/MiEcosystem/mijia_ble_standard/tree/telink)
 * [Dialog](https://github.com/MiEcosystem/mijia_ble_standard/tree/Dialog)
+* [realtek](https://github.com/MiEcosystem/mijia_ble_standard/tree/realtek)
