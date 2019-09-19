@@ -2,6 +2,7 @@
 
 - nRF52832-DK PCA10040
 - nRF52840-DK PCA10056
+- nRF52810-DK PCA10040e
 
 nRF51硬件请参考 [nordic_legacy 分支](https://github.com/MiEcosystem/mijia_ble_standard/tree/nordic_legacy)
 
