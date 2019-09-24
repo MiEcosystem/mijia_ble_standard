@@ -1,11 +1,8 @@
-简介
-====
+## 支持的硬件平台
 
-本仓库包含米家标准 BLE 接入参考工程, 每个 SoC 平台对应一个独立分支。
+- DA1468x
+- DA1469x
 
-* [silicon labs](https://github.com/MiEcosystem/mijia_ble_standard/tree/silabs)
-* [nordic 51 series](https://github.com/MiEcosystem/mijia_ble_standard/tree/nordic_legacy)
-* [nordic 52 series](https://github.com/MiEcosystem/mijia_ble_standard/tree/nordic)
-* [telink](https://github.com/MiEcosystem/mijia_ble_standard/tree/telink)
-* [Dialog](https://github.com/MiEcosystem/mijia_ble_standard/tree/Dialog)
-* [realtek](https://github.com/MiEcosystem/mijia_ble_standard/tree/realtek)
+## 使用说明
+
+具体代码还在整理中，后续release，敬请期待！
