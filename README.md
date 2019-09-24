@@ -2,6 +2,8 @@
 
 - DA14585
 
+DA1468x/69x硬件请参考 [da146xx 分支](https://github.com/MiEcosystem/mijia_ble_standard/tree/da146xx)
+
 ## 使用说明
 
 1. 获取DA14585_SDK（示例工程使用SDK版本号6.0.6.427） 
