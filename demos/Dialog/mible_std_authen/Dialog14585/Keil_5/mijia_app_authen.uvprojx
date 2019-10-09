@@ -1007,11 +1007,6 @@ mijia_ble_libs/standard_auth</GroupName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\mijia_ble_libs\third_party\pt\pt_misc.c</FilePath>
             </File>
-            <File>
-              <FileName>micro_ecc_m0p_le.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\..\..\..\..\mijia_ble_libs\third_party\micro-ecc\micro_ecc_m0p_le.lib</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -1026,6 +1021,11 @@ mijia_ble_libs/standard_auth</GroupName>
               <FileName>mi_config.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\mijia_ble_libs\mi_config.c</FilePath>
+            </File>
+            <File>
+              <FileName>stdio_service_server.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\mijia_ble_libs\mijia_profiles\stdio_service_server.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3133,11 +3133,6 @@ mijia_ble_libs/standard_auth</GroupName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\mijia_ble_libs\third_party\pt\pt_misc.c</FilePath>
             </File>
-            <File>
-              <FileName>micro_ecc_m0p_le.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\..\..\..\..\mijia_ble_libs\third_party\micro-ecc\micro_ecc_m0p_le.lib</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -3152,6 +3147,11 @@ mijia_ble_libs/standard_auth</GroupName>
               <FileName>mi_config.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\mijia_ble_libs\mi_config.c</FilePath>
+            </File>
+            <File>
+              <FileName>stdio_service_server.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\mijia_ble_libs\mijia_profiles\stdio_service_server.c</FilePath>
             </File>
           </Files>
         </Group>
