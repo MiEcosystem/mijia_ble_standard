@@ -14,8 +14,8 @@ DA14585硬件请参考 [Dialog 分支](https://github.com/MiEcosystem/mijia_ble_
 5. 由于SDK和MIJIA 库符号的重名，需要将Dialog SDK所有 queue_init函数修改为dialog_queue_init()
 6. 注意：由于Dialog146xx平台的特殊性，需要做如下修改：
 
-    a. 将mijia_ble_libs/common/mible_beacon.c文件中mible_service_data_set函数前面的static标志去掉，保证工程顺利编译通过
-    b. 在mijia_ble_libs\common\mible_crypto.c文件中，修改mi_session_uninit函数
+    a. 将mijia_ble_libs/common/mible_beacon.c文件中mible_service_data_set函数前面的static标志去掉，保证工程顺利编译通过  
+    b. 在mijia_ble_libs\common\mible_crypto.c文件中，修改mi_session_uninit函数  
 ```C
 int mi_session_uninit(void)
 {
@@ -27,9 +27,10 @@ int mi_session_uninit(void)
     }
     return 0;
 }
-```
+```  
 
-    c. 在mijia_ble_libs\mijia_profiles\stdio_service_server.c文件中，修改gatts_event_handler函数
+
+    c. 在mijia_ble_libs\mijia_profiles\stdio_service_server.c文件中，修改gatts_event_handler函数  
 ```C
 static void gatts_event_handler(mible_gatts_evt_t evt,
     mible_gatts_evt_param_t* param)
