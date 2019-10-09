@@ -72,7 +72,7 @@
 /**
  * @note Process mi scheduler in main loop (non-interrupt context).
  */
-#define MI_SCHD_PROCESS_IN_MAIN_LOOP    1
+#define MI_SCHD_PROCESS_IN_MAIN_LOOP    0
 
 /* DEBUG */
 #ifndef DEBUG_MIBLE
