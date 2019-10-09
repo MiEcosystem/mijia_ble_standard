@@ -1,0 +1,27 @@
+LDSCRIPT_PATH=../ldscripts
+SW_VERSION_PATH=../sw_version.h
+SEC_CONFIG_PATH=../../../../../utilities/python_scripts/secure_image/
+
+.PHONY: main-build pre-build post-build generate_ldscripts FORCE
+main-build : | pre-build post-build
+
+FORCE:
+
+generate_ldscripts : mem.ld sections.ld
+
+%.ld : $(LDSCRIPT_PATH)/%.ld.h FORCE
+	"$(CC)" -I "$(BSP_CONFIG_DIR)" -I "$(MIDDLEWARE_CONFIG_DIR)" $(PRE_BUILD_EXTRA_DEFS) -include "$(APP_CONFIG_H)" $(LD_DEFS) -Ddg_configDEVICE=$(DEVICE) -Ddg_configUSE_FPGA=$(USE_FPGA) -Ddg_configBLACK_ORCA_IC_REV=BLACK_ORCA_IC_REV_$(IC_REV) -Ddg_configBLACK_ORCA_IC_STEP=BLACK_ORCA_IC_STEP_$(IC_STEP) -E -P -c "$<" -o "$@"
+
+.NOTPARALLEL:
+
+%.img: %.bin
+	@echo 'Invoking: Mkimage Prepare SUOTA Image'
+	"$(PYTHON)" "$(SCRIPT)" -q -p "$(REVISION)" --sw_version "$(SW_VERSION_PATH)" $< $@
+	@echo ' '
+
+%_secure.img: %.bin
+	if [ -f $(SEC_CONFIG_PATH)secure_cfg.xml ] && [ -f $(SEC_CONFIG_PATH)product_keys.xml ]; then \
+		echo 'Invoking: Mkimage Prepare Secure SUOTA Image';\
+		"$(PYTHON)" "$(SCRIPT)" -q -p "$(REVISION)" --sw_version "$(SW_VERSION_PATH)" -s "$(SEC_CONFIG_PATH)secure_cfg.xml" --prod_keys "$(SEC_CONFIG_PATH)product_keys.xml"  $< $@; \
+		fi
+	@echo ' '
