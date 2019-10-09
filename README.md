@@ -11,7 +11,7 @@ DA1468x/69x硬件请参考 [da146xx 分支](https://github.com/MiEcosystem/mijia
 3. 执行 git clone --recursive https://github.com/MiEcosystem/mijia_ble_standard.git -b Dialog
 4. 注意：由于Dialog平台的特殊性，需要做如下修改：
 
-    a. 将mijia_ble_libs/common/mible_beacon.c文件中mible_service_data_set函数前面的static标志去掉，保证工程顺利编译通过
+    a. 将mijia_ble_libs/common/mible_beacon.c文件中mible_service_data_set函数前面的static标志去掉，保证工程顺利编译通过  
     b. 在mijia_ble_libs/cryptography/mi_crypto_backend_uECC.c文件中，
 ```C
 //添加一行代码
