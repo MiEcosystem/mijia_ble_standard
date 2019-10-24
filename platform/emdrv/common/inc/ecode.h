@@ -67,7 +67,6 @@ typedef uint32_t Ecode_t;
 #define ECODE_EMDRV_EZRADIODRV_BASE  (ECODE_EMDRV_BASE | 0x00009000U)   ///< Base value for EZRADIODRV error codes.
 #define ECODE_EMDRV_TEMPDRV_BASE     (ECODE_EMDRV_BASE | 0x0000D000U)   ///< Base value for TEMPDRV error codes.
 #define ECODE_EMDRV_NVM3_BASE        (ECODE_EMDRV_BASE | 0x0000E000U)   ///< Base value for NVM3 error codes.
-#define ECODE_EMDRV_SLEEPTIMER_BASE  (ECODE_EMDRV_BASE | 0x0000F000U)   ///< Base value for SLEEPTIMER error codes.
 
 /** @} (end addtogroup emdrv) */
 

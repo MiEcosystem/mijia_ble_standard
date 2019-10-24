@@ -490,6 +490,12 @@ typedef uint8_t RAIL_TxPowerLevel_t;
  * with RAIL_GetTxPower.
  */
 #define RAIL_TX_POWER_LEVEL_INVALID (255U)
+/**
+ * Sentinel value that can be passed to RAIL_SetTxPower to set
+ * the highest power level available on the current PA, regardless
+ * of which one is selected.
+ */
+#define RAIL_TX_POWER_LEVEL_MAX (254U)
 
 /**
  * @enum RAIL_TxPowerMode_t

@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief General Purpose Cyclic Redundancy Check (GPCRC) API.
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>

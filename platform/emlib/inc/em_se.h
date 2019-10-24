@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief Secure Element API
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -346,10 +346,19 @@ typedef uint32_t SE_Response_t;
 typedef struct {
   /** Enable secure boot for the host. */
   bool enableSecureBoot;
-  /** Enable verification of the secure boot certificate. */
+  /** Require certificate based secure boot signing. */
   bool verifySecureBootCertificate;
-  /** Enable anti-rollback for the host application. */
+  /** Enable anti-rollback for host application upgrades. */
   bool enableAntiRollback;
+
+  /** Set flag to enable locking down all flash pages that cover the
+   * secure-booted image, except the last page if end of signature is not
+   * page-aligned. */
+  bool secureBootPageLockNarrow;
+  /** Set flag to enable locking down all flash pages that cover the
+   * secure-booted image, including the last page if end of signature is not
+   * page-aligned. */
+  bool secureBootPageLockFull;
 } SE_OTPInit_t;
 
 typedef struct {
@@ -398,8 +407,14 @@ SE_Response_t SE_writeUserData(uint32_t offset,
 SE_Response_t SE_eraseUserData(void);
 
 // Initialization commands
-SE_Response_t SE_readPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, bool signature);
-SE_Response_t SE_initPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, bool signature);
+SE_Response_t SE_readPubkey(uint32_t key_type,
+                            void* pubkey,
+                            uint32_t numBytes,
+                            bool signature);
+SE_Response_t SE_initPubkey(uint32_t key_type,
+                            void* pubkey,
+                            uint32_t numBytes,
+                            bool signature);
 SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init);
 
 // Debug commands

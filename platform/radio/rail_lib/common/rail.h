@@ -893,9 +893,9 @@ RAIL_Status_t RAIL_ConfigEvents(RAIL_Handle_t railHandle,
 ///
 /// When trying to determine an appropriate threshold, the application needs
 /// to know the size of each FIFO. The default receive FIFO is internal to RAIL
-/// with a size of 512 bytes. This can be changed, however, using the
-/// \ref RAIL_SetRxFifo API and the default may be removed entirely by doing
-/// this in the RAILCb_SetupRxFifo() callback. The receive FIFO event is
+/// with a size of 512 bytes. This can be changed, however, using
+/// \ref RAIL_SetRxFifo() and the default may be removed entirely by calling
+/// this from the RAILCb_SetupRxFifo() callback. The receive FIFO event is
 /// level-based in that the \ref RAIL_EVENT_RX_FIFO_ALMOST_FULL event will
 /// constantly pend if the threshold is exceeded. This normally means that
 /// inside this event's callback, the application should empty enough of the FIFO
@@ -1159,6 +1159,11 @@ uint16_t RAIL_SetTxFifo(RAIL_Handle_t railHandle,
  * This function sets the memory location for the receive FIFO. It
  * must be called at least once before any receive operations occur.
  *
+ * @note Once called, any prior receive FIFO is orphaned. To avoid
+ *   orphaning the default internal 512-byte receive FIFO so it does
+ *   not unnecessarily consume RAM resources in your application,
+ *   implement \ref RAILCb_SetupRxFifo() to call this function.
+ *
  * The FIFO size can be determined by the value of size after this function. The
  * chosen size is determined based on the available FIFO sizes supported by
  * the hardware. For more on supported FIFO sizes and required alignments, see
@@ -1188,7 +1193,7 @@ RAIL_Status_t RAIL_SetRxFifo(RAIL_Handle_t railHandle,
 /// This function is called during the \ref RAIL_Init process to set up the FIFO
 /// to use for received packets. If not implemented by the application,
 /// a default implementation from within the RAIL library will be used to
-/// initialize a 512-byte receive FIFO.
+/// initialize an internal default 512-byte receive FIFO.
 ///
 /// If this function returns an error, then the RAIL_Init process will fail.
 ///
@@ -1605,7 +1610,8 @@ RAIL_RadioState_t RAIL_GetRadioState(RAIL_Handle_t railHandle);
  * While this function should always be called during initialization,
  * it can also be called any time if these settings need to change to adapt
  * to a different application/protocol. This API will also reset TX Power to
- * its minimum value, so \ref RAIL_SetTxPower must be called afterwards.
+ * \ref RAIL_TX_POWER_LEVEL_INVALID, so \ref RAIL_SetTxPower must be called
+ * afterwards.
  *
  * At times, certain combinations of configurations cannot be achieved.
  * This API attempts to get as close as possible to the requested settings. The
@@ -3329,9 +3335,8 @@ RAIL_Status_t RAIL_ConfigCal(RAIL_Handle_t railHandle,
  * call this function with a calibration values structure containing valid
  * calibration values after a reset).
  *
- * If multiple protocols are used, this function will return
- * \ref RAIL_STATUS_INVALID_STATE if it is called and the given railHandle is
- * not active. The caller must attempt to re-call this function later.
+ * If multiple protocols are used, this function will make the given railHandle
+ * active, if not already, and perform calibration.
  *
  * @note Instead of this function, consider using the individual chip-specific
  *   functions. Using the individual functions will allow for better

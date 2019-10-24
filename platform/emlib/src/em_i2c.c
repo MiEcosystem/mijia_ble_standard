@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief Inter-integrated Circuit (I2C) Peripheral API
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -466,42 +466,42 @@ void I2C_Reset(I2C_TypeDef *i2c)
   /* Do not reset the route register; setting should be done independently. */
 }
 
-/***************************************************************************//**
- * @brief
- *   Continue an initiated I2C transfer (single master mode only).
- *
- * @details
- *   This function is used repeatedly after a I2C_TransferInit() to
- *   complete a transfer. It may be used in polled mode as the below example
- *   shows:
- * @verbatim
- * I2C_TransferReturn_TypeDef ret;
- *
- * // Do a polled transfer
- * ret = I2C_TransferInit(I2C0, seq);
- * while (ret == i2cTransferInProgress)
- * {
- *   ret = I2C_Transfer(I2C0);
- * }
- * @endverbatim
- *  It may also be used in interrupt driven mode, where this function is invoked
- *  from the interrupt handler. Notice that, if used in interrupt mode, NVIC
- *  interrupts must be configured and enabled for the I2C bus used. I2C
- *  peripheral specific interrupts are managed by this software.
- *
- * @note
- *   Only single master mode is supported.
- *
- * @param[in] i2c
- *   A pointer to the I2C peripheral register block.
- *
- * @return
- *   Returns status for an ongoing transfer.
- *   @li #i2cTransferInProgress - indicates that transfer not finished.
- *   @li #i2cTransferDone - transfer completed successfully.
- *   @li otherwise some sort of error has occurred.
- *
- ******************************************************************************/
+// *****************************************************************************
+/// @brief
+///   Continue an initiated I2C transfer (single master mode only).
+///
+/// @details
+///   This function is used repeatedly after a I2C_TransferInit() to
+///   complete a transfer. It may be used in polled mode as the below example
+///   shows:
+/// @code{.c}
+/// I2C_TransferReturn_TypeDef ret;
+///
+/// // Do a polled transfer
+/// ret = I2C_TransferInit(I2C0, seq);
+/// while (ret == i2cTransferInProgress)
+/// {
+///   ret = I2C_Transfer(I2C0);
+/// }
+/// @endcode
+///  It may also be used in interrupt driven mode, where this function is invoked
+///  from the interrupt handler. Notice that, if used in interrupt mode, NVIC
+///  interrupts must be configured and enabled for the I2C bus used. I2C
+///  peripheral specific interrupts are managed by this software.
+///
+/// @note
+///   Only single master mode is supported.
+///
+/// @param[in] i2c
+///   A pointer to the I2C peripheral register block.
+///
+/// @return
+///   Returns status for an ongoing transfer.
+///   @li #i2cTransferInProgress - indicates that transfer not finished.
+///   @li #i2cTransferDone - transfer completed successfully.
+///   @li otherwise some sort of error has occurred.
+///
+// *****************************************************************************
 I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
 {
   uint32_t                tmp;

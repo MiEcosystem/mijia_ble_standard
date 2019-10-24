@@ -521,6 +521,8 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
   RAIL_EVENT_RX_TIMEOUT_SHIFT,
   /** Shift position of \ref  RAIL_EVENT_RX_SCHEDULED_RX_END bit */
   RAIL_EVENT_RX_SCHEDULED_RX_END_SHIFT,
+  /** Shift position of \ref  RAIL_EVENT_RX_SCHEDULED_RX_MISSED bit */
+  RAIL_EVENT_RX_SCHEDULED_RX_MISSED_SHIFT,
   /** Shift position of \ref RAIL_EVENT_RX_PACKET_ABORTED bit */
   RAIL_EVENT_RX_PACKET_ABORTED_SHIFT,
   /** Shift position of \ref RAIL_EVENT_RX_FILTER_PASSED bit */
@@ -566,6 +568,8 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
   RAIL_EVENT_TX_CCA_RETRY_SHIFT,
   /** Shift position of \ref RAIL_EVENT_TX_START_CCA bit */
   RAIL_EVENT_TX_START_CCA_SHIFT,
+  /** Shift position of \ref  RAIL_EVENT_TX_SCHEDULED_TX_MISSED bit */
+  RAIL_EVENT_TX_SCHEDULED_TX_MISSED_SHIFT,
 
   // Scheduler Event Bit Shifts
 
@@ -713,9 +717,19 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * RAIL_ScheduleRxConfig_t::rxTransitionEndSchedule was passed as true,
  * any of the \ref RAIL_EVENTS_RX_COMPLETION events occurring will also cause
  * this event not to occur, since the scheduled receive will end with the
- * transition at the end of the packet.
+ * transition at the end of the packet. However, if the application has not
+ * enabled the specific \ref RAIL_EVENTS_RX_COMPLETION event which implicitly
+ * ended the scheduled receive, this event will be posted instead.
  */
 #define RAIL_EVENT_RX_SCHEDULED_RX_END (1ULL << RAIL_EVENT_RX_SCHEDULED_RX_END_SHIFT)
+
+/**
+ * Occurs when start of a scheduled receive is missed
+ *
+ * This can occur if the radio is put to sleep and not woken up with enough time
+ * to configure the scheduled receive event.
+ */
+#define RAIL_EVENT_RX_SCHEDULED_RX_MISSED (1ULL << RAIL_EVENT_RX_SCHEDULED_RX_MISSED_SHIFT)
 
 /**
  * Occurs when a receive is aborted during filtering with
@@ -834,11 +848,12 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * Any of the other events will trigger the RAIL_StateTransitions_t::error
  * transition.
  */
-#define RAIL_EVENTS_RX_COMPLETION (RAIL_EVENT_RX_PACKET_RECEIVED  \
-                                   | RAIL_EVENT_RX_PACKET_ABORTED \
-                                   | RAIL_EVENT_RX_FRAME_ERROR    \
-                                   | RAIL_EVENT_RX_FIFO_OVERFLOW  \
-                                   | RAIL_EVENT_RX_ADDRESS_FILTERED)
+#define RAIL_EVENTS_RX_COMPLETION (RAIL_EVENT_RX_PACKET_RECEIVED    \
+                                   | RAIL_EVENT_RX_PACKET_ABORTED   \
+                                   | RAIL_EVENT_RX_FRAME_ERROR      \
+                                   | RAIL_EVENT_RX_FIFO_OVERFLOW    \
+                                   | RAIL_EVENT_RX_ADDRESS_FILTERED \
+                                   | RAIL_EVENT_RX_SCHEDULED_RX_MISSED)
 
 // TX Event Bitmasks
 
@@ -981,6 +996,14 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
 #define RAIL_EVENT_TX_START_CCA (1ULL << RAIL_EVENT_TX_START_CCA_SHIFT)
 
 /**
+ * Occurs when the start of a scheduled transmit is missed
+ *
+ * This can occur if the radio is put to sleep and not woken up with enough time
+ * to configure the scheduled transmit event.
+ */
+#define RAIL_EVENT_TX_SCHEDULED_TX_MISSED (1ULL << RAIL_EVENT_TX_SCHEDULED_TX_MISSED_SHIFT)
+
+/**
  * A mask representing all events that determine the end of a transmitted
  * packet. After a \ref RAIL_STATUS_NO_ERROR return value
  * from one of the transmit functions, exactly one of the following
@@ -990,11 +1013,12 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * if the \ref RAIL_EVENT_TX_PACKET_SENT event occurs. Any of the other
  * events will trigger the RAIL_StateTransitions_t::error transition.
  */
-#define RAIL_EVENTS_TX_COMPLETION (RAIL_EVENT_TX_PACKET_SENT \
-                                   | RAIL_EVENT_TX_ABORTED   \
-                                   | RAIL_EVENT_TX_BLOCKED   \
-                                   | RAIL_EVENT_TX_UNDERFLOW \
-                                   | RAIL_EVENT_TX_CHANNEL_BUSY)
+#define RAIL_EVENTS_TX_COMPLETION (RAIL_EVENT_TX_PACKET_SENT    \
+                                   | RAIL_EVENT_TX_ABORTED      \
+                                   | RAIL_EVENT_TX_BLOCKED      \
+                                   | RAIL_EVENT_TX_UNDERFLOW    \
+                                   | RAIL_EVENT_TX_CHANNEL_BUSY \
+                                   | RAIL_EVENT_TX_SCHEDULED_TX_MISSED)
 
 /**
  * A mask representing all events that determine the end of a transmitted
@@ -1876,13 +1900,19 @@ typedef struct RAIL_ScheduleTxConfig {
 /// (unslotted).
 /// \n In pseudo-code it works like this, showing relevant event notifications:
 /// @code{.c}
-/// RAIL_Event_t performCsma(const RAIL_CsmaConfig_t *csmaConfig)
+/// // Return true to transmit packet, false to not transmit packet.
+/// bool performCsma(const RAIL_CsmaConfig_t *csmaConfig)
 /// {
 ///   bool isFixedBackoff = ((csmaConfig->csmaMinBoExp == 0)
-///                          && (csmaConfig->csmaMinBoExp == 0));
+///                          && (csmaConfig->csmaMaxBoExp == 0));
 ///   int backoffExp = csmaConfig->csmaMinBoExp; // Initial backoff exponent
 ///   int backoffMultiplier = 1; // Assume fixed backoff
 ///   int try;
+///
+///   // Special-case tries == 0 to transmit immediately without backoff+CCA
+///   if (csmaConfig->csmaTries == 0) {
+///     return true;
+///   }
 ///
 ///   // Start overall timeout if specified:
 ///   if (csmaConfig->csmaTimeout > 0) {
@@ -1918,14 +1948,16 @@ typedef struct RAIL_ScheduleTxConfig {
 ///     if (performCca(csmaConfig->ccaDuration, csmaConfig->ccaThreshold)) {
 ///       // CCA (and CSMA) success: Transmit after Rx-to-Tx turnaround
 ///       StopAbortTimer();
-///       return RAIL_EVENT_TX_CHANNEL_CLEAR;
+///       signalEvent(RAIL_EVENT_TX_CHANNEL_CLEAR);
+///       return true;
 ///     } else {
 ///       // CCA failed: loop to try again, or exit if out of tries
 ///     }
 ///   }
 ///   // Overall CSMA failure: Don't transmit
 ///   StopAbortTimer();
-///   return RAIL_EVENT_TX_CHANNEL_BUSY;
+///   signalEvent(RAIL_EVENT_TX_CHANNEL_BUSY);
+///   return false;
 /// }
 /// @endcode
 ///
@@ -1945,8 +1977,10 @@ typedef struct RAIL_CsmaConfig {
   uint8_t  csmaMaxBoExp;
   /**
    * The number of backoff-then-CCA iterations that can fail before reporting
-   * \ref RAIL_EVENT_TX_CHANNEL_BUSY. It can range from 1 to \ref
-   * RAIL_MAX_LBT_TRIES; other values are disallowed.
+   * \ref RAIL_EVENT_TX_CHANNEL_BUSY. Typically ranges from 1 to \ref
+   * RAIL_MAX_LBT_TRIES; higher values are disallowed. A value 0 always
+   * transmits immediately without performing CSMA, similar to calling
+   * RAIL_StartTx().
    */
   uint8_t  csmaTries;
   /**
@@ -1966,7 +2000,9 @@ typedef struct RAIL_CsmaConfig {
    * The minimum desired CCA check duration in microseconds.
    *
    * @note Depending on the radio configuration, due to hardware constraints,
-   *   the actual duration may be longer.
+   *   the actual duration may be longer. Also, if the requested duration
+   *   is too large for the radio to accommodate, RAIL_StartCcaCsmaTx()
+   *   will fail returning \ref RAIL_STATUS_INVALID_PARAMETER.
    */
   uint16_t ccaDuration;
   /**
@@ -2057,8 +2093,10 @@ typedef struct RAIL_LbtConfig {
   uint8_t  lbtMaxBoRand;
   /**
    * The number of LBT iterations that can fail before reporting
-   * \ref RAIL_EVENT_TX_CHANNEL_BUSY. It can range from 1 to \ref
-   * RAIL_MAX_LBT_TRIES; other values are disallowed.
+   * \ref RAIL_EVENT_TX_CHANNEL_BUSY. Typically ranges from 1 to \ref
+   * RAIL_MAX_LBT_TRIES; higher values are disallowed. A value 0 always
+   * transmits immediately without performing LBT, similar to calling
+   * RAIL_StartTx().
    */
   uint8_t  lbtTries;
   /**
@@ -2078,7 +2116,9 @@ typedef struct RAIL_LbtConfig {
    * The minimum desired LBT check duration in microseconds.
    *
    * @note Depending on the radio configuration, due to hardware constraints,
-   *   the actual duration may be longer.
+   *   the actual duration may be longer. Also, if the requested duration
+   *   is too large for the radio to accommodate, RAIL_StartCcaLbtTx()
+   *   will fail returning \ref RAIL_STATUS_INVALID_PARAMETER.
    */
   uint16_t lbtDuration;
   /**
@@ -2276,12 +2316,26 @@ typedef struct RAIL_ScheduleRxConfig {
    * normal RX state, you will effectively end the scheduled RX window and can
    * continue to receive indefinitely depending on the state transitions. Set
    * to 1 to transition to normal RX and 0 to stay in the scheduled RX.
+   *
+   * This setting also influences the posting of
+   * \ref RAIL_EVENT_RX_SCHEDULED_RX_END when the scheduled Rx window is
+   * implicitly ended by a packet receive (any of the
+   * \ref RAIL_EVENTS_RX_COMPLETION events). See that event for details.
+   *
+   * @note An Rx transition to Idle state will always terminate the
+   * scheduled Rx window, regardless of this setting. This can be used
+   * to ensure Scheduled RX terminates on the first packet received
+   * (or first successful packet if the RX error transition is to Rx
+   * while the Rx success transition is to Idle).
    */
   uint8_t rxTransitionEndSchedule;
   /**
-   * If set to 0, this will allow any packets, which are received when the
-   * window end event occurs, to complete. If set to anything else, an abort
-   * of any packets received when the window end occurs is forced.
+   * This setting tells RAIL what to do with a packet being received
+   * when the window end event occurs. If set to 0, such a packet
+   * will be allowed to complete. Any other setting will cause that
+   * packet to be aborted. In either situation, any posting of
+   * \ref RAIL_EVENT_RX_SCHEDULED_RX_END is deferred briefly to when
+   * the packet's corresponding \ref RAIL_EVENTS_RX_COMPLETION occurs.
    */
   uint8_t hardWindowEnd;
 } RAIL_ScheduleRxConfig_t;

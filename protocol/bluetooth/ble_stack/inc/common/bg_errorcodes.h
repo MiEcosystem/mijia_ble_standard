@@ -175,7 +175,7 @@ typedef enum bg_error
 	bg_err_mesh_prov_invalid_pdu_format                                                   =bg_errspc_mesh+11,           //A provisioning PDU with wrong length or containing field values that are out of bounds was received.
 	bg_err_mesh_prov_unexpected_pdu                                                       =bg_errspc_mesh+12,           //An unexpected (out of sequence) provisioning PDU was received.
 	bg_err_mesh_prov_confirmation_failed                                                  =bg_errspc_mesh+13,           //The computed confirmation value did not match the expected value.
-	bg_err_mesh_prov_out_of_resources                                                     =bg_errspc_mesh+14,           //Provisioning could not be continued due to unsufficient resources.
+	bg_err_mesh_prov_out_of_resources                                                     =bg_errspc_mesh+14,           //Provisioning could not be continued due to insufficient resources.
 	bg_err_mesh_prov_decryption_failed                                                    =bg_errspc_mesh+15,           //The provisioning data block could not be decrypted.
 	bg_err_mesh_prov_unexpected_error                                                     =bg_errspc_mesh+16,           //An unexpected error happened during provisioning.
 	bg_err_mesh_prov_cannot_assign_addr                                                   =bg_errspc_mesh+17,           //Device could not assign unicast addresses to all of its elements.

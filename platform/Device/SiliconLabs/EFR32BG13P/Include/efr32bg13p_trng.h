@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief EFR32BG13P_TRNG register and bit field definitions
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>

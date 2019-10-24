@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief CMSIS Cortex-M3/M4 System Layer for EFR32 devices.
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>

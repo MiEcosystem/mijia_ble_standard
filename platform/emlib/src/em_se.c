@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief Secure Element API
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -55,6 +55,8 @@
 #define SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_ENABLE (1 << 16)
 #define SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_VERIFY_CERTIFICATE (1 << 17)
 #define SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_ANTI_ROLLBACK (1 << 18)
+#define SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_PAGE_LOCK_NARROW (1 << 19)
+#define SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_PAGE_LOCK_FULL (1 << 20)
 
 #elif defined(CRYPTOACC_PRESENT)
 
@@ -567,7 +569,7 @@ SE_Response_t SE_ackCommand(SE_Command_t *command)
  * @param[in] numBytes
  *   Number of bytes to write to flash. NB: Must be divisable by four.
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully or a
  *                        signature was successfully verified,
  * @retval SE_RESPONSE_INVALID_COMMAND when the command ID was not recognized,
@@ -601,7 +603,7 @@ SE_Response_t SE_writeUserData(uint32_t offset,
  * @brief
  *   Erases User Data section in MTP.
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully or a
  *                        signature was successfully verified,
  * @retval SE_RESPONSE_INVALID_COMMAND when the command ID was not recognized,
@@ -629,10 +631,10 @@ SE_Response_t SE_eraseUserData()
  *   Returns the current boot status, versions and system configuration.
  *
  * @param[out] status
- *   SE_Status_t containing current SE status.
+ *   @ref SE_Status_t containing current SE status.
  *
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK upon command completion. Errors are encoded in the
  *                        different parts of the returned status object.
  ******************************************************************************/
@@ -674,7 +676,7 @@ SE_Response_t SE_getStatus(SE_Status_t *status)
  *   Pointer to array of size 16 bytes.
  *
  * @return
- *   One of the SE_Response_t return codes.
+ *   One of the @ref SE_Response_t return codes.
  * @retval SE_RESPONSE_OK when serial number is returned successfully,
  * @retval SE_RESPONSE_INTERNAL_ERROR if not.
  ******************************************************************************/
@@ -699,8 +701,8 @@ SE_Response_t SE_serialNumber(void *serial)
  * @details
  *   Read out a public key stored in the SE, or its signature. The command can
  *   be used to read:
- *   * SE_KEY_TYPE_BOOT
- *   * SE_KEY_TYPE_AUTH
+ *   * @ref SE_KEY_TYPE_BOOT
+ *   * @ref SE_KEY_TYPE_AUTH
  *
  * @param[in] key_type
  *   ID of key type to read.
@@ -713,11 +715,11 @@ SE_Response_t SE_serialNumber(void *serial)
  *   Length of pubkey buffer (64 bytes).
  *
  * @param[in] signature
- *   If true, read signature for the requested key type instead of the public
- *   key.
+ *   If true, the function will return the signature programmed for the
+ *   specified public key instead of the public key itself.
  *
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully
  * @retval SE_RESPONSE_TEST_FAILED when the pubkey is not set
  * @retval SE_RESPONSE_INVALID_PARAMETER when an invalid type is passed
@@ -748,10 +750,10 @@ SE_Response_t SE_readPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, 
  *   Init pubkey or pubkey signature.
  *
  * @details
- *   Initialize public key stored in the SE, or its signature. The command can
- *   be used to write:
- *   * SE_KEY_TYPE_BOOT
- *   * SE_KEY_TYPE_AUTH
+ *   Initialize public key stored in the SE, or its corresponding signature. The
+ *   command can be used to write:
+ *   * @ref SE_KEY_TYPE_BOOT -- public key used to perform secure boot
+ *   * @ref SE_KEY_TYPE_AUTH -- public key used to perform secure debug
  *
  * @note
  *   These keys can not be overwritten, so this command can only be issued once
@@ -768,11 +770,11 @@ SE_Response_t SE_readPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, 
  *   Length of pubkey buffer (64 bytes).
  *
  * @param[in] signature
- *   If true, initialize signature for the requested key type instead of the
- *   public key.
+ *   If true, initialize signature for the specified key type instead of the
+ *   public key itself.
  *
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully
  * @retval SE_RESPONSE_TEST_FAILED when the pubkey is not set
  * @retval SE_RESPONSE_INVALID_PARAMETER when an invalid type is passed
@@ -809,9 +811,28 @@ SE_Response_t SE_initPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, 
 
 /***************************************************************************//**
  * @brief
- *   Initialize SE OTP configuration.
+ *   Initialize SE one-time-programmable (OTP) configuration.
+ *
+ * @details
+ *   Configuration is performed by setting the desired options in the
+ *   @ref SE_OTPInit_t structure.
+ *
+ *   This function can be used to enable secure boot, to configure flash page
+ *   locking, and to enable anti-rollback protection when using the SE to
+ *   perform an application upgrade, typically a Gecko bootloader upgrade.
+ *
+ *   Before secure boot can be enabled, the public key used for secure boot
+ *   verification must be uploaded using @ref SE_initPubkey().
+ *
+ * @warning
+ *   This command can only be executed once per device! When the configuration
+ *   has been programmed it is not possible to update any of the fields.
+ *
+ * @param[in] otp_init
+ *   @ref SE_OTPInit_t structure containing the SE configuration.
+ *
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully
  ******************************************************************************/
 SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init)
@@ -834,6 +855,16 @@ SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init)
   }
   if (otp_init->enableAntiRollback) {
     mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_ANTI_ROLLBACK;
+  }
+
+  if (otp_init->secureBootPageLockNarrow && otp_init->secureBootPageLockFull) {
+    return SE_RESPONSE_ABORT;
+  }
+  if (otp_init->secureBootPageLockNarrow) {
+    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_PAGE_LOCK_NARROW;
+  }
+  if (otp_init->secureBootPageLockFull) {
+    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_PAGE_LOCK_FULL;
   }
 
   volatile struct ReservedSettings {
@@ -880,7 +911,7 @@ SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init)
  * @brief
  *   Returns the current debug lock configuration.
  * @param[out] status
- *   The command returns a DebugStatus_t with the current status of the
+ *   The command returns a @ref DebugStatus_t with the current status of the
  *   debug configuration.
  * @return
  *   One of the SE_RESPONSE return codes.
@@ -913,9 +944,11 @@ SE_Response_t SE_debugLockStatus(SE_DebugStatus_t *status)
  *   Enables the debug lock for the part.
  * @details
  *   The debug port will be closed and the only way to open it is through
- *   device erase (if enabled) or through secure debug unlock (if enabled).
+ *   device erase (if enabled) or temporarily through secure debug unlock (if
+ *   enabled).
+ *
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INTERNAL_ERROR there was a problem locking the debug port.
  ******************************************************************************/
@@ -931,12 +964,16 @@ SE_Response_t SE_debugLockApply(void)
  * @brief
  *   Enables the secure debug functionality.
  * @details
- *   Enables the secure debug functionality that can be used to open a locked
- *   debug port through the Get challenge and Open debug commands. This command
- *   can only be executed before the debug port is locked, and after a secure
- *   debug public key has been installed in the SE.
+ *   Enables the secure debug functionality. This functionality makes it
+ *   possible to open a locked debug port by signing a cryptographic challenge
+ *   and using the debug command interface (DCI).
+ *
+ *   This command can only be executed before the debug port is locked, and
+ *   after a secure debug public key has been installed in the SE using
+ *   @ref SE_initPubkey() or the corresponding DCI command.
+ *
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INVALID_COMMAND if debug port is locked.
  * @retval SE_RESPONSE_INVALID_PARAMETER if secure debug certificates are
@@ -958,7 +995,7 @@ SE_Response_t SE_debugSecureEnable(void)
  *   Disables the secure debug functionality that can be used to open a
  *   locked debug port.
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INTERNAL_ERROR if there was a problem during execution.
  ******************************************************************************/
@@ -976,8 +1013,8 @@ SE_Response_t SE_debugSecureDisable(void)
  *
  * @details
  *   Performs a device mass erase and resets the debug configuration to its
- *   initial unlocked state. Only available before DEVICE_ERASE_DISABLE has
- *   been executed.
+ *   initial unlocked state. Only available before @ref SE_deviceEraseDisable or
+ *   the corresponding DCI command has been executed.
  *
  * @note
  *   This command clears and verifies the complete flash and ram of the
@@ -985,7 +1022,7 @@ SE_Response_t SE_debugSecureDisable(void)
  *   commissioning information in the secure element.
  *
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INVALID_COMMAND if device erase is disabled.
  * @retval SE_RESPONSE_INTERNAL_ERROR if there was a problem during execution.
@@ -1013,7 +1050,7 @@ SE_Response_t SE_deviceErase(void)
  *   This command permanently disables the device erase functionality!
  *
  * @return
- *   One of the SE_RESPONSE return codes.
+ *   One of the @ref SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INTERNAL_ERROR if there was a problem during execution.
  ******************************************************************************/

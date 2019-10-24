@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief RAM code support.
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -59,7 +59,7 @@ extern "C" {
     libraries placed in the default section may therefore occur. To disable
     hosted mode, add '-ffreestanding' to the build command line. This is the
     only way to guarantee no calls to standard libraries with GCC.
-    Read more at https://gcc.gnu.org/onlinedocs/gcc-5.3.0/gcc/Standards.html
+    Read more at www.gcc.gnu.org/onlinedocs/gcc-5.3.0/gcc/Standards.html
 
   @warning
     Keil/ARM uVision users must add a section named "ram_code" in their linker
@@ -112,6 +112,13 @@ extern "C" {
 #define SL_RAMFUNC_DISABLE
 #endif
 
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+/* Deprecated macro name  */
+#if defined(RAMFUNC_DISABLE)
+#define SL_RAMFUNC_DISABLE
+#endif
+/** @endcond */
+
 #if defined(SL_RAMFUNC_DISABLE)
 /** @brief Compiler ported function declarator for RAM code. */
 #define SL_RAMFUNC_DECLARATOR
@@ -149,11 +156,7 @@ extern "C" {
 #endif
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
-/* Deprecated macro names and user configuration */
-#if defined(RAMFUNC_DISABLE)
-#define SL_RAMFUNC_DISABLE
-#endif
-
+/* Deprecated macro names */
 #define RAMFUNC_DECLARATOR          SL_RAMFUNC_DECLARATOR
 #define RAMFUNC_DEFINITION_BEGIN    SL_RAMFUNC_DEFINITION_BEGIN
 #define RAMFUNC_DEFINITION_END      SL_RAMFUNC_DEFINITION_END

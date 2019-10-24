@@ -31,87 +31,85 @@ extern "C" {
  * @addtogroup emdrv
  * @{
  ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup SLEEP
- * @brief
- *   Sleep Management Driver.
- *
- * @details
- *
- *   @n @section sleepdrv_intro Introduction
- *   This is a sleep management module consisting of sleep.c and sleep.h
- *   source files. The main purpose of the module is to make it easy for an
- *   application to always enter the lowest possible energy mode using a simple
- *   API.
- *
- *   The module works by providing an API for defining "sleep blocks" in the
- *   application code. A "sleep block" will block the MCU from entering a certain
- *   energy mode. A "sleep block" can for instance block EM2 entry because an
- *   EM1 only peripheral is in use. These "sleep blocks" are created by the calls to
- *   @ref SLEEP_SleepBlockBegin() and end with @ref SLEEP_SleepBlockEnd().
- *
- *   When an application wants to enter a low energy mode it can call
- *   @ref SLEEP_Sleep() to enter the lowest possible energy mode. This module
- *   will use the "sleep blocks" to figure out the lowest possible energy mode.
- *
- *   Here is an example of how the sleep driver is initialized and how it can
- *   be used to enter EM2.
- *
- * @code
- *   SLEEP_Init_t sleepConfig = {0};
- *   SLEEP_InitEx(&sleepConfig);
- *   SLEEP_SleepBlockBegin(sleepEM3); // Block EM3 entry
- *   SLEEP_Sleep();
- *   SLEEP_SleepBlockEnd(sleepEM3);
- * @endcode
- *
- *   @n @section sleepdrv_callbacks Sleep and Wakeup Events/Callbacks
- *
- *   This module also provides a way to add application callbacks to notify
- *   the application that the MCU is entering sleep, or waking up from sleep.
- *   These callbacks can be provided to the driver when calling
- *   @ref SLEEP_InitEx().
- *
- *   The sleepCallback function is called before entering sleep and the
- *   wakeupCallback is called after waking up from sleep. The sleepCallback
- *   function has a bool return value. This return value can be used to control
- *   if the MCU should really go to sleep or not. Returning true will make
- *   the MCU enter the selected energy mode, while returning false will force
- *   the sleep driver to return without entering a sleep.
- *
- *   Here is an example of how the sleep and wakeup callbacks are used.
- *
- *   @code
- *   static bool beforeSleep(SLEEP_EnergyMode_t mode)
- *   {
- *     printf("sleep\n");
- *     return true;
- *   }
- *
- *   static void afterWakeup(SLEEP_EnergyMode_t mode)
- *   {
- *     printf("wakeup\n");
- *     (void) mode;
- *   }
- *
- *   void main(void)
- *   {
- *     SLEEP_Init_t sleepConfig = {
- *       .sleepCallback = beforeSleep,
- *       .wakeupCallback = afterWakeup
- *     };
- *     SLEEP_InitEx(&sleepConfig);
- *     SLEEP_SleepBlockBegin(sleepEM3); // Block EM3 entry
- *     while (true) {
- *       SLEEP_Sleep();
- *     }
- *     SLEEP_SleepBlockEnd(sleepEM3);
- *   }
- *   @endcode
- *
- * @{
- ******************************************************************************/
+/// @addtogroup SLEEP
+/// @brief
+///   Sleep Management Driver.
+///
+/// @details
+///
+///   @n @section sleepdrv_intro Introduction
+///   This is a sleep management module consisting of sleep.c and sleep.h
+///   source files. The main purpose of the module is to make it easy for an
+///   application to always enter the lowest possible energy mode using a simple
+///   API.
+///
+///   The module works by providing an API for defining "sleep blocks" in the
+///   application code. A "sleep block" will block the MCU from entering a certain
+///   energy mode. A "sleep block" can for instance block EM2 entry because an
+///   EM1 only peripheral is in use. These "sleep blocks" are created by the calls to
+///   @ref SLEEP_SleepBlockBegin() and end with @ref SLEEP_SleepBlockEnd().
+///
+///   When an application wants to enter a low energy mode it can call
+///   @ref SLEEP_Sleep() to enter the lowest possible energy mode. This module
+///   will use the "sleep blocks" to figure out the lowest possible energy mode.
+///
+///   Here is an example of how the sleep driver is initialized and how it can
+///   be used to enter EM2.
+///
+/// @code
+///   SLEEP_Init_t sleepConfig = {0};
+///   SLEEP_InitEx(&sleepConfig);
+///   SLEEP_SleepBlockBegin(sleepEM3); // Block EM3 entry
+///   SLEEP_Sleep();
+///   SLEEP_SleepBlockEnd(sleepEM3);
+/// @endcode
+///
+///   @n @section sleepdrv_callbacks Sleep and Wakeup Events/Callbacks
+///
+///   This module also provides a way to add application callbacks to notify
+///   the application that the MCU is entering sleep, or waking up from sleep.
+///   These callbacks can be provided to the driver when calling
+///   @ref SLEEP_InitEx().
+///
+///   The sleepCallback function is called before entering sleep and the
+///   wakeupCallback is called after waking up from sleep. The sleepCallback
+///   function has a bool return value. This return value can be used to control
+///   if the MCU should really go to sleep or not. Returning true will make
+///   the MCU enter the selected energy mode, while returning false will force
+///   the sleep driver to return without entering a sleep.
+///
+///   Here is an example of how the sleep and wakeup callbacks are used.
+///
+///   @code
+///   static bool beforeSleep(SLEEP_EnergyMode_t mode)
+///   {
+///     printf("sleep\n");
+///     return true;
+///   }
+///
+///   static void afterWakeup(SLEEP_EnergyMode_t mode)
+///   {
+///     printf("wakeup\n");
+///     (void) mode;
+///   }
+///
+///   void main(void)
+///   {
+///     SLEEP_Init_t sleepConfig = {
+///       .sleepCallback = beforeSleep,
+///       .wakeupCallback = afterWakeup
+///     };
+///     SLEEP_InitEx(&sleepConfig);
+///     SLEEP_SleepBlockBegin(sleepEM3); // Block EM3 entry
+///     while (true) {
+///       SLEEP_Sleep();
+///     }
+///     SLEEP_SleepBlockEnd(sleepEM3);
+///   }
+///   @endcode
+///
+/// @{
+///*****************************************************************************
 
 /*******************************************************************************
  *******************************   MACROS   ************************************

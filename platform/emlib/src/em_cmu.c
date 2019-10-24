@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief Clock management unit (CMU) Peripheral API
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -672,6 +672,12 @@ static void traceClkGet(uint32_t *freq, CMU_Select_TypeDef *sel)
   CMU_Select_TypeDef s;
 
   switch (CMU->TRACECLKCTRL & _CMU_TRACECLKCTRL_CLKSEL_MASK) {
+    // By default, TRACECLK is driven by PCLK
+    case _CMU_TRACECLKCTRL_CLKSEL_DEFAULT:
+      f = SystemHCLKGet() / CMU_ClockDivGet(cmuClock_PCLK);
+      s = cmuSelect_PCLK;
+      break;
+
     case _CMU_TRACECLKCTRL_CLKSEL_HCLK:
       f = SystemHCLKGet();
       s = cmuSelect_HCLK;

@@ -133,6 +133,11 @@ extern "C" {
 #define RAIL_FEAT_IEEE802154_MULTIPURPOSE_FRAME_SUPPORTED \
   (_SILICON_LABS_32B_SERIES_1_CONFIG != 1)
 
+/// Boolean to indicate whether the selected chip supports
+/// alternate power settings for the Power Amplifier.
+#define RAIL_FEAT_ALTERNATE_POWER_TX_SUPPORTED \
+  (_SILICON_LABS_32B_SERIES_1_CONFIG > 1)
+
 /** @} */ // end of group Features
 
 /** @} */ // end of group RAIL_API

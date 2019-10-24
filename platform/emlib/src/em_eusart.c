@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief Universal asynchronous receiver/transmitter (EUSART) peripheral API
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>

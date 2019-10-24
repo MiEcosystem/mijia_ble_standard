@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief Chip Initialization API
- * @version 5.8.0
+ * @version 5.8.3
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -319,12 +319,11 @@ __STATIC_INLINE void CHIP_Init(void)
 
   if (chipRev.major == 0x01 && chipRev.minor == 0x0) {
     /* Trigger RAM read for each RAM instance */
-    uint32_t value;
     volatile uint32_t *dmem = (volatile uint32_t *) DMEM_RAM0_RAM_MEM_BASE;
     for (uint32_t i = 0U; i < DMEM_NUM_BANK; i++) {
-      value = *dmem;
+      // Force memory read
+      *dmem;
       dmem += (DMEM_BANK0_SIZE / 4U);
-      (void) value;
     }
   }
 #endif
