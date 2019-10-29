@@ -154,14 +154,14 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="util/third_party/mbedtls/sl_crypto/src/cryptoacc" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="mijia_ble_libs/mesh_auth|mijia_ble_libs/secure_auth|util/third_party/mbedtls/sl_crypto/src/cryptoacc" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
 	</storageModule>
-	<storageModule generalProj.esf.protocolIds="com.silabs.sdk.stack.super:2.6.0._1914562655.com.silabs.stack.ble:2.12.0.0_134876927" generalProj.esf.protocolNames="ble" moduleId="com.silabs.ss.framework.ide.project.core.cpp" project.generation="1" projectCommon.boardIds="brd4104a:0.0.0.A00" projectCommon.partId="mcu.arm.efr32.bg13.efr32bg13p632f512gm48" projectCommon.sdkId="com.silabs.sdk.stack.super:2.6.0._1914562655"/>
+	<storageModule generalProj.esf.protocolIds="com.silabs.sdk.stack.super:2.6.3._1914562655.com.silabs.stack.ble:2.12.3.0_134876927" generalProj.esf.protocolNames="ble" moduleId="com.silabs.ss.framework.ide.project.core.cpp" project.generation="1" projectCommon.boardIds="brd4104a:0.0.0.A00" projectCommon.partId="mcu.arm.efr32.bg13.efr32bg13p632f512gm48" projectCommon.sdkId="com.silabs.sdk.stack.super:2.6.0._1914562655"/>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="mijia_ble_standard.com.silabs.ss.framework.ide.project.core.cdt.cdtMbsProjectType.280214106" name="SLS CDT Project" projectType="com.silabs.ss.framework.ide.project.core.cdt.cdtMbsProjectType"/>
 	</storageModule>
