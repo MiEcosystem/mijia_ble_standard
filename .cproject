@@ -154,7 +154,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="mijia_ble_libs/mesh_auth|mijia_ble_libs/secure_auth|util/third_party/mbedtls/sl_crypto/src/cryptoacc" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="util/third_party/mbedtls/sl_crypto/src/cryptoacc" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -80,6 +80,6 @@
 #define TIME_PROFILE           1
 #endif
 
-#define MAX_ATT_MTU            244
+#define MAX_ATT_MTU            247
 
 #endif
