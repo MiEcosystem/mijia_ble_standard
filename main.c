@@ -134,6 +134,19 @@ void flush_keyboard_buffer(void)
 }
 
 
+static void enqueue_new_objs()
+{
+    static int8_t  battery;
+    battery = battery < 100 ? battery + 1 : 0;
+    mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery, 0);
+}
+
+static void enqueue_door_event(uint8_t stat)
+{
+    MI_LOG_WARNING("door %s\n", stat ? "opened" : "closed");
+    mibeacon_obj_enque(MI_EVT_DOOR, sizeof(stat), &stat, 0);
+}
+
 void gpio_irq_handler(uint8_t pin)
 {
     uint32_t t_diff;
@@ -154,27 +167,16 @@ void gpio_irq_handler(uint8_t pin)
     }
 
     if (pin == BSP_BUTTON1_PIN) {
-        if (GPIO_PinInGet(BSP_BUTTON0_PORT, BSP_BUTTON1_PIN) == 0) {
-            // PB0 pressed - record RTCC timestamp
-            pb1_press = RTCC_CounterGet();
-        } else {
-            // PB0 released - check if it was short or long press
-            t_diff = RTCC_CounterGet() - pb1_press;
-            if (t_diff < LONG_PRESS_TIME_TICKS) {
-                gecko_external_signal(EXT_SIGNAL_PB1_SHORT_PRESS);
-            } else {
-
-            }
-        }
+        // Hall sensor on P36, has detected motion.
+        enqueue_door_event(GPIO_PinInGet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN));
     }
 }
-
 
 void button_init(void)
 {
     // configure pushbutton PB0 and PB1 as inputs, with pull-up enabled
-    GPIO_PinModeSet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN, gpioModeInputPull, 1);
-    GPIO_PinModeSet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN, gpioModeInputPull, 1);
+    GPIO_PinModeSet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN, gpioModeInput, 1);
+    GPIO_PinModeSet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN, gpioModeInput, 1);
 
     GPIOINT_Init();
 
@@ -185,15 +187,6 @@ void button_init(void)
     /* register the callback function that is invoked when interrupt occurs */
     GPIOINT_CallbackRegister(BSP_BUTTON0_PIN, gpio_irq_handler);
     GPIOINT_CallbackRegister(BSP_BUTTON1_PIN, gpio_irq_handler);
-}
-
-
-static void enqueue_new_objs()
-{
-    static int8_t  battery;
-
-    battery = battery < 100 ? battery + 1 : 0;
-    mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery, 0);
 }
 
 
@@ -264,7 +257,7 @@ static void process_softtimer(struct gecko_cmd_packet *evt)
     switch (evt->data.evt_hardware_soft_timer.handle) {
     case TIMER_ID_OBJ_PERIOD_ADV:
         MI_LOG_WARNING("systime %d\n", gecko_cmd_hardware_get_time()->seconds);
-        enqueue_new_objs();
+//        enqueue_new_objs();
         break;
 
     case TIMER_ID_CLEAR_BIND_CFM:
@@ -293,6 +286,7 @@ static void process_external_signal(struct gecko_cmd_packet *evt)
     }
 
     if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB1_SHORT_PRESS) {
+        MI_LOG_DEBUG("PB1 pressed\n");
         // TODO
     }
 }
