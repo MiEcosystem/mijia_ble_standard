@@ -66,7 +66,7 @@
  */
 #define OBJ_QUEUE_SIZE         4
 #define OBJ_ADV_INTERVAL_MS    100
-#define OBJ_ADV_TIMEOUT_MS     2000
+#define OBJ_ADV_TIMEOUT_MS     3000
 
 
 /**

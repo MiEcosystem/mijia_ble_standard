@@ -181,7 +181,7 @@ void button_init(void)
 {
     // configure pushbutton PB0 and PB1 as inputs, with pull-up enabled
     GPIO_PinModeSet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN, gpioModeInput, 1);
-    GPIO_PinModeSet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN, gpioModeInput, 1);
+    GPIO_PinModeSet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN, gpioModeInputPull, 1);
 
     GPIOINT_Init();
 
@@ -240,7 +240,7 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     struct gecko_msg_system_boot_evt_t boot_info = evt->data.evt_system_boot;
     MI_LOG_INFO("system stack %d.%0d.%0d-%d, heap %d bytes\n", boot_info.major, boot_info.minor, boot_info.patch, boot_info.build,sizeof(bluetooth_stack_heap));
 
-    gecko_cmd_system_set_tx_power(0);
+    gecko_cmd_system_set_tx_power(70);
 
     mi_service_init();
     stdio_service_init(stdio_rx_handler);
