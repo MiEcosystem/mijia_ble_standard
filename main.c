@@ -149,6 +149,7 @@ static void enqueue_door_event(uint8_t stat)
 
 void gpio_irq_handler(uint8_t pin)
 {
+    static uint64_t ticks = 0;
     uint32_t t_diff;
 
     if (pin == BSP_BUTTON0_PIN) {
@@ -166,9 +167,13 @@ void gpio_irq_handler(uint8_t pin)
         }
     }
 
+    // Hall sensor on P36, has detected motion.
     if (pin == BSP_BUTTON1_PIN) {
-        // Hall sensor on P36, has detected motion.
-        enqueue_door_event(GPIO_PinInGet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN));
+        uint64_t last_ticks = ticks;
+        ticks = gecko_cmd_hardware_get_time()->ticks + (gecko_cmd_hardware_get_time()->seconds << 16);
+
+        if (ticks - last_ticks > 32768 / 4)
+            enqueue_door_event(GPIO_PinInGet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN));
     }
 }
 
@@ -339,6 +344,8 @@ int main()
     gecko_bgapi_class_gatt_server_init();
     gecko_bgapi_class_hardware_init();
     gecko_bgapi_class_flash_init();
+
+    gecko_cmd_system_set_tx_power(190);
 
     button_init();
     time_init(NULL);
