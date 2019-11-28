@@ -16,7 +16,7 @@
 /**
  * @note Product identification got from xiaomi IoT developer platform.
  */
-#define PRODUCT_ID              156   // xiaomi BLE devboard
+#define PRODUCT_ID              426 // clear glass thermometer
 
 
 /**
@@ -65,8 +65,8 @@
  * OBJ_ADV_TIMEOUT_MS  : the time one object will be continuously sent.
  */
 #define OBJ_QUEUE_SIZE         4
-#define OBJ_ADV_INTERVAL_MS    100
-#define OBJ_ADV_TIMEOUT_MS     3000
+#define OBJ_ADV_INTERVAL_MS    30
+#define OBJ_ADV_TIMEOUT_MS     1000
 
 
 /**

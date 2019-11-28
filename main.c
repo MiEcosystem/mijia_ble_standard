@@ -60,7 +60,6 @@
 #include "mi_config.h"
 
 
-#define DEVICE_NAME                    "stand_demo"
 #ifndef MAX_CONNECTIONS
 #define MAX_CONNECTIONS                1
 #endif
@@ -77,7 +76,7 @@
 #define TIMER_ID_CLEAR_BIND_CFM        12
 
 /// Number of ticks after which press is considered to be long (1s)
-#define LONG_PRESS_TIME_TICKS           (32768)
+#define LONG_PRESS_TIME_TICKS           (32768 * 2)
 #define EXT_SIGNAL_PB0_SHORT_PRESS      (1<<0)
 #define EXT_SIGNAL_PB0_LONG_PRESS       (1<<1)
 #define EXT_SIGNAL_PB1_SHORT_PRESS      (1<<2)
@@ -112,9 +111,6 @@ static gecko_configuration_t config = {
   .max_timers = 8,
 };
 
-/// button press timestamp for very long/long/short Push Button 0 press detection
-static uint32 pb0_press, pb1_press;
-
 extern void time_init(struct tm * time_ptr);
 static void advertising_init(uint8_t solicite_bind);
 static void advertising_start(void);
@@ -136,15 +132,10 @@ void flush_keyboard_buffer(void)
 
 static void enqueue_new_objs()
 {
-    static int8_t  battery;
-    battery = battery < 100 ? battery + 1 : 0;
-    mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery, 0);
-}
+    static int16_t temp;
 
-static void enqueue_door_event(uint8_t stat)
-{
-    MI_LOG_WARNING("door %s\n", stat ? "opened" : "closed");
-    mibeacon_obj_enque(MI_EVT_DOOR, sizeof(stat), &stat, 0);
+    temp = temp < 500 ? temp + 1 : -500;
+    mibeacon_obj_enque(MI_STA_TEMPERATURE, sizeof(temp), &temp, 0);
 }
 
 void gpio_irq_handler(uint8_t pin)
@@ -154,11 +145,11 @@ void gpio_irq_handler(uint8_t pin)
 
     if (pin == BSP_BUTTON0_PIN) {
         if (GPIO_PinInGet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN) == 0) {
-            // PB0 pressed - record RTCC timestamp
-            pb0_press = RTCC_CounterGet();
+            // PB0 pressed - record RTCC time stamp
+            ticks = gecko_cmd_hardware_get_time()->ticks + (gecko_cmd_hardware_get_time()->seconds << 16);
         } else {
             // PB0 released - check if it was short or long press
-            t_diff = RTCC_CounterGet() - pb0_press;
+            t_diff = gecko_cmd_hardware_get_time()->ticks + (gecko_cmd_hardware_get_time()->seconds << 16) - ticks;
             if (t_diff < LONG_PRESS_TIME_TICKS) {
                 gecko_external_signal(EXT_SIGNAL_PB0_SHORT_PRESS);
             } else {
@@ -166,21 +157,12 @@ void gpio_irq_handler(uint8_t pin)
             }
         }
     }
-
-    // Hall sensor on P36, has detected motion.
-    if (pin == BSP_BUTTON1_PIN) {
-        uint64_t last_ticks = ticks;
-        ticks = gecko_cmd_hardware_get_time()->ticks + (gecko_cmd_hardware_get_time()->seconds << 16);
-
-        if (ticks - last_ticks > 32768 / 4)
-            enqueue_door_event(GPIO_PinInGet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN));
-    }
 }
 
 void button_init(void)
 {
     // configure pushbutton PB0 and PB1 as inputs, with pull-up enabled
-    GPIO_PinModeSet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN, gpioModeInput, 1);
+    GPIO_PinModeSet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN, gpioModeInputPull, 1);
     GPIO_PinModeSet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN, gpioModeInputPull, 1);
 
     GPIOINT_Init();
@@ -210,7 +192,12 @@ static void mi_schd_event_handler(schd_evt_t *p_event)
     case SCHD_EVT_REG_SUCCESS:
         // set register bit.
         advertising_init(0);
-        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(60), TIMER_ID_OBJ_PERIOD_ADV, 0);
+        enqueue_new_objs();
+        // fall through here
+
+    case SCHD_EVT_KEY_FOUND:
+        // start periodic advertise objects.
+        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(10), TIMER_ID_OBJ_PERIOD_ADV, 0);
         break;
 
     case SCHD_EVT_KEY_DEL_SUCC:
@@ -240,7 +227,7 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     struct gecko_msg_system_boot_evt_t boot_info = evt->data.evt_system_boot;
     MI_LOG_INFO("system stack %d.%0d.%0d-%d, heap %d bytes\n", boot_info.major, boot_info.minor, boot_info.patch, boot_info.build,sizeof(bluetooth_stack_heap));
 
-    gecko_cmd_system_set_tx_power(70);
+    gecko_cmd_system_set_tx_power(0);
 
     mi_service_init();
     stdio_service_init(stdio_rx_handler);
@@ -251,9 +238,6 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     /* Start general advertising and enable connections. */
     advertising_init(0);
     advertising_start();
-
-    // start periodic advertise objects.
-    gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(60), TIMER_ID_OBJ_PERIOD_ADV, 0);
 }
 
 
@@ -262,7 +246,7 @@ static void process_softtimer(struct gecko_cmd_packet *evt)
     switch (evt->data.evt_hardware_soft_timer.handle) {
     case TIMER_ID_OBJ_PERIOD_ADV:
         MI_LOG_WARNING("systime %d\n", gecko_cmd_hardware_get_time()->seconds);
-//        enqueue_new_objs();
+        enqueue_new_objs();
         break;
 
     case TIMER_ID_CLEAR_BIND_CFM:
@@ -275,9 +259,7 @@ static void process_softtimer(struct gecko_cmd_packet *evt)
 static void process_external_signal(struct gecko_cmd_packet *evt)
 {
     if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB0_SHORT_PRESS) {
-        if(get_mi_reg_stat()) {
-            enqueue_new_objs();
-        } else {
+        if(!get_mi_reg_stat()) {
             MI_LOG_DEBUG("Set bind confirm bit in mibeacon.\n");
             advertising_init(1);
             gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(10), TIMER_ID_CLEAR_BIND_CFM, 1);
@@ -285,9 +267,11 @@ static void process_external_signal(struct gecko_cmd_packet *evt)
     }
 
     if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB0_LONG_PRESS) {
-        MI_LOG_DEBUG("Factory reset.\n");
-        mi_scheduler_start(SYS_KEY_DELETE);
-        gecko_cmd_hardware_set_soft_timer(0, TIMER_ID_OBJ_PERIOD_ADV, 0);
+        if(get_mi_reg_stat()) {
+            MI_LOG_DEBUG("Factory reset.\n");
+            mi_scheduler_start(SYS_KEY_DELETE);
+            gecko_cmd_hardware_set_soft_timer(0, TIMER_ID_OBJ_PERIOD_ADV, 0);
+        }
     }
 
     if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB1_SHORT_PRESS) {
@@ -345,8 +329,6 @@ int main()
     gecko_bgapi_class_hardware_init();
     gecko_bgapi_class_flash_init();
 
-    gecko_cmd_system_set_tx_power(190);
-
     button_init();
     time_init(NULL);
 
@@ -368,8 +350,8 @@ int main()
         /* Process mi scheduler */
         mi_schd_process();
 
-        /* Enter low power mode */
-        gecko_sleep_for_ms(gecko_can_sleep_ms());
+//        /* Enter low power mode */
+//        gecko_sleep_for_ms(gecko_can_sleep_ms());
     }
 }
 
@@ -377,14 +359,7 @@ static void advertising_init(uint8_t solicite_bind)
 {
     MI_LOG_INFO("advertising init...\n");
 
-    // add user customized adv struct : complete local name
-    uint8_t user_data[31], user_dlen;
-    user_data[0] = 1 + strlen(DEVICE_NAME);
-    user_data[1] = 9;  // complete local name
-    strcpy((char*)&user_data[2], DEVICE_NAME);
-    user_dlen = 2 + strlen(DEVICE_NAME);
-
-    if(MI_SUCCESS != mibeacon_adv_data_set(solicite_bind, 0, user_data, user_dlen)){
+    if(MI_SUCCESS != mibeacon_adv_data_set(solicite_bind, 0, NULL, 0)){
         MI_LOG_ERROR("mibeacon_data_set failed. \r\n");
     }
 }
