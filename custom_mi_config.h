@@ -75,9 +75,9 @@
 #define MI_SCHD_PROCESS_IN_MAIN_LOOP    1
 
 /* DEBUG */
-#define DEBUG_MIBLE            1
+#define DEBUG_MIBLE            0
 #define TIME_PROFILE           1
-#define RXFER_VERBOSE          1
+#define RXFER_VERBOSE          0
 
 #define MAX_ATT_MTU            247
 

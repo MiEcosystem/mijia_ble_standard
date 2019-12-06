@@ -212,7 +212,7 @@ static void mi_schd_event_handler(schd_evt_t *p_event)
     case SCHD_EVT_REG_SUCCESS:
         // set register bit.
         advertising_init(0);
-        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(60), TIMER_ID_OBJ_PERIOD_ADV, 0);
+        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(600), TIMER_ID_OBJ_PERIOD_ADV, 0);
         break;
 
     case SCHD_EVT_KEY_DEL_SUCC:
@@ -255,7 +255,7 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     advertising_start();
 
     // start periodic advertise objects.
-    gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(60), TIMER_ID_OBJ_PERIOD_ADV, 0);
+    gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(600), TIMER_ID_OBJ_PERIOD_ADV, 0);
 }
 
 
