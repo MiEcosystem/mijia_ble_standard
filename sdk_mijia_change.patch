@@ -1,0 +1,417 @@
+diff -ur 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/config/da1458x_config_advanced.h mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/config/da1458x_config_advanced.h
+--- 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/config/da1458x_config_advanced.h	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/config/da1458x_config_advanced.h	2019-10-24 15:09:53.894699900 +0800
+@@ -317,7 +317,7 @@
+ /* -  512:  Enables TRNG with  512 Bytes Buffer.                                                                */
+ /* - 1024:  Enables TRNG with 1024 Bytes Buffer.                                                                */
+ /****************************************************************************************************************/
+-#define CFG_TRNG (1024)
++#define CFG_TRNG (0)
+ 
+ /****************************************************************************************************************/
+ /* Creation of private and public keys using Elliptic Curve Diffie Hellman algorithms.                          */
+@@ -360,7 +360,7 @@
+ /* - CFG_NVDS_TAG_BLE_CA_NB_PKT         Number of packets to receive for statistics                             */
+ /* - CFG_NVDS_TAG_BLE_CA_NB_BAD_PKT     Number  of bad packets needed to remove a channel                       */
+ /****************************************************************************************************************/
+-#define CFG_NVDS_TAG_BD_ADDRESS             {0x06, 0x00, 0x70, 0xCA, 0xEA, 0x80}
++#define CFG_NVDS_TAG_BD_ADDRESS             {0x06, 0x00, 0x70, 0xCA, 0xEA, 0x89}
+ 
+ #define CFG_NVDS_TAG_LPCLK_DRIFT            DRIFT_500PPM
+ #define CFG_NVDS_TAG_BLE_CA_TIMER_DUR       2000
+@@ -397,7 +397,7 @@
+ /*             supportedMaxTxTime = (supportedMaxTxOctets + 11 + 3 ) * 8                                        */
+ /*         Range: 328 - 2120 usec.                                                                              */
+ /****************************************************************************************************************/
+-#define CFG_MAX_TX_PACKET_LENGTH        (251)
++#define CFG_MAX_TX_PACKET_LENGTH        (27)
+ 
+ /****************************************************************************************************************/
+ /* Maximum supported RX data packet length (supportedMaxRxOctets value, as defined in 4.2 Specification).       */
+@@ -409,7 +409,7 @@
+ /*             supportedMaxRxTime = (supportedMaxRxOctets + 11 + 3 ) * 8                                        */
+ /*         Range: 328 - 2120 usec.                                                                              */
+ /****************************************************************************************************************/
+-#define CFG_MAX_RX_PACKET_LENGTH        (251)
++#define CFG_MAX_RX_PACKET_LENGTH        (27)
+ 
+ /****************************************************************************************************************/
+ /* Select external application/host transport layer:                                                            */
+diff -ur 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/config/da1458x_config_basic.h mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/config/da1458x_config_basic.h
+--- 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/config/da1458x_config_basic.h	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/config/da1458x_config_basic.h	2019-10-24 17:29:05.758189000 +0800
+@@ -137,12 +137,12 @@
+ /****************************************************************************************************************/
+ /* Enables the BLE security functionality in TASK_APP. If not defined BLE security related code is compiled out.*/
+ /****************************************************************************************************************/
+-#define CFG_APP_SECURITY
++#define nCFG_APP_SECURITY
+ 
+ /****************************************************************************************************************/
+ /* Enables WatchDog timer.                                                                                      */
+ /****************************************************************************************************************/
+-#define CFG_WDOG
++#define nCFG_WDOG
+ 
+ /****************************************************************************************************************/
+ /* Watchdog timer behavior in production mode:                                                                  */
+@@ -177,7 +177,7 @@
+ /* If CFG_PRINTF_UART2 is defined, then serial interface logging mechanism is implented using UART2, else UART1 */
+ /* will be used.                                                                                                */
+ /****************************************************************************************************************/
+-#undef CFG_PRINTF
++#define nCFG_PRINTF
+ #ifdef CFG_PRINTF
+     #define CFG_PRINTF_UART2
+ #endif
+@@ -214,6 +214,10 @@
+ /****************************************************************************************************************/
+ #undef CFG_POWER_MODE_BYPASS
+ 
++// for Flash erase activity, we already have scheduler_en 
++#define EXCLUDE_MIJIA_POST
++//#define nEXCLUDE_RECORD_OVER_FLASH
++
+ #endif
+ 
+ #endif // _DA1458X_CONFIG_BASIC_H_
+diff -ur 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/config/user_callback_config.h mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/config/user_callback_config.h
+--- 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/config/user_callback_config.h	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/config/user_callback_config.h	2019-10-24 11:37:01.354107800 +0800
+@@ -50,6 +50,8 @@
+ #endif // (BLE_APP_SEC)
+ #include "user_proxr.h"
+ 
++#include "app_mijia.h"
++#include "user_default_handlers.h"
+ /*
+  * LOCAL VARIABLE DEFINITIONS
+  ****************************************************************************************
+@@ -75,7 +77,7 @@
+ #endif // BLE_SUOTA_RECEIVER
+ 
+ static const struct app_callbacks user_app_callbacks = {
+-    .app_on_connection                  = default_app_on_connection,
++    .app_on_connection                  = user_app_on_connection,
+     .app_on_disconnect                  = user_app_on_disconnect,
+     .app_on_update_params_rejected      = NULL,
+     .app_on_update_params_complete      = NULL,
+@@ -83,7 +85,7 @@
+     .app_on_adv_nonconn_complete        = NULL,
+     .app_on_adv_undirect_complete       = app_advertise_complete,
+     .app_on_adv_direct_complete         = NULL,
+-    .app_on_db_init_complete            = default_app_on_db_init_complete,
++    .app_on_db_init_complete            = on_mijiaauth_db_init,
+     .app_on_scanning_completed          = NULL,
+     .app_on_adv_report_ind              = NULL,
+     .app_on_get_dev_name                = default_app_on_get_dev_name,
+@@ -133,11 +135,7 @@
+  * - Use const declaration if "user_catch_rest_hndl" is NULL
+  */
+ 
+-#if defined ( __CC_ARM )
+-static const catch_rest_event_func_t app_process_catch_rest_cb = NULL;
+-#elif defined ( __GNUC__ )
+-#define app_process_catch_rest_cb   ((const catch_rest_event_func_t)NULL)
+-#endif
++#define app_process_catch_rest_cb user_process_catch
+ 
+ // Default Handler Operations
+ static const struct default_app_operations user_default_app_operations = {
+@@ -145,7 +143,7 @@
+ };
+ 
+ static const struct arch_main_loop_callbacks user_app_main_loop_callbacks = {
+-    .app_on_init            = default_app_on_init,
++    .app_on_init            = on_mijiaauth_app_init,
+ 
+     // By default the watchdog timer is reloaded and resumed when the system wakes up.
+     // The user has to take into account the watchdog timer handling (keep it running,
+diff -ur 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/config/user_profiles_config.h mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/config/user_profiles_config.h
+--- 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/config/user_profiles_config.h	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/config/user_profiles_config.h	2019-10-24 08:41:15.918175200 +0800
+@@ -54,10 +54,12 @@
+ /* Used BLE profiles (used by "rwprf_config.h").                                       */
+ /***************************************************************************************/
+ 
+-#define CFG_PRF_DISS
+-#define CFG_PRF_PXPR
+-#define CFG_PRF_SUOTAR
+-#define CFG_PRF_BASS
++#define nCFG_PRF_DISS
++#define nCFG_PRF_PXPR
++#define nCFG_PRF_SUOTAR
++#define nCFG_PRF_BASS
++
++#define CFG_PRF_MIJIA
+ 
+ /***************************************************************************************/
+ /* Profile application configuration section                                           */
+Only in mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src: user
+diff -ur 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/user_proxr.c mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/user_proxr.c
+--- 6.0.12.1020/projects/target_apps/ble_examples/prox_reporter/src/user_proxr.c	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/projects/target_apps/ble_examples/prox_reporter/src/user_proxr.c	2019-10-24 10:42:30.475783900 +0800
+@@ -167,30 +167,7 @@
+ }
+ #endif
+ 
+-void user_app_on_disconnect(struct gapc_disconnect_ind const *param)
+-{
+-    default_app_on_disconnect(NULL);
+ 
+-#if (BLE_BATT_SERVER)
+-    app_batt_poll_stop();
+-#endif
+-
+-#if (BLE_SUOTA_RECEIVER)
+-    // Issue a platform reset when it is requested by the suotar procedure
+-    if (suota_state.reboot_requested)
+-    {
+-        // Reboot request will be served
+-        suota_state.reboot_requested = 0;
+-
+-        // Platform reset
+-        platform_reset(RESET_AFTER_SUOTA_UPDATE);
+-    }
+-#endif
+-
+-#if BLE_PROX_REPORTER
+-    app_proxr_alert_stop();
+-#endif
+-}
+ 
+ #if defined (__DA14531__)
+ 
+
+
+diff -ur 6.0.12.1020/sdk/app_modules/src/app_common/app.c mijia_sdk/sdk/app_modules/src/app_common/app.c
+--- 6.0.12.1020/sdk/app_modules/src/app_common/app.c	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/sdk/app_modules/src/app_common/app.c	2019-10-24 09:17:33.107639600 +0800
+@@ -51,6 +51,11 @@
+ #include "user_custs_config.h"
+ #endif
+ 
++#if (BLE_MIJIA_SERVER)
++#include "mijia.h"
++#include "app_mijia.h"
++#endif
++
+ /*
+  * DEFINES
+  ****************************************************************************************
+@@ -120,6 +125,10 @@
+     {TASK_ID_CTSC,          app_ctsc_create_task, app_ctsc_enable},
+ #endif
+ 
++#if (BLE_MIJIA_SERVER)
++    {TASK_ID_MIJIA,          app_mijia_create_db, NULL},
++#endif
++		
+ #if (BLE_SUOTA_RECEIVER)
+     {TASK_ID_SUOTAR,        app_suotar_create_db, NULL},
+ #endif
+diff -ur 6.0.12.1020/sdk/app_modules/src/app_entry/app_entry_point.c mijia_sdk/sdk/app_modules/src/app_entry/app_entry_point.c
+--- 6.0.12.1020/sdk/app_modules/src/app_entry/app_entry_point.c	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/sdk/app_modules/src/app_entry/app_entry_point.c	2019-10-24 10:31:38.869179900 +0800
+@@ -112,6 +112,10 @@
+ #include "app_wsss_task.h"
+ #endif
+ 
++#if (BLE_MIJIA_SERVER)
++#include "app_mijia_task.h"
++#endif
++
+ /*
+  * GLOBAL VARIABLES DEFINITION
+  ****************************************************************************************
+@@ -193,6 +197,10 @@
+     (process_event_func_t) app_gattc_process_handler,
+ #endif
+ 
++#if ((BLE_MIJIA_SERVER) && (!EXCLUDE_DLG_MIJIA))
++    (process_event_func_t) app_mijia_process_handler,
++#endif
++
+ #if defined (__DA14531__) && !defined (__EXCLUDE_ROM_APP_TASK__)
+     #define END_PROCESS_HANDLER_TABLE       (0xF8)
+     (process_event_func_t) END_PROCESS_HANDLER_TABLE,
+diff -ur 6.0.12.1020/sdk/ble_stack/profiles/prf.c mijia_sdk/sdk/ble_stack/profiles/prf.c
+--- 6.0.12.1020/sdk/ble_stack/profiles/prf.c	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/sdk/ble_stack/profiles/prf.c	2019-10-24 09:07:38.852797100 +0800
+@@ -216,6 +216,10 @@
+ #include "gatt_client.h"
+ #endif //(BLE_GATT_CLIENT)
+ 
++#if (BLE_MIJIA_SERVER)
++#include "mijia.h"
++#endif //(BLE_MIJIA_SERVER)
++
+ #if (BLE_SUOTA_RECEIVER)
+ #include "suotar.h"
+ #endif // (BLE_SUOTA_RECEIVER)
+@@ -550,6 +554,12 @@
+             break;
+         #endif // (BLE_GATT_CLIENT)
+ 
++				#if (BLE_MIJIA_SERVER)
++				case TASK_ID_MIJIA:
++						prf_cbs = mijia_prf_itf_get();
++						break;
++				#endif // (BLE_MIJIA_SERVER)
++
+         #if (BLE_SUOTA_RECEIVER)
+         case TASK_ID_SUOTAR:
+             prf_cbs = suotar_prf_itf_get();
+@@ -1020,6 +1030,10 @@
+     {TASK_ID_GATT_CLIENT,    (prfif_func_t)gatt_client_prf_itf_get},
+ #endif // (BLE_GATT_CLIENT)
+ 
++#if (BLE_MIJIA_SERVER)
++    {TASK_ID_MIJIA,    (prfif_func_t)mijia_prf_itf_get},
++#endif // (BLE_MIJIA_SERVER)
++
+ #if (BLE_SUOTA_RECEIVER)
+     {TASK_ID_SUOTAR,  (prfif_func_t)suotar_prf_itf_get},
+ #endif
+diff -ur 6.0.12.1020/sdk/ble_stack/profiles/rwprf_config.h mijia_sdk/sdk/ble_stack/profiles/rwprf_config.h
+--- 6.0.12.1020/sdk/ble_stack/profiles/rwprf_config.h	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/sdk/ble_stack/profiles/rwprf_config.h	2019-10-24 08:48:10.763889500 +0800
+@@ -378,6 +378,13 @@
+ #define BLE_CUSTOM2_SERVER      0
+ #endif // defined(CFG_PRF_CUST2)
+ 
++/// MIJIA server
++#if defined(CFG_PRF_MIJIA)
++#define BLE_MIJIA_SERVER      1
++#else
++#define BLE_MIJIA_SERVER      0
++#endif // defined(CFG_PRF_MIJIA)
++
+ #define BLE_CUSTOM_SERVER (BLE_CUSTOM1_SERVER || BLE_CUSTOM2_SERVER)
+ 
+ /// BLE_CLIENT_PRF indicates if at least one client profile is present
+@@ -399,7 +406,7 @@
+         || BLE_BATT_SERVER || BLE_HID_DEVICE || BLE_GL_SENSOR || BLE_RSC_SENSOR  \
+         || BLE_CSC_SENSOR || BLE_CP_SENSOR || BLE_LN_SENSOR || BLE_AN_SERVER \
+         || BLE_PAS_SERVER || BLE_BMS_SERVER || BLE_BCS_SERVER || BLE_WSS_SERVER \
+-        || BLE_UDS_SERVER || BLE_CTS_SERVER || BLE_SUOTA_RECEIVER || BLE_CUSTOM_SERVER)
++        || BLE_UDS_SERVER || BLE_CTS_SERVER || BLE_SUOTA_RECEIVER || BLE_CUSTOM_SERVER || BLE_MIJIA_SERVER)
+ 
+ #define BLE_SERVER_PRF          1
+ #else
+Only in mijia_sdk/sdk/common_project_files/misc: .da14531_symbols.txt.un~
+Only in mijia_sdk/sdk/common_project_files/misc: da14531_symbols - Copy.txt
+diff -ur 6.0.12.1020/sdk/common_project_files/misc/da14531_symbols.txt mijia_sdk/sdk/common_project_files/misc/da14531_symbols.txt
+--- 6.0.12.1020/sdk/common_project_files/misc/da14531_symbols.txt	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/sdk/common_project_files/misc/da14531_symbols.txt	2019-10-24 14:31:16.688313500 +0800
+@@ -765,13 +765,13 @@
+ 0x07f1f0f9 T __aeabi_memcpy
+ 0x07f1f0f9 T __aeabi_memcpy4
+ 0x07f1f0f9 T __aeabi_memcpy8
+-0x07f1f11d T __aeabi_memset
+-0x07f1f11d T __aeabi_memset4
+-0x07f1f11d T __aeabi_memset8
+-0x07f1f12b T __aeabi_memclr
+-0x07f1f12b T __aeabi_memclr4
+-0x07f1f12b T __aeabi_memclr8
+-0x07f1f12f T _memset$wrapper
++;0x07f1f11d T __aeabi_memset
++;0x07f1f11d T __aeabi_memset4
++;0x07f1f11d T __aeabi_memset8
++;0x07f1f12b T __aeabi_memclr
++;0x07f1f12b T __aeabi_memclr4
++;0x07f1f12b T __aeabi_memclr8
++;0x07f1f12f T _memset$wrapper
+ 0x07f1f141 T memcmp
+ 0x07f1f15b T __aeabi_uread4
+ 0x07f1f15b T __rt_uread4
+Only in mijia_sdk/sdk/common_project_files/misc: da14531_symbols.txt~
+diff -ur 6.0.12.1020/sdk/platform/arch/boot/ARM/startup_DA14531.s mijia_sdk/sdk/platform/arch/boot/ARM/startup_DA14531.s
+--- 6.0.12.1020/sdk/platform/arch/boot/ARM/startup_DA14531.s	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/sdk/platform/arch/boot/ARM/startup_DA14531.s	2019-10-24 14:01:05.750346900 +0800
+@@ -45,7 +45,7 @@
+ ;   <o>  Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
+ ; </h>
+ 
+-Heap_Size       EQU     0x00000100
++Heap_Size       EQU     0x00000400
+ 
+                 AREA    HEAP, NOINIT, READWRITE, ALIGN=3
+ __heap_base
+diff -ur 6.0.12.1020/sdk/platform/arch/boot/ARM/startup_DA14585_586.s mijia_sdk/sdk/platform/arch/boot/ARM/startup_DA14585_586.s
+--- 6.0.12.1020/sdk/platform/arch/boot/ARM/startup_DA14585_586.s	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/sdk/platform/arch/boot/ARM/startup_DA14585_586.s	2019-10-24 13:56:58.556378800 +0800
+@@ -45,7 +45,7 @@
+ ;   <o>  Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
+ ; </h>
+ 
+-Heap_Size       EQU     0x00000100
++Heap_Size       EQU     0x00000400
+ 
+                 AREA    HEAP, NOINIT, READWRITE, ALIGN=3
+ __heap_base
+diff -ur 6.0.12.1020/sdk/platform/core_modules/crypto/aes_api.c mijia_sdk/sdk/platform/core_modules/crypto/aes_api.c
+--- 6.0.12.1020/sdk/platform/core_modules/crypto/aes_api.c	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/sdk/platform/core_modules/crypto/aes_api.c	2019-10-23 17:22:47.544501800 +0800
+@@ -5,7 +5,7 @@
+  *
+  * @brief AES.
+  *
+- * Copyright (c) 2017-2019 Dialog Semiconductor. All rights reserved.
++ * Copyright (c) 2017-2018 Dialog Semiconductor. All rights reserved.
+  *
+  * This software ("Software") is owned by Dialog Semiconductor.
+  *
+@@ -40,9 +40,9 @@
+ #include "reg_blecore.h"
+ #include "co_bt.h"
+ 
+-/* using a dummy IV vector filled with zeroes for the software decryption since the chip does not use IV for encryption */
+-extern uint8_t IV[];
+ 
++	/* using a dummy IV vector filled with zeroes for decryption since the chip does not use IV at encryption */
++//uint8_t IV[ENC_DATA_LEN] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+ int aes_set_key(const uint8_t *userKey, const uint32_t bits, AES_KEY *key, uint8_t enc_dec)
+ {
+     if(enc_dec == AES_ENCRYPT)
+@@ -56,6 +56,7 @@
+ 
+         return 0;
+     }
++		/*
+     if (enc_dec == AES_DECRYPT)
+     {
+         if (bits == 128)
+@@ -65,6 +66,7 @@
+ 
+       AES_convert_key(key);
+     }
++		*/
+     return 0; /* now we always return 0 since the handling functions changed to void */
+ }
+ 
+diff -ur 6.0.12.1020/sdk/platform/core_modules/crypto/sw_aes.c mijia_sdk/sdk/platform/core_modules/crypto/sw_aes.c
+--- 6.0.12.1020/sdk/platform/core_modules/crypto/sw_aes.c	2019-10-09 14:28:34.000000000 +0800
++++ mijia_sdk/sdk/platform/core_modules/crypto/sw_aes.c	2019-10-23 17:22:44.741940900 +0800
+@@ -1,6 +1,6 @@
+ /**
+  * Copyright (c) 2007, Cameron Rich
+- * Copyright (c) 2017-2019 Modified by Dialog Semiconductor
++ * Copyright (C) 2017 Modified by Dialog Semiconductor
+  * 
+  * All rights reserved.
+  * 
+diff -ur 6.0.12.1020/sdk/platform/core_modules/rwip/api/rwip_config.h mijia_sdk/sdk/platform/core_modules/rwip/api/rwip_config.h
+--- 6.0.12.1020/sdk/platform/core_modules/rwip/api/rwip_config.h	2019-10-09 14:28:36.000000000 +0800
++++ mijia_sdk/sdk/platform/core_modules/rwip/api/rwip_config.h	2019-10-24 09:24:55.087067100 +0800
+@@ -570,6 +570,10 @@
+     TASK_ID_ANCC         = 65,   // Apple Notification Center Service Client Task
+ 
+     TASK_ID_GATT_CLIENT  = 66,   // Generic Attribute Profile Service Client Task
++		
++#if (BLE_MIJIA_SERVER)
++		TASK_ID_MIJIA        = 0xFB,   // Mijia Task
++#endif
+ 
+     TASK_ID_SUOTAR       = 0xFC, // Software Patching Over The Air Receiver
+ 

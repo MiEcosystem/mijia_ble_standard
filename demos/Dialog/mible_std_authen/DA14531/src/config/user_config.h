@@ -5,11 +5,27 @@
  *
  * @brief User configuration file.
  *
- * Copyright (C) 2015-2017 Dialog Semiconductor.
- * This computer program includes Confidential, Proprietary Information
- * of Dialog Semiconductor. All Rights Reserved.
+ * Copyright (c) 2015-2019 Dialog Semiconductor. All rights reserved.
  *
- * <bluetooth.support@diasemi.com>
+ * This software ("Software") is owned by Dialog Semiconductor.
+ *
+ * By using this Software you agree that Dialog Semiconductor retains all
+ * intellectual property and proprietary rights in and to this Software and any
+ * use, reproduction, disclosure or distribution of the Software without express
+ * written permission or a license agreement from Dialog Semiconductor is
+ * strictly prohibited. This Software is solely for use on or in conjunction
+ * with Dialog Semiconductor products.
+ *
+ * EXCEPT AS OTHERWISE PROVIDED IN A LICENSE AGREEMENT BETWEEN THE PARTIES, THE
+ * SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. EXCEPT AS OTHERWISE
+ * PROVIDED IN A LICENSE AGREEMENT BETWEEN THE PARTIES, IN NO EVENT SHALL
+ * DIALOG SEMICONDUCTOR BE LIABLE FOR ANY DIRECT, SPECIAL, INDIRECT, INCIDENTAL,
+ * OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+ * USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+ * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+ * OF THE SOFTWARE.
  *
  ****************************************************************************************
  */
@@ -28,6 +44,43 @@
 #include "app_adv_data.h"
 #include "co_bt.h"
 #include "user_periph_setup.h"
+
+/*
+ * DEFINES
+ ****************************************************************************************
+ */
+
+/*
+ ****************************************************************************************
+ *
+ * Privacy / Addressing configuration
+ *
+ ****************************************************************************************
+ */
+
+/*************************************************************************
+ * Privacy Capabilities and address configuration of local device:
+ * - APP_CFG_ADDR_PUB               No Privacy, Public BDA
+ * - APP_CFG_ADDR_STATIC            No Privacy, Random Static BDA
+ * - APP_CFG_HOST_PRIV_RPA          Host Privacy, RPA, Public Identity
+ * - APP_CFG_HOST_PRIV_NRPA         Host Privacy, NRPA (non-connectable ONLY)
+ * - APP_CFG_CNTL_PRIV_RPA_PUB      Controller Privacy, RPA or PUB, Public Identity
+ * - APP_CFG_CNTL_PRIV_RPA_RAND     Controller Privacy, RPA, Public Identity
+ *
+ * Select only one option for privacy / addressing configuration.
+ **************************************************************************
+ */
+#define USER_CFG_ADDRESS_MODE       APP_CFG_ADDR_PUB
+
+/*************************************************************************
+ * Controller Privacy Mode:
+ * - APP_CFG_CNTL_PRIV_MODE_NETWORK Controler Privacy Network mode (default)
+ * - APP_CFG_CNTL_PRIV_MODE_DEVICE  Controler Privacy Device mode
+ *
+ * Select only one option for controller privacy mode configuration.
+ **************************************************************************
+ */
+#define USER_CFG_CNTL_PRIV_MODE     APP_CFG_CNTL_PRIV_MODE_NETWORK
 
 /*
  * VARIABLES
@@ -53,13 +106,8 @@ static const sleep_state_t app_default_sleep_mode = ARCH_EXT_SLEEP_ON;
  ****************************************************************************************
  */
 static const struct advertise_configuration user_adv_conf = {
-    /**
-     * Own BD address source of the device:
-     * - GAPM_STATIC_ADDR: Public or Private Static Address according to device address configuration
-     * - GAPM_GEN_RSLV_ADDR: Generated resolvable private random address
-     * - GAPM_GEN_NON_RSLV_ADDR: Generated non-resolvable private random address
-     */
-    .addr_src = GAPM_STATIC_ADDR,
+
+    .addr_src = APP_CFG_ADDR_SRC(USER_CFG_ADDRESS_MODE),
 
     /// Minimum interval for advertising
     .intv_min = MS_TO_BLESLOTS(687.5),                    // 687.5ms
@@ -92,22 +140,12 @@ static const struct advertise_configuration user_adv_conf = {
     /// Host information advertising data (GAPM_ADV_NON_CONN and GAPM_ADV_UNDIRECT)
     /// Advertising filter policy:
     /// - ADV_ALLOW_SCAN_ANY_CON_ANY: Allow both scan and connection requests from anyone
-    /// - ADV_ALLOW_SCAN_WLST_CON_ANY: Allow both scan req from White List devices only and
-    ///   connection req from anyone
-    /// - ADV_ALLOW_SCAN_ANY_CON_WLST: Allow both scan req from anyone and connection req
-    ///   from White List devices only
-    /// - ADV_ALLOW_SCAN_WLST_CON_WLST: Allow scan and connection requests from White List
-    ///   devices only
     .adv_filt_policy = ADV_ALLOW_SCAN_ANY_CON_ANY,
 
-    /// Direct address information (GAPM_ADV_DIRECT/GAPM_ADV_DIRECT_LDC)
-    /// (used only if reconnection address isn't set or privacy disabled)
-    /// BD Address of device
+    /// Address of peer device
     .peer_addr = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6},
 
-    /// Direct address information (GAPM_ADV_DIRECT/GAPM_ADV_DIRECT_LDC)
-    /// (used only if reconnection address isn't set or privacy disabled)
-    /// Address type of the device 0=public/1=private random
+    /// Address type of peer device (0=public/1=random)
     .peer_addr_type = 0,
 };
 
@@ -137,12 +175,15 @@ static const struct advertise_configuration user_adv_conf = {
  ****************************************************************************************
  */
 /// Advertising data
-#define USER_ADVERTISE_DATA         "\x09"\
+#define USER_ADVERTISE_DATA         ("\x09"\
                                     ADV_TYPE_COMPLETE_LIST_16BIT_SERVICE_IDS\
                                     ADV_UUID_LINK_LOSS_SERVICE\
                                     ADV_UUID_IMMEDIATE_ALERT_SERVICE\
                                     ADV_UUID_TX_POWER_SERVICE\
-                                    ADV_UUID_SUOTAR_SERVICE
+                                    ADV_UUID_SUOTAR_SERVICE\
+                                    "\x10"\
+                                    ADV_TYPE_URI\
+                                    "\x16\x2F\x2F\x77\x77\x77\x2E\x69\x61\x6E\x61\x2E\x6F\x72\x67")
 
 /// Advertising data length - maximum 28 bytes, 3 bytes are reserved to set
 #define USER_ADVERTISE_DATA_LEN               (sizeof(USER_ADVERTISE_DATA)-1)
@@ -190,17 +231,16 @@ static const struct gapm_configuration user_gapm_conf = {
     .max_mtu = 247,
 
     /// Device Address Type
-    /// - GAPM_CFG_ADDR_PUBLIC: Device Address is a Public Static address
-    /// - GAPM_CFG_ADDR_PRIVATE: Device Address is a Private Static address
-    /// - GAPM_CFG_ADDR_PRIVACY: Device Address generated using Privacy feature
-    .addr_type = GAPM_CFG_ADDR_PUBLIC,
+    .addr_type = APP_CFG_ADDR_TYPE(USER_CFG_ADDRESS_MODE),
+    /// Duration before regenerating the Random Private Address when privacy is enabled
+    .renew_dur = 15000,    // 15000 * 10ms = 150s is the minimum value
 
     /***********************
      * Privacy configuration
      ***********************
      */
 
-    /// Private static address
+    /// Random Static address
     // NOTE: The address shall comply with the following requirements:
     // - the two most significant bits of the address shall be equal to 1,
     // - all the remaining bits of the address shall NOT be equal to 1,
@@ -209,14 +249,8 @@ static const struct gapm_configuration user_gapm_conf = {
     // random static address will be automatically generated.
     .addr = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 
-    /// Duration before regenerate device address when privacy is enabled.
-    .renew_dur = 0,
-
-    /// Device IRK used for resolvable random BD address generation (LSB first)
+    /// Device IRK used for Resolvable Private Address generation (LSB first)
     .irk = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f},
-
-    // privacy 1.2 - Link Layer Privacy (4.2)
-    .priv1_2 = 0,
 
     /****************************
      * ATT database configuration
@@ -228,8 +262,8 @@ static const struct gapm_configuration user_gapm_conf = {
     /// +-----+-----+----+-----+-----+----+----+----+
     /// | DBG | RFU | SC | PCP | APP_PERM |NAME_PERM|
     /// +-----+-----+----+-----+-----+----+----+----+
-    /// - Bit [0-1]: Device Name write permission requirements for peer device (@see gapm_write_att_perm)
-    /// - Bit [2-3]: Device Appearance write permission requirements for peer device (@see gapm_write_att_perm)
+    /// - Bit [0-1]: Device Name write permission requirements for peer device (@see device_name_write_perm)
+    /// - Bit [2-3]: Device Appearance write permission requirements for peer device (@see device_appearance_write_perm)
     /// - Bit [4]  : Slave Preferred Connection Parameters present
     /// - Bit [5]  : Service change feature present in GATT attribute database.
     /// - Bit [6]  : Reserved
@@ -333,10 +367,7 @@ static const struct central_configuration user_central_conf = {
     .code = GAPM_CONNECTION_DIRECT,
 
     /// Own BD address source of the device:
-    ///  - GAPM_STATIC_ADDR: Public or Private Static Address according to device address configuration
-    ///  - GAPM_GEN_RSLV_ADDR: Generated resolvable private random address
-    ///  - GAPM_GEN_NON_RSLV_ADDR: Generated non-resolvable private random address
-    .addr_src = GAPM_STATIC_ADDR,
+    .addr_src = APP_CFG_ADDR_SRC(USER_CFG_ADDRESS_MODE),
 
     /// Scan interval
     .scan_interval = 0x180,
@@ -370,49 +401,49 @@ static const struct central_configuration user_central_conf = {
     /// BD Address of device
     .peer_addr_0 = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
 
-    /// Address type of the device 0=public/1=private random
+    /// Address type of the device 0=public/1=random
     .peer_addr_0_type = 0,
 
     /// BD Address of device
     .peer_addr_1 = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
 
-    /// Address type of the device 0=public/1=private random
+    /// Address type of the device 0=public/1=random
     .peer_addr_1_type = 0,
 
     /// BD Address of device
     .peer_addr_2 = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
 
-    /// Address type of the device 0=public/1=private random
+    /// Address type of the device 0=public/1=random
     .peer_addr_2_type = 0,
 
     /// BD Address of device
     .peer_addr_3 = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
 
-    /// Address type of the device 0=public/1=private random
+    /// Address type of the device 0=public/1=random
     .peer_addr_3_type = 0,
 
     /// BD Address of device
     .peer_addr_4 = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
 
-    /// Address type of the device 0=public/1=private random
+    /// Address type of the device 0=public/1=random
     .peer_addr_4_type = 0,
 
     /// BD Address of device
     .peer_addr_5 = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
 
-    /// Address type of the device 0=public/1=private random
+    /// Address type of the device 0=public/1=random
     .peer_addr_5_type = 0,
 
     /// BD Address of device
     .peer_addr_6 = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
 
-    /// Address type of the device 0=public/1=private random
+    /// Address type of the device 0=public/1=random
     .peer_addr_6_type = 0,
 
     /// BD Address of device
     .peer_addr_7 = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
 
-    /// Address type of the device 0=public/1=private random
+    /// Address type of the device 0=public/1=random
     .peer_addr_7_type = 0,
 };
 

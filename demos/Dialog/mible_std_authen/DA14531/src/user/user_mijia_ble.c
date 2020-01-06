@@ -165,3 +165,6 @@ void mijia_service_init(void)
     //with the limit of mible_gatts_service_init API, we can only init one service here
     //stdio_service_init(stdio_rx_handler);
 }
+
+
+

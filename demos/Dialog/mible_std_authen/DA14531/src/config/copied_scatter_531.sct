@@ -1,0 +1,126 @@
+#! armcc -E -I .\,.\..,.\..\src\config,C:\workspace\DA14531\test\6.0.12.1020\sdk\common_project_files\ --cpu Cortex-M0+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                   System RAM                                                ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;+******************************+******************************+******************************+
+;+ 1st RAM block (16KB)         + 2nd RAM block (12KB)         + 3rd RAM block (20KB)         +
+;+******************************+******************************+******************************+
+;                                                                        ^                    ;
+;                                                                        |                    ;
+;                                                                 RET_MEM_BASE_ADDR    ^      ;
+;                                                                                      |      ;
+;                                                                              __SCT_BLE_BASE ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Scatter file definitions required by the inclusion of the da1458x_scatter_config.h (do not remove)
+#define ARM_SCATTERFILE
+
+; Define the used DA14531 sample version (ES2: Use __ES2_DA14531__, ES3: Use __DA14531__)
+#define __DA14531__
+
+#include "da1458x_config_basic.h"
+#include "da1458x_config_advanced.h"
+#include "da1458x_scatter_config.h"
+
+; Macro to align val on the multiple of 4 equal or nearest higher
+#define ALIGN4_HI(val) (((val)+3) AND (~3))
+
+#if !defined(CFG_RET_DATA_SIZE)
+    #error "CFG_RET_DATA_SIZE is not defined!"
+#endif
+
+#if !defined(CFG_RET_DATA_UNINIT_SIZE)
+    #error "CFG_RET_DATA_UNINIT_SIZE is not defined!"
+#endif
+
+#define RET_MEM_BASE_ADDR    ALIGN4_HI((__SCT_BLE_BASE - (CFG_RET_DATA_UNINIT_SIZE + CFG_RET_DATA_SIZE + RET_HEAP_SIZE)))
+
+
+#if defined(CFG_CODE_LOCATION_OTP) && defined(CFG_CODE_LOCATION_EXT)
+    #error "Only one of CFG_CODE_LOCATION_OTP and CFG_CODE_LOCATION_EXT must be defined!"
+#elif defined(CFG_CODE_LOCATION_OTP)
+    #define CODE_LOCATION_OTP   1
+    #define CODE_LOCATION_EXT   0
+#elif defined(CFG_CODE_LOCATION_EXT)
+    #define CODE_LOCATION_OTP   0
+    #define CODE_LOCATION_EXT   1
+#else
+    #error "One of CFG_CODE_LOCATION_OTP and CFG_CODE_LOCATION_EXT must be defined!"
+#endif
+
+; OTP memory size = 32K
+#define OTP_MEM_SIZE        (32 * 1024)
+
+; OTP header section size = 64 bytes
+#define OTP_HEADER_SIZE     (64)
+
+; OTP TCS section size = 240 bytes
+#define OTP_TCS_SIZE        (240)
+
+#define CODE_AREA_BASE      (0x07fc0000 + 0xC0 + 80)
+
+#if CODE_LOCATION_OTP
+    #define CODE_AREA_MAX_SIZE  (OTP_MEM_SIZE - OTP_HEADER_SIZE - OTP_TCS_SIZE - (0xC0 + 80))
+#elif CODE_LOCATION_EXT
+    #define CODE_AREA_MAX_SIZE  (0xA800 - (0xC0 + 80))       // TODO - change maximum size according to RAM space allocated by ROM
+#endif
+
+
+LR_IROM1 0x07fc0000 0xc0 {                      ;
+    ER_IROM1 0x07fc0000 0xc0 {                  ; load address = execution address
+        *.o (RESET, +First)
+    }
+}
+
+LR_IROM2 0x07fc00c0 80 {                        ; 20 patch function slots
+    ER_IROM2 0x07fc00c0 EMPTY 80 {              ; load address = execution address
+    }
+}
+
+LR_IROM3 CODE_AREA_BASE CODE_AREA_MAX_SIZE {
+
+    ER_IROM3 CODE_AREA_BASE CODE_AREA_MAX_SIZE {
+       *(InRoot$$Sections)                      ; All library sections that must be in a
+                                                ; root region, for example, __main.o,
+                                                ; __scatter*.o, __dc*.o, and * Region$$Table
+        startup_DA14531.o (+RO)
+        system_DA14531.o (+RO)
+        .ANY (+RO)
+        .ANY (+RW)
+    }
+
+    ; *********************************************************************************************
+    ; * END OF OTP - ANYTHING BELOW THIS POINT IS NOT WRITTEN WHEN THE CODE IS BURNED TO THE OTP! *
+    ; *********************************************************************************************
+
+    ER_PRODTEST AlignExpr(+0,8) UNINIT {
+        .ANY (prodtest_uninit)
+    }
+
+    ER_ZI +0 {
+        .ANY (+ZI)
+        .ANY (STACK)
+    }
+
+    ER_NZI +0 UNINIT {
+        jump_table.o (heap_mem_area_not_ret)    ; not retained HEAP
+    }
+}
+
+LR_RETAINED_RAM0 RET_MEM_BASE_ADDR {
+
+    RET_DATA_UNINIT RET_MEM_BASE_ADDR UNINIT CFG_RET_DATA_UNINIT_SIZE {
+        .ANY (retention_mem_area_uninit)        ; uninitialized application data
+    }
+
+    RET_DATA +0 CFG_RET_DATA_SIZE {
+        .ANY (retention_mem_area0)              ; zero initialized SDK + application data
+    }
+
+    RET_HEAP +0 UNINIT RET_HEAP_SIZE {
+        jump_table.o (heap_env_area)
+        jump_table.o (heap_db_area)
+        jump_table.o (heap_msg_area)            ; this area is used also for TRNG at system startup
+    }
+}
