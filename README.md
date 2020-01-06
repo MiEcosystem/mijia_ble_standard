@@ -3,7 +3,7 @@
 - DA1468x
 - DA1469x
 
-DA14585硬件请参考 [Dialog 分支](https://github.com/MiEcosystem/mijia_ble_standard/tree/Dialog)
+DA14585/DA14531 硬件请参考 [Dialog 分支](https://github.com/MiEcosystem/mijia_ble_standard/tree/Dialog)
 
 ## 使用说明
 
