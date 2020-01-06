@@ -7,7 +7,7 @@ DA1468x/69x硬件请参考 [da146xx 分支](https://github.com/MiEcosystem/mijia
 
 ## 使用说明
 
-1. 获取DA145xx_SDK（示例工程使用SDK版本号6.0.12.1020, https://www.dialog-semiconductor.com/products/connectivity/bluetooth-low-energy/products/da14531）
+1. 获取DA145xx_SDK（ 示例工程使用SDK版本号6.0.12.1020, https://www.dialog-semiconductor.com/products/connectivity/bluetooth-low-energy/products/da14531 ）
 2. 进入到文件目录 6.0.12.1020\projects\target_apps\ble_examples\
 3. 执行 git clone --recursive https://github.com/MiEcosystem/mijia_ble_standard.git -b Dialog
 
