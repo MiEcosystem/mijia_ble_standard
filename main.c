@@ -349,6 +349,8 @@ int main()
     button_init();
     time_init(NULL);
 
+
+
     /* Event pointer for handling events */
     struct gecko_cmd_packet* evt;
 
