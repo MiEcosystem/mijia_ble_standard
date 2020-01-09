@@ -10,7 +10,7 @@
  * @note Device firmware version. It'll be filled in Version character appended to
  * mijia ble libs version.
  */
-#define DEVELOPER_VERSION       0002
+#define DEVELOPER_VERSION       0038
 
 
 /**
