@@ -42,26 +42,15 @@
 
 
 /**
- * @note Which OOB methods device used in authentication procedure.
- *       OOB_USE_NUMPAD_INPUT  : device has a numeric keypad to enter the pairing code.
- *       OOB_USE_QR_CODE_OUT   : device provided with a QR code label.
- *       OOB_USE_DISPLAT_OUT   : device displayed a six digit number.
- */
-#define OOB_USE_NUMPAD_INPUT   0
-#define OOB_USE_QR_CODE_OUT    0
-#define OOB_USE_DISPLAT_OUT    0
-
-
-/**
  * @note Process mi scheduler in main loop (non-interrupt context).
  */
 #define MI_SCHD_PROCESS_IN_MAIN_LOOP    1
 
 /* DEBUG */
-#ifndef DEBUG_MIBLE
-#define DEBUG_MIBLE            0
+#define DEBUG_MIBLE            1
 #define TIME_PROFILE           1
-#endif
+#define RXFER_VERBOSE          1
 
+#define MAX_ATT_MTU            247
 
 #endif

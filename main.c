@@ -87,7 +87,7 @@ static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 /* Bluetooth stack configuration parameters (see "UG136: Silicon Labs Bluetooth C Application Developer's Guide" for details on each parameter) */
 static gecko_configuration_t config = {
   .config_flags = 0,                                   /* Check flag options from UG136 */
-#if defined(FEATURE_LFXO)
+#if BSP_CLK_LFXO_PRESENT
   .sleep.flags = SLEEP_FLAGS_DEEP_SLEEP_ENABLE,        /* Sleep is enabled */
 #else
   .sleep.flags = 0,
@@ -212,7 +212,7 @@ static void mi_schd_event_handler(schd_evt_t *p_event)
     case SCHD_EVT_REG_SUCCESS:
         // set register bit.
         advertising_init(0);
-        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(60), TIMER_ID_OBJ_PERIOD_ADV, 0);
+        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(600), TIMER_ID_OBJ_PERIOD_ADV, 0);
         break;
 
     case SCHD_EVT_KEY_DEL_SUCC:
@@ -255,7 +255,7 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     advertising_start();
 
     // start periodic advertise objects.
-    gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(60), TIMER_ID_OBJ_PERIOD_ADV, 0);
+    gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(600), TIMER_ID_OBJ_PERIOD_ADV, 0);
 }
 
 
@@ -349,6 +349,8 @@ int main()
     button_init();
     time_init(NULL);
 
+
+
     /* Event pointer for handling events */
     struct gecko_cmd_packet* evt;
 
@@ -367,8 +369,10 @@ int main()
         /* Process mi scheduler */
         mi_schd_process();
 
+#if BSP_CLK_LFXO_PRESENT
         /* Enter low power mode */
         gecko_sleep_for_ms(gecko_can_sleep_ms());
+#endif
     }
 }
 
