@@ -62,7 +62,7 @@
 #endif
 
 #ifndef MAX_CONNECTIONS
-#define MAX_CONNECTIONS 4
+#define MAX_CONNECTIONS 1
 #endif
 
 uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
@@ -86,9 +86,6 @@ static gecko_configuration_t config = {
   .bluetooth.sleep_clock_accuracy = 500,               /* In case of internal RCO the sleep clock accuracy is 500 ppm */
 #endif
   .gattdb = &bg_gattdb_data,                           /* Pointer to GATT database */
-  .ota.flags = 0,                                      /* Check flag options from UG136 */
-  .ota.device_name_len = 3,                            /* Length of the device name in OTA DFU mode */
-  .ota.device_name_ptr = "OTA",                        /* Device name in OTA DFU mode */
   .pa.config_enable = 1,                               /* Set this to be a valid PA config */
 #if defined(FEATURE_PA_INPUT_FROM_VBAT)
   .pa.input = GECKO_RADIO_PA_INPUT_VBAT,               /* Configure PA input to VBAT */
@@ -97,6 +94,7 @@ static gecko_configuration_t config = {
 #endif // defined(FEATURE_PA_INPUT_FROM_VBAT)
   .rf.flags = GECKO_RF_CONFIG_ANTENNA,                 /* Enable antenna configuration. */
   .rf.antenna = GECKO_RF_ANTENNA,                      /* Select antenna path! */
+  .max_timers = 16,
 };
 
 /**
@@ -110,7 +108,6 @@ int main(void)
   initBoard();
   /* Initialize application */
   initApp();
-  initVcomEnable();
   /* Start application */
   appMain(&config);
 }

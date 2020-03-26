@@ -43,7 +43,13 @@ void appMain(gecko_configuration_t *pconfig)
   initLog();
 
   /* Initialize stack */
-  gecko_init(pconfig);
+  gecko_stack_init(pconfig);
+  gecko_bgapi_class_system_init();
+  gecko_bgapi_class_le_gap_init();
+  gecko_bgapi_class_gatt_server_init();
+  gecko_bgapi_class_hardware_init();
+  gecko_bgapi_class_flash_init();
+  gecko_bgapi_class_test_init();
 
   while (1) {
     /* Event pointer for handling events */
@@ -88,38 +94,7 @@ void appMain(gecko_configuration_t *pconfig)
       case gecko_evt_le_connection_closed_id:
 
         printLog("connection closed, reason: 0x%2.2x\r\n", evt->data.evt_le_connection_closed.reason);
-
-        /* Check if need to boot to OTA DFU mode */
-        if (boot_to_dfu) {
-          /* Enter to OTA DFU mode */
-          gecko_cmd_system_reset(2);
-        } else {
-          /* Restart advertising after client has disconnected */
-          gecko_cmd_le_gap_start_advertising(0, le_gap_general_discoverable, le_gap_connectable_scannable);
-        }
         break;
-
-      /* Events related to OTA upgrading
-         ----------------------------------------------------------------------------- */
-
-      /* Check if the user-type OTA Control Characteristic was written.
-       * If ota_control was written, boot the device into Device Firmware Upgrade (DFU) mode. */
-      case gecko_evt_gatt_server_user_write_request_id:
-
-        if (evt->data.evt_gatt_server_user_write_request.characteristic == gattdb_ota_control) {
-          /* Set flag to enter to OTA mode */
-          boot_to_dfu = 1;
-          /* Send response to Write Request */
-          gecko_cmd_gatt_server_send_user_write_response(
-            evt->data.evt_gatt_server_user_write_request.connection,
-            gattdb_ota_control,
-            bg_err_success);
-
-          /* Close connection to enter to DFU OTA mode */
-          gecko_cmd_le_connection_close(evt->data.evt_gatt_server_user_write_request.connection);
-        }
-        break;
-
       /* Add additional event handlers as your application requires */
 
       default:

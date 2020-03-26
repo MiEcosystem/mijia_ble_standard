@@ -11,7 +11,7 @@
 MEMORY
 {
   FLASH_BOOTLOADER (rx) : ORIGIN = 0x0000, LENGTH = 0x4000
-  FLASH (rx) : ORIGIN = 0x4000, LENGTH = 0x00080000-8192-0x4000
+  FLASH (rx) : ORIGIN = 0x4000, LENGTH = 0x00080000-0x4000-8192-8192*3
   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 0x00010000
 }
 
@@ -190,6 +190,6 @@ SECTIONS
   } > FLASH
   
   /* Set NVM to end of FLASH*/
-  __nvm3Base = 0x00080000-8192- SIZEOF(.nvm_dummy);  
+  __nvm3Base = 0x00080000 - SIZEOF(.nvm_dummy);  
   ASSERT((__etext + SIZEOF(.text_application_data)) <= __nvm3Base, "FLASH memory overlapped with NVM section.")
 }
