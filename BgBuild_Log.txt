@@ -1,0 +1,9 @@
+// Copyright 2020 Silicon Laboratories, Inc.
+//
+//
+
+Executing: bgbuild (/Applications/Simplicity Studio.app/Contents/Eclipse/developer/sdks/gecko_sdk_suite/v2.7/protocol/bluetooth/bin/bgbuild)
+Standard output
+ALL OK
+
+
