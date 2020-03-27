@@ -79,6 +79,8 @@
 									<listOptionValue builtIn="false" value="NVM3_DEFAULT_NVM_SIZE=24576"/>
 									<listOptionValue builtIn="false" value="__StackLimit=0x20000000"/>
 									<listOptionValue builtIn="false" value="HAL_CONFIG=1"/>
+									<listOptionValue builtIn="false" value="CORE_ATOMIC_METHOD=1"/>
+									<listOptionValue builtIn="false" value="MI_LOG_ENABLED=1"/>
 									<listOptionValue builtIn="false" value="EFR32MG21A020F512IM32=1"/>
 									<listOptionValue builtIn="false" value="MBEDTLS_CONFIG_FILE=&quot;mbedtls/config.h&quot;"/>
 									<listOptionValue builtIn="false" value="CUSTOMIZED_MI_CONFIG_FILE=&lt;custom_mi_config.h&gt;"/>
@@ -138,6 +140,7 @@
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/platform/emdrv/nvm3/lib/libnvm3_CM33_gcc.a}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/platform/radio/rail_lib/autogen/librail_release/librail_efr32xg21_gcc_release.a}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/protocol/bluetooth/lib/EFR32MG21/GCC/libbluetooth.a}"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/mijia_ble_libs/standard_auth/stand-auth-cortex-m33f.a}"/>
 								</option>
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type.2097839708" name="Floating-Point ABI" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type" value="floatingpoint.type.hard" valueType="enumerated"/>
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.circulardependency.1403068405" name="Use library file circular dependency" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.circulardependency" value="true" valueType="boolean"/>
@@ -163,6 +166,9 @@
 							<tool id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.archiver.base.1889210854" name="GNU ARM Archiver" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.archiver.base"/>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="mijia_ble_libs/mesh_auth|mijia_ble_libs/secure_auth" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

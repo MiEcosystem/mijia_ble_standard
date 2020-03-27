@@ -39,7 +39,7 @@
  ******************************************************************************/
 
 // $[CMU]
-#define BSP_CLK_LFXO_PRESENT                          (1)
+#define BSP_CLK_LFXO_PRESENT                          (0)
 #define BSP_CLK_HFXO_PRESENT                          (1)
 #define BSP_CLK_LFXO_INIT                              CMU_LFXOINIT_DEFAULT
 #define BSP_CLK_LFXO_CTUNE                            (79U)
@@ -50,6 +50,24 @@
 // [CMU]$
 
 #warning "Following pin mappings need to be set for your custom board when using printf..>"
+// $[BUTTON]
+#define BSP_BUTTON_PRESENT                            (1)
+
+#define BSP_BUTTON0_PIN                               (0U)
+#define BSP_BUTTON0_PORT                              (gpioPortB)
+
+#define BSP_BUTTON_COUNT                              (1U)
+#define BSP_BUTTON_INIT                               { { BSP_BUTTON0_PORT, BSP_BUTTON0_PIN }}
+#define BSP_BUTTON_GPIO_DOUT                          (HAL_GPIO_DOUT_LOW)
+#define BSP_BUTTON_GPIO_MODE                          (HAL_GPIO_MODE_INPUT)
+// [BUTTON]$
+
+// $[GPIO]
+#define BSP_TRACE_SWO_PIN                             (3U)
+#define BSP_TRACE_SWO_PORT                            (gpioPortA)
+#define BSP_TRACE_SWO_LOC                             (0U)
+
+// [GPIO]$
 
 // $[SERIAL]
 #define BSP_SERIAL_APP_PORT                           (HAL_SERIAL_PORT_USART0)

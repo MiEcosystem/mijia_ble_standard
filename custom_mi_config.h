@@ -26,16 +26,6 @@
 
 
 /**
- * @note To support Secure Auth procedure MUST have mijia secure chip (MSC).
- * If device use Standard auth or Mesh Auth, it should be 0.
- *      NONE   : 0
- *      MJSC   : 1
- *      MJA1   : 2
- */
-#define HAVE_MSC               0
-
-
-/**
  * @note Device side has RESET button or not.
  */
 #define HAVE_RESET_BUTTON      0
@@ -46,9 +36,12 @@
  */
 #define MI_SCHD_PROCESS_IN_MAIN_LOOP    1
 
+
+#define MAX_ATT_MTU            247
+
 /* DEBUG */
 #define DEBUG_MIBLE            1
-#define TIME_PROFILE           1
-#define RXFER_VERBOSE          1
+#define TIME_PROFILE           0
+#define RXFER_VERBOSE          0
 
 #endif
