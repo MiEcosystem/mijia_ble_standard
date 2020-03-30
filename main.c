@@ -56,22 +56,14 @@
 #undef  MI_LOG_MODULE_NAME
 #define MI_LOG_MODULE_NAME __FILE__
 #include "mible_log.h"
-
 #include "mi_config.h"
-
-#define DEVICE_NAME                    "stand_demo"
-#ifndef MAX_CONNECTIONS
-#define MAX_CONNECTIONS                1
-#endif
-
-#ifndef MAX_ADVERTISERS
-#define MAX_ADVERTISERS                1
-#endif
+#include "curr_git_version.h"
 
 #define MSEC_TO_UNITS(TIME, RESOLUTION) (((TIME) * 1000) / (RESOLUTION))
-#define MS_2_TIMERTICK(ms)             ((TIMER_CLK_FREQ * (uint32)(ms)) / 1000)
-#define SEC_2_TIMERTICK(sec)           ((TIMER_CLK_FREQ * (sec)))
 
+#define DEVICE_NAME                    "stand_demo"
+#define MAX_CONNECTIONS                1
+#define MAX_ADVERTISERS                1
 #define TIMER_ID_OBJ_PERIOD_ADV        11
 #define TIMER_ID_CLEAR_BIND_CFM        12
 
@@ -79,6 +71,8 @@
 #define LONG_PRESS_TIME_TICKS           (32768)
 #define EXT_SIGNAL_PB0_SHORT_PRESS      (1<<0)
 #define EXT_SIGNAL_PB0_LONG_PRESS       (1<<1)
+
+#define HAL_PA_ENABLE                  1
 
 static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 
@@ -99,6 +93,7 @@ static gecko_configuration_t config = {
   .gattdb = &bg_gattdb_data,                           /* Pointer to GATT database */
 #if (HAL_PA_ENABLE)
   .pa.config_enable = 1,                               /* Set this to be a valid PA config */
+  .pa.pa_mode       = 1,
 #if defined(FEATURE_PA_INPUT_FROM_VBAT)
   .pa.input = GECKO_RADIO_PA_INPUT_VBAT,               /* Configure PA input to VBAT */
 #else
@@ -111,31 +106,14 @@ static gecko_configuration_t config = {
 };
 
 /// button press timestamp for very long/long/short Push Button 0 press detection
-static uint32 pb0_press, pb1_press;
+static uint32 pb0_press;
 
-extern void time_init(struct tm * time_ptr);
 static void advertising_init(uint8_t solicite_bind);
 static void advertising_start(void);
-
-int scan_keyboard(uint8_t *pdata, uint8_t len)
-{
-    if (pdata == NULL)
-        return 0;
-
-    return SEGGER_RTT_ReadNoLock(0, pdata, len);
-}
-
-void flush_keyboard_buffer(void)
-{
-    uint8_t tmp[16];
-    while(SEGGER_RTT_ReadNoLock(0, tmp, 16));
-}
-
 
 void gpio_irq_handler(uint8_t pin)
 {
     uint32_t t_diff;
-
     if (pin == BSP_BUTTON0_PIN) {
         if (GPIO_PinInGet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN) == 0) {
             // PB0 pressed - record RTCC timestamp
@@ -165,7 +143,6 @@ void button_init(void)
     GPIOINT_CallbackRegister(BSP_BUTTON0_PIN, gpio_irq_handler);
 }
 
-
 static void enqueue_new_objs()
 {
     static int8_t  battery;
@@ -173,7 +150,6 @@ static void enqueue_new_objs()
     battery = battery < 100 ? battery + 1 : 0;
     mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery, 0);
 }
-
 
 static void mi_schd_event_handler(schd_evt_t *p_event)
 {
@@ -212,7 +188,7 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     struct gecko_msg_system_boot_evt_t boot_info = evt->data.evt_system_boot;
     MI_LOG_INFO("system stack %d.%0d.%0d-%d, heap %d bytes\n", boot_info.major, boot_info.minor, boot_info.patch, boot_info.build,sizeof(bluetooth_stack_heap));
 
-    gecko_cmd_system_set_tx_power(0);
+    gecko_cmd_system_set_tx_power(100);
 
     mi_service_init();
     stdio_service_init(stdio_rx_handler);
@@ -228,7 +204,6 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(600), TIMER_ID_OBJ_PERIOD_ADV, 0);
 }
 
-
 static void process_softtimer(struct gecko_cmd_packet *evt)
 {
     switch (evt->data.evt_hardware_soft_timer.handle) {
@@ -242,7 +217,6 @@ static void process_softtimer(struct gecko_cmd_packet *evt)
         break;
     }
 }
-
 
 static void process_external_signal(struct gecko_cmd_packet *evt)
 {
@@ -324,7 +298,9 @@ int main()
     MI_LOG_INFO(RTT_CTRL_CLEAR"\n");
     MI_LOG_INFO("Compiled %s %s\n", __DATE__, __TIME__);
     MI_LOG_INFO("system clock %d Hz\n", SystemCoreClockGet());
-
+#ifdef GIT_VERSION
+    MI_LOG_INFO("git version %s\n", GIT_VERSION);
+#endif
     // Initialize stack
     gecko_stack_init(&config);
     gecko_bgapi_class_system_init();

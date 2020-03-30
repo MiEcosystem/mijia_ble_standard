@@ -25,7 +25,7 @@
 #include "hal-config-ioexp.h"
 #endif
 
-
+#define FEATURE_PA_INPUT_FROM_VBAT
 #define HAL_PA_RAMP                                   (10)
 #define HAL_PA_2P4_LOWPOWER                           (0)
 #define HAL_PA_POWER                                  (252)

@@ -61,7 +61,6 @@ void initMcu(void)
   // Set up clocks
   initMcu_clocks();
 
-
   RTCC_Init_TypeDef rtccInit = RTCC_INIT_DEFAULT;
   rtccInit.enable                = true;
   rtccInit.debugRun              = false;
@@ -83,7 +82,6 @@ void initMcu(void)
 #endif // EMU_VSCALE_PRESENT
   EMU_EM23Init(&em23init);
 
-
 #if defined(RMU_PRESENT)
   // Set reset mode for sysreset back to DEFAULT (extended), this might have
   // been changed by the bootloader to FULL reset.
@@ -97,21 +95,32 @@ static void initMcu_clocks(void)
   // Initialize HFXO
   initHFXO();
 
-  // Set system HFXO frequency
-  SystemHFXOClockSet(BSP_CLK_HFXO_FREQ);
-
   CMU_HFRCODPLLBandSet(cmuHFRCODPLLFreq_80M0Hz);
   CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
 
-  #warning "WARNING: Use the CMU_LFXOInit() function only if the LFXO hardware is actually present!"
-  // Initialize LFXO
-  //CMU_LFXOInit_TypeDef lfxoInit = BSP_CLK_LFXO_INIT;
-  //lfxoInit.capTune = BSP_CLK_LFXO_CTUNE;
-  //CMU_LFXOInit(&lfxoInit);
-  // Set system LFXO frequency
-  //SystemLFXOClockSet(BSP_CLK_LFXO_FREQ);
+#if(BSP_CLK_LFXO_PRESENT)
+    // Initialize LFXO
+    CMU_LFXOInit_TypeDef lfxoInit = BSP_CLK_LFXO_INIT;
+    lfxoInit.capTune = BSP_CLK_LFXO_CTUNE;
+    CMU_LFXOInit(&lfxoInit);
 
+    // Set system LFXO frequency
+    SystemLFXOClockSet(BSP_CLK_LFXO_FREQ);
 
+    // Select LFXO as low frequency clock source
+    CMU_ClockSelectSet(cmuClock_RTCC, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_EM4GRPACLK, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_WDOG0, cmuSelect_LFXO);
+#else
+    CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
+
+    // Set LFRCO if selected as LFCLK
+    CMU_ClockSelectSet(cmuClock_RTCC, cmuSelect_LFRCO);
+    CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFRCO);
+    CMU_ClockSelectSet(cmuClock_EM4GRPACLK, cmuSelect_LFRCO);
+    CMU_ClockSelectSet(cmuClock_WDOG0, cmuSelect_LFRCO);
+#endif
 }
 
 static void initHFXO(void)

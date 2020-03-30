@@ -39,7 +39,7 @@
  ******************************************************************************/
 
 // $[CMU]
-#define BSP_CLK_LFXO_PRESENT                          (0)
+#define BSP_CLK_LFXO_PRESENT                          (1)
 #define BSP_CLK_HFXO_PRESENT                          (1)
 #define BSP_CLK_LFXO_INIT                              CMU_LFXOINIT_DEFAULT
 #define BSP_CLK_LFXO_CTUNE                            (79U)
@@ -53,8 +53,8 @@
 // $[BUTTON]
 #define BSP_BUTTON_PRESENT                            (1)
 
-#define BSP_BUTTON0_PIN                               (0U)
-#define BSP_BUTTON0_PORT                              (gpioPortB)
+#define BSP_BUTTON0_PIN                               (2U)
+#define BSP_BUTTON0_PORT                              (gpioPortD)
 
 #define BSP_BUTTON_COUNT                              (1U)
 #define BSP_BUTTON_INIT                               { { BSP_BUTTON0_PORT, BSP_BUTTON0_PIN }}
