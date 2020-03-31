@@ -31,6 +31,7 @@
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_rtcc.h"
+#include "em_usart.h"
 #include "gpiointerrupt.h"
 
 /* Device initialization header */
@@ -68,16 +69,17 @@
 #define TIMER_ID_CLEAR_BIND_CFM        12
 
 /// Number of ticks after which press is considered to be long (1s)
-#define LONG_PRESS_TIME_TICKS           (32768)
+#define LONG_PRESS_TIME_TICKS           (2*32768)
 #define EXT_SIGNAL_PB0_SHORT_PRESS      (1<<0)
 #define EXT_SIGNAL_PB0_LONG_PRESS       (1<<1)
 
+#define SUPPORT_DTM                    0
 #define HAL_PA_ENABLE                  1
 
 static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 
 /* Bluetooth stack configuration parameters (see "UG136: Silicon Labs Bluetooth C Application Developer's Guide" for details on each parameter) */
-static gecko_configuration_t config = {
+static gecko_configuration_t stack_config = {
   .config_flags = 0,                                   /* Check flag options from UG136 */
 #if BSP_CLK_LFXO_PRESENT
   .sleep.flags = SLEEP_FLAGS_DEEP_SLEEP_ENABLE,        /* Sleep is enabled */
@@ -111,6 +113,10 @@ static uint32 pb0_press;
 static void advertising_init(uint8_t solicite_bind);
 static void advertising_start(void);
 
+#if SUPPORT_DTM==1
+#include "dtm.h"
+#endif
+
 void gpio_irq_handler(uint8_t pin)
 {
     uint32_t t_diff;
@@ -118,9 +124,12 @@ void gpio_irq_handler(uint8_t pin)
         if (GPIO_PinInGet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN) == 0) {
             // PB0 pressed - record RTCC timestamp
             pb0_press = RTCC_CounterGet();
+            MI_LOG_INFO("press tick %d\n", pb0_press);
         } else {
             // PB0 released - check if it was short or long press
             t_diff = RTCC_CounterGet() - pb0_press;
+            MI_LOG_INFO("release tick %d\n", RTCC_CounterGet());
+            MI_LOG_WARNING("diff tick %d\n", t_diff);
             if (t_diff < LONG_PRESS_TIME_TICKS) {
                 gecko_external_signal(EXT_SIGNAL_PB0_SHORT_PRESS);
             } else {
@@ -299,10 +308,30 @@ int main()
     MI_LOG_INFO("Compiled %s %s\n", __DATE__, __TIME__);
     MI_LOG_INFO("system clock %d Hz\n", SystemCoreClockGet());
 #ifdef GIT_VERSION
-    MI_LOG_INFO("git version %s\n", GIT_VERSION);
+    MI_LOG_INFO("git commit info %s\n", GIT_VERSION);
 #endif
+
+#if SUPPORT_DTM==1
+    const testmode_config_t test_config = {
+            .write_response_byte = USART0_Tx,
+            .get_ticks = BURTC_CounterGet,
+            .ticks_per_second = 32768,
+            .command_ready_signal = 1,
+    };
+    GPIO_PinModeSet(gpioPortB, 13, gpioModeInputPull, 0);
+    if (GPIO_PinInGet(gpioPortB, 13) == 1) {
+        testmode_init(&test_config);
+        while(1) {
+            // Event pointer for handling events
+            struct gecko_cmd_packet* evt = gecko_wait_event();
+            testmode_handle_gecko_event(evt);
+        }
+    }
+    initApp();
+#endif
+
     // Initialize stack
-    gecko_stack_init(&config);
+    gecko_stack_init(&stack_config);
     gecko_bgapi_class_system_init();
     gecko_bgapi_class_le_gap_init();
     gecko_bgapi_class_le_connection_init();
