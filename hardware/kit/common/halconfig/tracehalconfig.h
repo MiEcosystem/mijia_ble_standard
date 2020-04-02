@@ -11,7 +11,7 @@
 #define BSP_TRACE_SWO_LOCATION     BSP_TRACE_SWO_LOC
 #endif
 
-/* Enable output on pin - GPIO Port F, Pin 2. */
+/* Enable output on pin - GPIO Port A, Pin 3. */
 #define TRACE_ENABLE_PINS()           \
   GPIO_PinModeSet(BSP_TRACE_SWO_PORT, \
                   BSP_TRACE_SWO_PIN,  \

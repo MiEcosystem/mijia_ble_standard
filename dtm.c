@@ -396,6 +396,8 @@ static void process_setup_command(enum cmd_type cmd_type,
             get_device_id(did_string);
             snprintf(szBuf, 64, "DID : %s \r\n", did_string);
             UartSendStr(szBuf);
+#else
+            UartSendStr("NO CERTIFICATES\r\n");
 #endif
             break;
 
@@ -447,15 +449,13 @@ static void process_setup_command(enum cmd_type cmd_type,
              * if error happen, two bytes will transmit, high half of type
              * index is fail or success and low half index port.
              * second type index is pin number*/
-//            hardware_io_test(gpioPortD, 14, gpioPortF, 6);
-//            hardware_io_test(gpioPortD, 15, gpioPortF, 7);
-//            hardware_io_test(gpioPortA, 3, gpioPortF, 5);
-//            hardware_io_test(gpioPortA, 5, gpioPortF, 2);
-//            hardware_io_test(gpioPortB, 11, gpioPortC, 11);
-//            hardware_io_test(gpioPortB, 12, gpioPortC, 9);
-//            hardware_io_test(gpioPortC, 6, gpioPortF, 4);
-//            hardware_io_test(gpioPortC, 7, gpioPortF, 3);
-//            hardware_io_test(gpioPortC, 8, gpioPortC, 10);
+            hardware_io_test(gpioPortB, 1, gpioPortD, 2);
+            hardware_io_test(gpioPortA, 0, gpioPortC, 3);
+            hardware_io_test(gpioPortA, 3, gpioPortC, 0);
+            hardware_io_test(gpioPortD, 4, gpioPortC, 5);
+            hardware_io_test(gpioPortD, 3, gpioPortC, 2);
+            hardware_io_test(gpioPortA, 4, gpioPortC, 4);
+            hardware_io_test(gpioPortA, 4, gpioPortC, 1);
             break;
 
         case PROGRAM_CERTS:
@@ -636,7 +636,7 @@ void USART0_Tx(uint8_t data)
 void dtm_uart_init(void)
 {
     /* Enable peripheral clocks */
-    CMU_ClockEnable(cmuClock_HCLK, true);
+    CMU_ClockEnable(cmuClock_PCLK, true);
     CMU_ClockEnable(cmuClock_GPIO, true);
 
     /* To avoid false start, configure output as high */

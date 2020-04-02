@@ -10,7 +10,7 @@
  * @note Device firmware version. It'll be filled in Version character appended to
  * mijia ble libs version.
  */
-#define DEVELOPER_VERSION       0001
+#define DEVELOPER_VERSION       0003
 
 
 /**
@@ -42,7 +42,7 @@
 #define MAX_ATT_MTU             247
 
 /* DEBUG */
-#define DEBUG_MIBLE             1
+#define DEBUG_MIBLE             0
 #define TIME_PROFILE            0
 #define RXFER_VERBOSE           0
 

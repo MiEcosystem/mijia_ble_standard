@@ -90,13 +90,14 @@ void initMcu(void)
 
 }
 
+#include "mible_log.h"
 static void initMcu_clocks(void)
 {
   // Initialize HFXO
   initHFXO();
 
-  CMU_HFRCODPLLBandSet(cmuHFRCODPLLFreq_80M0Hz);
   CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
+  CMU_HFRCODPLLBandSet(cmuHFRCODPLLFreq_80M0Hz);
 
 #if(BSP_CLK_LFXO_PRESENT)
     // Initialize LFXO

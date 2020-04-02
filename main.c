@@ -74,7 +74,6 @@
 #define EXT_SIGNAL_PB0_LONG_PRESS       (1<<1)
 
 #define SUPPORT_DTM                    0
-#define HAL_PA_ENABLE                  1
 
 static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 
@@ -93,7 +92,6 @@ static gecko_configuration_t stack_config = {
   .bluetooth.sleep_clock_accuracy = 100,               /* Accuracy of the Low Frequency Crystal Oscillator in ppm. *
                                                         * Do not modify if you are using a module                  */
   .gattdb = &bg_gattdb_data,                           /* Pointer to GATT database */
-#if (HAL_PA_ENABLE)
   .pa.config_enable = 1,                               /* Set this to be a valid PA config */
   .pa.pa_mode       = 1,
 #if defined(FEATURE_PA_INPUT_FROM_VBAT)
@@ -101,7 +99,6 @@ static gecko_configuration_t stack_config = {
 #else
   .pa.input = GECKO_RADIO_PA_INPUT_DCDC,               /* Configure PA input to DCDC */
 #endif // defined(FEATURE_PA_INPUT_FROM_VBAT)
-#endif // (HAL_PA_ENABLE)
   .rf.flags = GECKO_RF_CONFIG_ANTENNA,                 /* Enable antenna configuration. */
   .rf.antenna = GECKO_RF_ANTENNA,                      /* Select antenna path! */
   .max_timers = 8,
@@ -302,7 +299,7 @@ int main()
     initApp();
 
     // Setup SWD for code correlation
-    BSP_TraceSwoSetup();
+    BSP_TraceProfilerSetup();
 
     MI_LOG_INFO(RTT_CTRL_CLEAR"\n");
     MI_LOG_INFO("Compiled %s %s\n", __DATE__, __TIME__);
@@ -318,8 +315,8 @@ int main()
             .ticks_per_second = 32768,
             .command_ready_signal = 1,
     };
-    GPIO_PinModeSet(gpioPortB, 13, gpioModeInputPull, 0);
-    if (GPIO_PinInGet(gpioPortB, 13) == 1) {
+    GPIO_PinModeSet(gpioPortD, 0, gpioModeInputPull, 0);
+    if (GPIO_PinInGet(gpioPortD, 0) == 1) {
         testmode_init(&test_config);
         while(1) {
             // Event pointer for handling events
