@@ -2,6 +2,7 @@
 #include "dtm.h"
 #include "em_usart.h"
 #include "em_cmu.h"
+#include "em_device.h"
 #include "cryptography/mi_mesh_otp.h"
 #include "cryptography/mi_crypto.h"
 #include "mi_config.h"
@@ -27,7 +28,12 @@
 #define CALC_MAX_PDU_TIME(octet_time, packet_overhead_time) (MAX_PDU_OCTETS * (octet_time) + (packet_overhead_time))
 
 static bd_addr customer_bt_addr;
-static testmode_config_t cfg;
+static const testmode_config_t cfg = {
+        .write_response_byte = USART0_Tx,
+        .get_ticks = BURTC_CounterGet,
+        .ticks_per_second = 32768,
+        .command_ready_signal = 1,
+};
 
 enum phy {
     PHY_NONE = 0,
@@ -554,7 +560,8 @@ static void handle_dtm_completed(struct gecko_cmd_packet *evt)
     }
 }
 
-void testmode_init(const testmode_config_t *config)
+
+void testmode_init(void)
 {
 #if defined(CRYOTIMER_PRESENT)
   CRYOTIMER_Init_TypeDef init = CRYOTIMER_INIT_DEFAULT;
@@ -572,14 +579,17 @@ void testmode_init(const testmode_config_t *config)
 #endif
 
     dtm_uart_init();
-    cfg = *config;
+
     reset_setup();
     reset_cmd_buffer();
     reset_transceiver_test_state();
 }
 
+#include "mible_log.h"
+
 void testmode_process_command_byte(uint8_t byte)
 {
+    MI_LOG_INFO("%c ", byte);
     if (cmd_buffer.len >= sizeof(cmd_buffer.data)) {
         // Processing previous command => ignore byte
         return;
@@ -638,15 +648,11 @@ void dtm_uart_init(void)
     /* Enable peripheral clocks */
     CMU_ClockEnable(cmuClock_PCLK, true);
     CMU_ClockEnable(cmuClock_GPIO, true);
-
-    /* To avoid false start, configure output as high */
-    GPIO_PinModeSet(DTM_UART_TX_PORT, DTM_UART_TX_PIN, gpioModePushPull, 1);
-    GPIO_PinModeSet(DTM_UART_RX_PORT, DTM_UART_RX_PIN, gpioModeInput, 0);
+    CMU_ClockEnable(DTM_UART_CLK, true);
 
     USART_InitAsync_TypeDef init   = USART_INITASYNC_DEFAULT;
     init.enable                    = usartDisable;
     USART_InitAsync(DTM_UART, &init);
-    CMU_ClockEnable(DTM_UART_CLK, true);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
     GPIO->USARTROUTE[USART_NUM(BSP_EXP_USART)].ROUTEEN = GPIO_USART_ROUTEEN_TXPEN
@@ -675,4 +681,8 @@ void dtm_uart_init(void)
 
     /* Finally enable it */
     USART_Enable(DTM_UART, usartEnable);
+
+    /* To avoid false start, configure output as high */
+    GPIO_PinModeSet(DTM_UART_TX_PORT, DTM_UART_TX_PIN, gpioModePushPull, 1);
+    GPIO_PinModeSet(DTM_UART_RX_PORT, DTM_UART_RX_PIN, gpioModeInput, 0);
 }

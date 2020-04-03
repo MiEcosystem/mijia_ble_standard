@@ -73,7 +73,7 @@
 #define EXT_SIGNAL_PB0_SHORT_PRESS      (1<<0)
 #define EXT_SIGNAL_PB0_LONG_PRESS       (1<<1)
 
-#define SUPPORT_DTM                    0
+#define SUPPORT_DTM                    1
 
 static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 
@@ -308,25 +308,6 @@ int main()
     MI_LOG_INFO("git commit info %s\n", GIT_VERSION);
 #endif
 
-#if SUPPORT_DTM==1
-    const testmode_config_t test_config = {
-            .write_response_byte = USART0_Tx,
-            .get_ticks = BURTC_CounterGet,
-            .ticks_per_second = 32768,
-            .command_ready_signal = 1,
-    };
-    GPIO_PinModeSet(gpioPortD, 0, gpioModeInputPull, 0);
-    if (GPIO_PinInGet(gpioPortD, 0) == 1) {
-        testmode_init(&test_config);
-        while(1) {
-            // Event pointer for handling events
-            struct gecko_cmd_packet* evt = gecko_wait_event();
-            testmode_handle_gecko_event(evt);
-        }
-    }
-    initApp();
-#endif
-
     // Initialize stack
     gecko_stack_init(&stack_config);
     gecko_bgapi_class_system_init();
@@ -335,6 +316,19 @@ int main()
     gecko_bgapi_class_gatt_server_init();
     gecko_bgapi_class_hardware_init();
     gecko_bgapi_class_flash_init();
+
+#if SUPPORT_DTM==1
+    GPIO_PinModeSet(gpioPortD, 0, gpioModeInputPull, 0);
+    if (GPIO_PinInGet(gpioPortD, 0) == 1) {
+        testmode_init();
+        while(1) {
+            // Event pointer for handling events
+            struct gecko_cmd_packet* evt = gecko_wait_event();
+            testmode_handle_gecko_event(evt);
+        }
+    }
+    initApp();
+#endif
 
     button_init();
 

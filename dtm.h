@@ -41,7 +41,7 @@ typedef struct {
  *
  * @param config Configuration structure
  */
-void testmode_init(const testmode_config_t *config);
+void testmode_init(void);
 
 /**
  * Process a single byte of a command received from the Upper Tester
