@@ -3,6 +3,12 @@
 #include "em_usart.h"
 #include "em_cmu.h"
 #include "em_device.h"
+#if defined(CRYOTIMER_PRESENT)
+#include "em_cryotimer.h"
+#elif defined(BURTC_PRESENT)
+#include "em_burtc.h"
+#endif
+
 #include "cryptography/mi_mesh_otp.h"
 #include "cryptography/mi_crypto.h"
 #include "mi_config.h"
@@ -28,6 +34,7 @@
 #define CALC_MAX_PDU_TIME(octet_time, packet_overhead_time) (MAX_PDU_OCTETS * (octet_time) + (packet_overhead_time))
 
 static bd_addr customer_bt_addr;
+static void USART0_Tx(uint8_t data);
 static const testmode_config_t cfg = {
         .write_response_byte = USART0_Tx,
         .get_ticks = BURTC_CounterGet,
@@ -561,6 +568,79 @@ static void handle_dtm_completed(struct gecko_cmd_packet *evt)
 }
 
 
+void USART0_RX_IRQHandler(void)
+{
+    testmode_process_command_byte(USART_Rx(DTM_UART));
+}
+
+static void USART0_Tx(uint8_t data)
+{
+    USART_Tx(DTM_UART, data);
+}
+
+static void dtm_uart_init(void)
+{
+    /* Enable peripheral clocks */
+    CMU_ClockEnable(cmuClock_PCLK, true);
+    CMU_ClockEnable(cmuClock_GPIO, true);
+    CMU_ClockEnable(DTM_UART_CLK, true);
+
+    USART_InitAsync_TypeDef init_uart   = USART_INITASYNC_DEFAULT;
+    init_uart.enable                    = usartDisable;
+#if defined(USART_INPUT_RXPRS) && defined(USART_CTRL_MVDIS)
+    init_uart.mvdis                = 0;
+    init_uart.prsRxEnable          = 0;
+    init_uart.prsRxCh              = 0;
+#endif
+    USART_InitAsync(DTM_UART, &init_uart);
+
+    USART_PrsTriggerInit_TypeDef initprs = USART_INITPRSTRIGGER_DEFAULT;
+    initprs.prsTriggerChannel      = usartPrsTriggerCh0;
+    USART_InitPrsTrigger(DTM_UART, &initprs);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+    GPIO->USARTROUTE[USART_NUM(DTM_UART)].ROUTEEN = GPIO_USART_ROUTEEN_TXPEN
+                                                         | GPIO_USART_ROUTEEN_RXPEN;
+    GPIO->USARTROUTE[USART_NUM(DTM_UART)].TXROUTE =
+      (BSP_EXP_USART_TX_PORT << _GPIO_USART_TXROUTE_PORT_SHIFT)
+      | (BSP_EXP_USART_TX_PIN << _GPIO_USART_TXROUTE_PIN_SHIFT);
+    GPIO->USARTROUTE[USART_NUM(DTM_UART)].RXROUTE =
+      (BSP_EXP_USART_RX_PORT << _GPIO_USART_RXROUTE_PORT_SHIFT)
+      | (BSP_EXP_USART_RX_PIN << _GPIO_USART_RXROUTE_PIN_SHIFT);
+#else
+    /* Enable pins at correct UART/USART location. */
+    DTM_UART->ROUTEPEN = USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_TXPEN;
+    DTM_UART->ROUTELOC0 = (DTM_UART->ROUTELOC0
+                 & (~(_USART_ROUTELOC0_RXLOC_MASK|_USART_ROUTELOC0_TXLOC_MASK)))
+                 | (((uint32_t) DTM_UART_RX_LOC) << _USART_ROUTELOC0_RXLOC_SHIFT)
+                 | (((uint32_t) DTM_UART_TX_LOC) << _USART_ROUTELOC0_TXLOC_SHIFT);
+#endif
+
+    /* Disable CTS */
+    DTM_UART->CTRLX   = DTM_UART->CTRLX & (~USART_CTRLX_CTSEN);
+    /* Set CTS active low */
+    DTM_UART->CTRLX   = DTM_UART->CTRLX & (~USART_CTRLX_CTSINV);
+    /* Set RTS active low */
+    DTM_UART->CTRLX   = DTM_UART->CTRLX & (~USART_CTRLX_RTSINV);
+    /* Set CS active low */
+    DTM_UART->CTRL    = DTM_UART->CTRL & (~USART_CTRL_CSINV);
+    /* Set TX active high */
+    DTM_UART->CTRL    = DTM_UART->CTRL & (~USART_CTRL_TXINV);
+    /* Set RX active high */
+    DTM_UART->CTRL    = DTM_UART->CTRL & (~USART_CTRL_RXINV);
+
+    /* Finally enable it */
+    USART_Enable(DTM_UART, usartEnable);
+
+    /* To avoid false start, configure output as high */
+    GPIO_PinModeSet(DTM_UART_TX_PORT, DTM_UART_TX_PIN, gpioModePushPull, 1);
+    GPIO_PinModeSet(DTM_UART_RX_PORT, DTM_UART_RX_PIN, gpioModeInput, 0);
+
+    /* Enable RX interrupts */
+    USART_IntEnable(DTM_UART, USART_IF_RXDATAV);
+    NVIC_EnableIRQ(DTM_UART_IRQn);
+}
+
 void testmode_init(void)
 {
 #if defined(CRYOTIMER_PRESENT)
@@ -623,7 +703,7 @@ int testmode_handle_gecko_event(struct gecko_cmd_packet *evt)
     case gecko_evt_test_dtm_completed_id:
         handle_dtm_completed(evt);
         break;
-		
+
     case gecko_evt_system_boot_id:
         cfg.write_response_byte(0x00);
         cfg.write_response_byte(0x00);
@@ -633,56 +713,3 @@ int testmode_handle_gecko_event(struct gecko_cmd_packet *evt)
     return 0;
 }
 
-void USART0_RX_IRQHandler(void)
-{
-    testmode_process_command_byte(USART_Rx(DTM_UART));
-}
-
-void USART0_Tx(uint8_t data)
-{
-    USART_Tx(DTM_UART, data);
-}
-
-void dtm_uart_init(void)
-{
-    /* Enable peripheral clocks */
-    CMU_ClockEnable(cmuClock_PCLK, true);
-    CMU_ClockEnable(cmuClock_GPIO, true);
-    CMU_ClockEnable(DTM_UART_CLK, true);
-
-    USART_InitAsync_TypeDef init   = USART_INITASYNC_DEFAULT;
-    init.enable                    = usartDisable;
-    USART_InitAsync(DTM_UART, &init);
-
-#if defined(_SILICON_LABS_32B_SERIES_2)
-    GPIO->USARTROUTE[USART_NUM(BSP_EXP_USART)].ROUTEEN = GPIO_USART_ROUTEEN_TXPEN
-                                                         | GPIO_USART_ROUTEEN_RXPEN;
-    GPIO->USARTROUTE[USART_NUM(BSP_EXP_USART)].TXROUTE =
-      (BSP_EXP_USART_TX_PORT << _GPIO_USART_TXROUTE_PORT_SHIFT)
-      | (BSP_EXP_USART_TX_PIN << _GPIO_USART_TXROUTE_PIN_SHIFT);
-    GPIO->USARTROUTE[USART_NUM(BSP_EXP_USART)].RXROUTE =
-      (BSP_EXP_USART_RX_PORT << _GPIO_USART_RXROUTE_PORT_SHIFT)
-      | (BSP_EXP_USART_RX_PIN << _GPIO_USART_RXROUTE_PIN_SHIFT);
-#else
-    /* Enable pins at correct UART/USART location. */
-    DTM_UART->ROUTEPEN = USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_TXPEN;
-    DTM_UART->ROUTELOC0 = (DTM_UART->ROUTELOC0
-                 & (~(_USART_ROUTELOC0_RXLOC_MASK|_USART_ROUTELOC0_TXLOC_MASK)))
-                 | (((uint32_t) DTM_UART_RX_LOC) << _USART_ROUTELOC0_RXLOC_SHIFT)
-                 | (((uint32_t) DTM_UART_TX_LOC) << _USART_ROUTELOC0_TXLOC_SHIFT);
-#endif
-    /* Clear previous RX interrupts */
-    USART_IntClear(DTM_UART, USART_IF_RXDATAV);
-    NVIC_ClearPendingIRQ(DTM_UART_IRQn);
-
-    /* Enable RX interrupts */
-    USART_IntEnable(DTM_UART, USART_IF_RXDATAV);
-    NVIC_EnableIRQ(DTM_UART_IRQn);
-
-    /* Finally enable it */
-    USART_Enable(DTM_UART, usartEnable);
-
-    /* To avoid false start, configure output as high */
-    GPIO_PinModeSet(DTM_UART_TX_PORT, DTM_UART_TX_PIN, gpioModePushPull, 1);
-    GPIO_PinModeSet(DTM_UART_RX_PORT, DTM_UART_RX_PIN, gpioModeInput, 0);
-}

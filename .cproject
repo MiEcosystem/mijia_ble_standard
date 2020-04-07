@@ -79,7 +79,6 @@
 									<listOptionValue builtIn="false" value="__HEAP_SIZE=0xD00"/>
 									<listOptionValue builtIn="false" value="NVM3_DEFAULT_NVM_SIZE=24576"/>
 									<listOptionValue builtIn="false" value="HAL_CONFIG=1"/>
-									<listOptionValue builtIn="false" value="CORE_ATOMIC_METHOD=1"/>
 									<listOptionValue builtIn="false" value="MI_LOG_ENABLED=1"/>
 									<listOptionValue builtIn="false" value="EFR32MG21A020F512IM32=1"/>
 									<listOptionValue builtIn="false" value="FAST_CRC32=1"/>

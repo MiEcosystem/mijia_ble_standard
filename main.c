@@ -80,7 +80,7 @@ static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 /* Bluetooth stack configuration parameters (see "UG136: Silicon Labs Bluetooth C Application Developer's Guide" for details on each parameter) */
 static gecko_configuration_t stack_config = {
   .config_flags = 0,                                   /* Check flag options from UG136 */
-#if BSP_CLK_LFXO_PRESENT
+#if 0
   .sleep.flags = SLEEP_FLAGS_DEEP_SLEEP_ENABLE,        /* Sleep is enabled */
 #else
   .sleep.flags = 0,
@@ -312,7 +312,6 @@ int main()
     gecko_stack_init(&stack_config);
     gecko_bgapi_class_system_init();
     gecko_bgapi_class_le_gap_init();
-    gecko_bgapi_class_le_connection_init();
     gecko_bgapi_class_gatt_server_init();
     gecko_bgapi_class_hardware_init();
     gecko_bgapi_class_flash_init();

@@ -4,15 +4,8 @@
 #include <stdint.h>
 
 #include "native_gecko.h"
-#include "em_cryotimer.h"
 #include "gecko_configuration.h"
-#include "em_usart.h"
 
-#if defined(CRYOTIMER_PRESENT)
-#include "em_cryotimer.h"
-#elif defined(BURTC_PRESENT)
-#include "em_burtc.h"
-#endif
 
 
 #ifdef __cplusplus
@@ -59,9 +52,6 @@ void testmode_process_command_byte(uint8_t byte);
  * @return Non-zero if the event was processed, zero otherwise
  */
 int testmode_handle_gecko_event(struct gecko_cmd_packet *evt);
-
-void USART0_Tx(uint8_t data);
-void dtm_uart_init(void);
 
 #ifdef __cplusplus
 };
