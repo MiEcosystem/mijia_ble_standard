@@ -39,7 +39,7 @@
  ******************************************************************************/
 
 // $[CMU]
-#define BSP_CLK_LFXO_PRESENT                          (0)
+#define BSP_CLK_LFXO_PRESENT                          (1)
 #define BSP_CLK_HFXO_PRESENT                          (1)
 #define BSP_CLK_LFXO_INIT                              CMU_LFXOINIT_DEFAULT
 #define BSP_CLK_LFXO_CTUNE                            (79U)

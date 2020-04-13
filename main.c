@@ -44,6 +44,7 @@
 #endif
 
 #include "bsp_trace.h"
+#include "dtm.h"
 
 /* Mijia BLE API and Middleware */
 #include "efr32_api.h"
@@ -80,7 +81,7 @@ static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 /* Bluetooth stack configuration parameters (see "UG136: Silicon Labs Bluetooth C Application Developer's Guide" for details on each parameter) */
 static gecko_configuration_t stack_config = {
   .config_flags = 0,                                   /* Check flag options from UG136 */
-#if 0
+#if BSP_CLK_LFXO_PRESENT
   .sleep.flags = SLEEP_FLAGS_DEEP_SLEEP_ENABLE,        /* Sleep is enabled */
 #else
   .sleep.flags = 0,
@@ -93,7 +94,7 @@ static gecko_configuration_t stack_config = {
                                                         * Do not modify if you are using a module                  */
   .gattdb = &bg_gattdb_data,                           /* Pointer to GATT database */
   .pa.config_enable = 1,                               /* Set this to be a valid PA config */
-  .pa.pa_mode       = 1,
+  .pa.pa_mode       = 2,
 #if defined(FEATURE_PA_INPUT_FROM_VBAT)
   .pa.input = GECKO_RADIO_PA_INPUT_VBAT,               /* Configure PA input to VBAT */
 #else
@@ -101,7 +102,7 @@ static gecko_configuration_t stack_config = {
 #endif // defined(FEATURE_PA_INPUT_FROM_VBAT)
   .rf.flags = GECKO_RF_CONFIG_ANTENNA,                 /* Enable antenna configuration. */
   .rf.antenna = GECKO_RF_ANTENNA,                      /* Select antenna path! */
-  .max_timers = 8,
+  .max_timers = 16,
 };
 
 /// button press timestamp for very long/long/short Push Button 0 press detection
@@ -110,9 +111,6 @@ static uint32 pb0_press;
 static void advertising_init(uint8_t solicite_bind);
 static void advertising_start(void);
 
-#if SUPPORT_DTM==1
-#include "dtm.h"
-#endif
 
 void gpio_irq_handler(uint8_t pin)
 {
@@ -298,14 +296,34 @@ int main()
     // Initialize application
     initApp();
 
-    // Setup SWD for code correlation
-    BSP_TraceProfilerSetup();
-
     MI_LOG_INFO(RTT_CTRL_CLEAR"\n");
     MI_LOG_INFO("Compiled %s %s\n", __DATE__, __TIME__);
     MI_LOG_INFO("system clock %d Hz\n", SystemCoreClockGet());
 #ifdef GIT_VERSION
     MI_LOG_INFO("git commit info %s\n", GIT_VERSION);
+#endif
+
+#if SUPPORT_DTM==1
+    GPIO_PinModeSet(gpioPortC, 1, gpioModeInputPull, 0);
+    if (GPIO_PinInGet(gpioPortC, 1) == 1) {
+        MI_LOG_WARNING("Enter DTM mode\n");
+        stack_config.sleep.flags = 0;
+        stack_config.pa.pa_mode  = 0;
+        stack_config.rf.tx_gain  = -100;
+        gecko_stack_init(&stack_config);
+        gecko_bgapi_class_system_init();
+        gecko_bgapi_class_le_gap_init();
+        gecko_bgapi_class_gatt_server_init();
+        gecko_bgapi_class_hardware_init();
+        gecko_bgapi_class_flash_init();
+        gecko_bgapi_class_test_init();
+        testmode_init();
+        while(1) {
+            // Event pointer for handling events
+            struct gecko_cmd_packet* evt = gecko_wait_event();
+            testmode_handle_gecko_event(evt);
+        }
+    }
 #endif
 
     // Initialize stack
@@ -315,19 +333,6 @@ int main()
     gecko_bgapi_class_gatt_server_init();
     gecko_bgapi_class_hardware_init();
     gecko_bgapi_class_flash_init();
-
-#if SUPPORT_DTM==1
-    GPIO_PinModeSet(gpioPortD, 0, gpioModeInputPull, 0);
-    if (GPIO_PinInGet(gpioPortD, 0) == 1) {
-        testmode_init();
-        while(1) {
-            // Event pointer for handling events
-            struct gecko_cmd_packet* evt = gecko_wait_event();
-            testmode_handle_gecko_event(evt);
-        }
-    }
-    initApp();
-#endif
 
     button_init();
 
@@ -351,7 +356,9 @@ int main()
 
 #if BSP_CLK_LFXO_PRESENT
         /* Enter low power mode */
+        CORE_ATOMIC_SECTION(
         gecko_sleep_for_ms(gecko_can_sleep_ms());
+        )
 #endif
     }
 }

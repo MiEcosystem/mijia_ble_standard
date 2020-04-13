@@ -468,7 +468,7 @@ static void process_setup_command(enum cmd_type cmd_type,
             hardware_io_test(gpioPortD, 4, gpioPortC, 5);
             hardware_io_test(gpioPortD, 3, gpioPortC, 2);
             hardware_io_test(gpioPortA, 4, gpioPortC, 4);
-            hardware_io_test(gpioPortA, 4, gpioPortC, 1);
+            hardware_io_test(gpioPortB, 0, gpioPortC, 4);
             break;
 
         case PROGRAM_CERTS:
@@ -669,7 +669,6 @@ void testmode_init(void)
 
 void testmode_process_command_byte(uint8_t byte)
 {
-    MI_LOG_INFO("%c ", byte);
     if (cmd_buffer.len >= sizeof(cmd_buffer.data)) {
         // Processing previous command => ignore byte
         return;
@@ -705,6 +704,7 @@ int testmode_handle_gecko_event(struct gecko_cmd_packet *evt)
         break;
 
     case gecko_evt_system_boot_id:
+        gecko_cmd_system_set_tx_power(100);
         cfg.write_response_byte(0x00);
         cfg.write_response_byte(0x00);
         break;
