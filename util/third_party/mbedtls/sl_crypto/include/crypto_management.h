@@ -20,16 +20,17 @@
 #ifndef CRYPTO_MANAGEMENT_H
 #define CRYPTO_MANAGEMENT_H
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+
 /***************************************************************************//**
  * \addtogroup sl_crypto
  * \{
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_management CRYPTO peripheral instance management
- * \brief Management functions for CRYPTO peripherals. These functions take care
- *        of not having two 'owners' simultaneously for the same peripheral,
- *        potentially messing up the internal state of said peripheral.
+ * \addtogroup sl_crypto_management Peripheral Instance Management: CRYPTO
+ * \brief Resource management functions for the CRYPTO peripheral
+ *
  * \{
  ******************************************************************************/
 

@@ -37,18 +37,21 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_entropy_rail Silicon Labs RAIL Entropy Source Plugin
- * \brief Collect entropy from the RAIL on Silicon Labs devices.
+ * \addtogroup sl_entropy_rail Radio (RAIL) Entropy Source Plugin
+ * \brief Collect entropy from Radio Abstraction and Interface Layer (RAIL) on 
+ *        Silicon Labs EFR32 devices
  *
- * \details The RAIL entropy module implements an entropy source plugin module
+ * \details This RAIL entropy module implements an entropy source plugin module
  * for mbedTLS that can be used in applications needing random numbers or
  * indirectly using mbedTLS modules that depend on the random number generation
  * interfaces of mbed TLS.
- * The configuration #define @ref MBEDTLS_ENTROPY_RAIL_C will compile the this
+ *
+ * The configuration #define MBEDTLS_ENTROPY_RAIL_C will compile the this
  * module.
- * The configuration #defines @ref MBEDTLS_ENTROPY_RAIL_C &&
- * @ref MBEDTLS_ENTROPY_HARDWARE_ALT &&
- * @ref MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL will compile mbedtls_hardware_poll
+ *
+ * The configuration #defines MBEDTLS_ENTROPY_RAIL_C,
+ * MBEDTLS_ENTROPY_HARDWARE_ALT and MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL will 
+ * compile the @ref mbedtls_hardware_poll() 
  * function implemented in this module. This will automatically register the
  * rail entropy module as the default hardware entropy source during runtime
  * initialization.

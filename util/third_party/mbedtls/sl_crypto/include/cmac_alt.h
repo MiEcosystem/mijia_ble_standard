@@ -25,8 +25,9 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_cmac AES-CMAC cipher
- * \brief Hardware accelerated AES-CMAC cipher.
+ * \addtogroup sl_crypto_cmac Accelerated AES-CMAC Cipher
+ * \brief Accelerated AES-CMAC cipher using the SE peripheral
+ *
  * \{
  ******************************************************************************/
 #if defined(MBEDTLS_CMAC_ALT)
@@ -175,5 +176,8 @@ int mbedtls_aes_cmac_prf_128( const unsigned char *key, size_t key_len,
 #endif
 
 #endif /* MBEDTLS_CMAC_ALT */
+
+/** \} (end addtogroup sl_crypto_cmac) */
+/** \} (end addtogroup sl_crypto) */
 
 #endif /* MBEDTLS_CMAC_ALT_H */

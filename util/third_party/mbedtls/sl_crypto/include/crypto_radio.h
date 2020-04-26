@@ -19,6 +19,8 @@
 #ifndef CRYPTO_RADIO_H
 #define CRYPTO_RADIO_H
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+
 /***************************************************************************//**
  * \addtogroup sl_crypto
  * \{

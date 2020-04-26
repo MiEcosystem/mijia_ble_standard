@@ -123,8 +123,55 @@
 #define MBEDTLS_SHA256_ALT
 #endif
 
+#if defined(CRYPTOACC_PRESENT)
+#define MBEDTLS_AES_ALT
+#define AES_192_SUPPORTED
+#define MBEDTLS_CCM_ALT
+#define MBEDTLS_CMAC_ALT
+#define MBEDTLS_ECDH_COMPUTE_SHARED_ALT
+#define MBEDTLS_GCM_ALT
+#define MBEDTLS_SHA1_ALT
+#define MBEDTLS_SHA256_ALT
 #endif /* #if !defined(NO_CRYPTO_ACCELERATION) */
 
+#if defined(SEMAILBOX_PRESENT)
+#include "em_se.h"
+#if defined(SE_COMMAND_OPTION_HASH_SHA1)
+#define MBEDTLS_SHA1_ALT
+#define MBEDTLS_SHA1_PROCESS_ALT
+#endif
+#if defined(SE_COMMAND_OPTION_HASH_SHA256) || defined(SE_COMMAND_OPTION_HASH_SHA224)
+#define MBEDTLS_SHA256_ALT
+#define MBEDTLS_SHA256_PROCESS_ALT
+#endif
+#if defined(SE_COMMAND_OPTION_HASH_SHA512) || defined(SE_COMMAND_OPTION_HASH_SHA384)
+#define MBEDTLS_SHA512_ALT
+#define MBEDTLS_SHA512_PROCESS_ALT
+#endif
+#if defined(SE_COMMAND_CREATE_KEY)
+#define MBEDTLS_ECDH_GEN_PUBLIC_ALT
+#define MBEDTLS_ECDSA_GENKEY_ALT
+#endif
+#if defined(SE_COMMAND_DH)
+#define MBEDTLS_ECDH_COMPUTE_SHARED_ALT
+#endif
+#if defined(SE_COMMAND_SIGNATURE_SIGN)
+#define MBEDTLS_ECDSA_SIGN_ALT
+#endif
+#if defined(SE_COMMAND_SIGNATURE_VERIFY)
+#define MBEDTLS_ECDSA_VERIFY_ALT
+#endif
+#if defined(SE_COMMAND_JPAKE_GEN_SESSIONKEY)
+#define MBEDTLS_ECJPAKE_ALT
+#endif
+#if defined(SE_COMMAND_AES_CCM_ENCRYPT) && defined(SE_COMMAND_AES_CCM_DECRYPT)
+#define MBEDTLS_CCM_ALT
+#endif
+#if defined(SE_COMMAND_AES_CMAC)
+#define MBEDTLS_CMAC_ALT
+#endif
+#endif /* SEMAILBOX_PRESENT */
+#endif /* !NO_CRYPTO_ACCELERATION */
 /**
  * \def MBEDTLS_TRNG_C
  *
@@ -134,19 +181,47 @@
  *
  * Requires TRNG_COUNT>0
  */
-#if defined(TRNG_COUNT) && (TRNG_COUNT > 0)
+#if defined(TRNG_PRESENT) && \
+  !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_95) && \
+  !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_89)
 #define MBEDTLS_TRNG_C
+#endif
+
+/**
+ * \def MBEDTLS_ENTROPY_RAIL_C
+ *
+ * Enable software support for the retrieving entropy data from the RAIL
+ * incorporated on devices from Silicon Labs.
+ *
+ * Requires _EFR_DEVICE
+ */
+#if defined(_EFR_DEVICE) && defined(_SILICON_LABS_32B_SERIES_1)
+#define MBEDTLS_ENTROPY_RAIL_C
+#endif
+
+/**
+ * \def MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL
+ *
+ * Use the radio (RAIL) as default hardware entropy source.
+ *
+ * Requires MBEDTLS_ENTROPY_RAIL_C && _SILICON_LABS_32B_SERIES_1 &&
+ *         !MBEDTLS_TRNG_C
+ */
+#if defined(MBEDTLS_ENTROPY_RAIL_C) && \
+    defined(_SILICON_LABS_32B_SERIES_1) && \
+    !defined(MBEDTLS_TRNG_C)
+#define MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL
 #endif
 
 /**
  * \def MBEDTLS_ENTROPY_HARDWARE_ALT
  *
- * Integrate the provided TRNG entropy collector callback into the mbed
+ * Integrate the provided default entropy source into the mbed
  * TLS entropy infrastructure.
  *
- * Requires TRNG_COUNT>0
+ * Requires MBEDTLS_TRNG_C || MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL || SEMAILBOX
  */
-#if defined(TRNG_COUNT) && (TRNG_COUNT > 0)
+#if defined(MBEDTLS_TRNG_C) || defined(MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL) || defined(SEMAILBOX_PRESENT)
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
 #endif
 

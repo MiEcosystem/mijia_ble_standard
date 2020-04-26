@@ -16,11 +16,13 @@
  * sections applicable to open source software.
  *
  ******************************************************************************/
+
 /*
  * This file includes alternative plugin implementations of various
  * functions in ecp.c using the CRYPTO hardware accelerator incorporated
  * in MCU devices from Silicon Laboratories.
  */
+ 
 /*
  * References:
  *

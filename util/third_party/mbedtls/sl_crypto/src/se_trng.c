@@ -24,20 +24,13 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#if defined(MBEDTLS_SELF_TEST) && defined(MBEDTLS_PLATFORM_C)
-#include "mbedtls/platform.h"
-#else
-#include <stdio.h>
-#define mbedtls_printf     printf
-#endif
-
 #include "em_device.h"
 #include "em_se.h"
 #include "se_management.h"
 
 #if defined(SEMAILBOX_PRESENT)
 
-#if defined(MBEDTLS_ENTROPY_HARDWARE_ALT)
+#if defined(MBEDTLS_ENTROPY_HARDWARE_ALT) && defined(MBEDTLS_ENTROPY_C)
 
 #include "mbedtls/entropy.h"
 
@@ -108,6 +101,6 @@ int mbedtls_hardware_poll( void *data,
     }
 }
 
-#endif /* MBEDTLS_ENTROPY_HARDWARE_ALT */
+#endif /* MBEDTLS_ENTROPY_HARDWARE_ALT && MBEDTLS_ENTROPY_C */
 
 #endif /* SEMAILBOX_PRESENT */

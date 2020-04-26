@@ -208,8 +208,8 @@ static int aes_ccm_ble(bool                 encrypt,
   }
 
   RADIOAES->CTRL = AES_CTRL_FETCHERSCATTERGATHER | AES_CTRL_PUSHERSCATTERGATHER;
-  RADIOAES->FETCHDESCR = (uint32_t) &ccmDescFetcherConfig;
-  RADIOAES->PUSHDESCR  = (uint32_t) &ccmDescPusherB0B1;
+  RADIOAES->FETCHADDR = (uint32_t) &ccmDescFetcherConfig;
+  RADIOAES->PUSHADDR  = (uint32_t) &ccmDescPusherB0B1;
 
   RADIOAES->CMD = AES_CMD_STARTPUSHER | AES_CMD_STARTFETCHER;
   while (RADIOAES->STATUS & (AES_STATUS_FETCHERBSY | AES_STATUS_PUSHERBSY)) ;
@@ -336,12 +336,13 @@ int mbedtls_process_ble_rpa(const unsigned char   keytable[],
       // Write key address and start operation
       while (RADIOAES->STATUS & AES_STATUS_FETCHERBSY) ;
       aesDescFetcherKey.address = (uint32_t) &keytable[block * BLE_RPA_KEY_BYTES];
-      RADIOAES->FETCHDESCR = (uint32_t) &aesDescFetcherKey;
+      RADIOAES->FETCHADDR = (uint32_t) &aesDescFetcherKey;
+
       RADIOAES->CMD = AES_CMD_STARTFETCHER;
 
       // Wait for pusher from previous round to finish
       while (RADIOAES->STATUS & AES_STATUS_PUSHERBSY) ;
-      RADIOAES->PUSHDESCR  = (uint32_t) &aesDescPusherData;
+      RADIOAES->PUSHADDR  = (uint32_t) &aesDescPusherData;
 
       // Check previous results while AES is processing
       if ((previousBlock >= 0) && ((rpaDataOut[3] & 0xFFFFFF00) == __REV(hash)) ) {

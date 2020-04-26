@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs SE device management interface.
+ * @brief Silicon Labs CRYPTOACC device management interface.
  *******************************************************************************
  * # License
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
@@ -17,8 +17,8 @@
  *
  ******************************************************************************/
 
-#ifndef SE_MANAGEMENT_H
-#define SE_MANAGEMENT_H
+#ifndef CRYPTOACC_MANAGEMENT_H
+#define CRYPTOACC_MANAGEMENT_H
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
@@ -28,9 +28,11 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_se_management Peripheral Instance Management: Secure Element
- * \brief Concurrency management functions for Secure Element mailbox access
- *
+ * \addtogroup sl_cryptoacc_management CRYPTOACC device instance management
+ * \brief Management functions for the CRYPTOACC. These functions take care
+ *        of not having two 'owners' simultaneously for the same CRYPTOACC
+ *        device, which could potentially be causing conflicts and system
+ *        lock-up.
  * \{
  ******************************************************************************/
 
@@ -44,34 +46,33 @@
 
 #include "em_device.h"
 
-#if defined( SEMAILBOX_PRESENT )
-#include "em_se.h"
+#if defined(CRYPTOACC_PRESENT)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * \brief		   Get ownership of the SE mailbox
+ * \brief		   Get ownership of the crypto device
  *
  * \return         0 if successful, negative on error
  */
-int se_management_acquire( void );
+int cryptoacc_management_acquire( void );
 
 /**
- * \brief          Release ownership of the SE mailbox
+ * \brief          Release ownership of the crypto device
  *
  * \return         0 if successful, negative on error
  */
-int se_management_release( void );
+int cryptoacc_management_release( void );
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SEMAILBOX_PRESENT */
+#endif /* CRYPTOACC_PRESENT */
 
-/** \} (end addtogroup sl_se_management) */
+/** \} (end addtogroup sl_cryptoacc_management) */
 /** \} (end addtogroup sl_crypto) */
 
-#endif /* SE_MANAGEMENT_H */
+#endif /* CRYPTOACC_MANAGEMENT_H */

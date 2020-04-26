@@ -36,13 +36,16 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_trng Silicon Labs True Random Number Generator Plugin
- * \brief True Random Number Generator (TRNG) driver for Silicon Labs devices.
+ * \addtogroup sl_entropy_trng True Random Number Generator (TRNG) Plugin
+ * \brief True Random Number Generator (TRNG) driver for Silicon Labs devices
  *
- * \details The EFR32xG12 and EFM32xG12 and newer Silicon Labs devices contains
+ * \details EFR32xG12/EFM32xG12 and newer Silicon Labs devices contains
  * a True Random Number Generator (TRNG) peripheral. The TRNG is a
  * non-deterministic random number generator based on a full hardware solution.
  * The TRNG contains a 64 x 32-bit FIFO for reading out random numbers.
+ *
+ * @note The TRNG peripheral may either be stand-alone or integrated in the SE 
+ * peripheral depending on the target device.
  *
  * The samples from entropy source within the TRNG are monitored permanently by
  * 4 built in tests that detect issues with the noise source. The tests are
@@ -52,7 +55,7 @@
  * the "AIS31 Online Test".
  *
  * In addition the TRNG has options for running startup tests. When these tests
- * are enabled the TRNG FIFO will not contains any data before all the startup
+ * are enabled, the TRNG FIFO will not contain any data before all the startup
  * tests have passed. There are 4 TRNG startup tests, 3 of the tests are
  * specified in NIST-800-90B. These are the "Repetition Count Test", "Adaptive
  * Proportion Test (64-sample window)" and "Adaptive Proportion Test

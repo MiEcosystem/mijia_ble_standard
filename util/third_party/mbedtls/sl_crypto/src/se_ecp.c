@@ -30,6 +30,8 @@
 #include "mbedtls/ecdh.h"
 #include "mbedtls/ecdsa.h"
 
+#if defined(MBEDTLS_ECP_C)
+
 #if defined(MBEDTLS_ECDH_GEN_PUBLIC_ALT) \
     || defined(MBEDTLS_ECDH_COMPUTE_SHARED_ALT) \
     || defined(MBEDTLS_ECDSA_GENKEY_ALT) \
@@ -414,3 +416,5 @@ int mbedtls_ecdh_compute_shared( mbedtls_ecp_group *grp, mbedtls_mpi *z,
 #endif /* #if defined(SEMAILBOX_PRESENT) */
 
 #endif /* #if defined(MBEDTLS_ECDH_GEN_PUBLIC_ALT) || defined(MBEDTLS_ECDH_COMPUTE_SHARED_ALT) */
+
+#endif /* #if defined(MBEDTLS_ECP_C) */

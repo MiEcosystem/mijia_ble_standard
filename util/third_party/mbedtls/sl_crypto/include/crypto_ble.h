@@ -20,13 +20,14 @@
 #define CRYPTO_BLE_H
 
 /***************************************************************************//**
- * \addtogroup sl_crypto
+ * \addtogroup sl_crypto_internal
  * \{
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_ble BLE-specific CRYPTO
- * \brief BLE-tailored cryptographic primitives.
+ * \addtogroup sl_crypto_ble Accelerated Bluetooth Primitives
+ * \brief Accelerated Bluetooth cryptographic primitives using the CRYPTO peripheral
+ *
  * \{
  ******************************************************************************/
 

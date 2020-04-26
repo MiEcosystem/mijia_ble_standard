@@ -103,12 +103,12 @@ static const crypto_device_t crypto_devices[CRYPTO_COUNT] =
 static inline int crypto_management_index_by_device( CRYPTO_TypeDef *device )
 {
 #if defined( CRYPTO0 )
-    if ( device == CRYPTO0 ) return 0;
+    if ( device == CRYPTO0 ) { return 0; }
 #elif defined( CRYPTO )
-    if ( device == CRYPTO ) return 0;
+    if ( device == CRYPTO ) { return 0; }
 #endif
 #if defined( CRYPTO1 )
-    if ( device == CRYPTO1 ) return 1;
+    if ( device == CRYPTO1 ) { return 1; }
 #endif
     return -1;
 }

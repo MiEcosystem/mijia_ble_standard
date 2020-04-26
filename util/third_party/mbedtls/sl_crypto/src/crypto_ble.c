@@ -405,22 +405,20 @@ int mbedtls_process_ble_rpa(  const unsigned char   keytable[],
     uint32_t data_register[4] = {0};
     data_register[3] = __REV(prand);
 
-    // Mangling DDATA1 (KEY) and DDATA2 (= DATA0/DATA1)
-    // Max execution length = 2
+    /* Mangling DDATA1 (KEY) and DDATA2 (= DATA0/DATA1). Max execution length = 2 */
     CRYPTO_TypeDef *device = crypto_management_acquire_preemption(
                               CRYPTO_MANAGEMENT_SAVE_DDATA1
                               | CRYPTO_MANAGEMENT_SAVE_DDATA2
                               | CRYPTO_MANAGEMENT_SAVE_UPTO_SEQ0 );
-
-    // Set up CRYPTO to do AES, and load prand
+    /* Set up CRYPTO to do AES, and load prand */
     device->CTRL     = CRYPTO_CTRL_AES_AES128 | CRYPTO_CTRL_KEYBUFDIS;
     device->WAC      = 0UL;
 
     CRYPTO_DataWrite(&device->DATA1, (uint32_t*)data_register);
 
-    // For each key, execute AES encrypt operation and compare with hash
-    // Read result of previous iteration first to minimize stall while waiting
-    // for AES to finish
+    /* For each key, execute AES encrypt operation and compare w hash */
+    /* Read result of previous iteration first to minimize stall while waiting
+       for AES to finish */
     int currentindex = -1;
     for ( index = 0; index < 32; index++ ) {
         if ( (keymask & (1U << index)) == 0 ) {
@@ -434,7 +432,7 @@ int mbedtls_process_ble_rpa(  const unsigned char   keytable[],
                           CRYPTO_CMD_INSTR_AESENC );
 
         if ( ( currentindex >= 0 )
-             && ( (data_register[3] & 0xFFFFFF00) == __REV(hash) ) ) {
+             && ( (data_register[3] & 0xFFFFFF00UL) == __REV(hash) ) ) {
             crypto_management_release_preemption(device);
             return currentindex;
         }
@@ -446,7 +444,7 @@ int mbedtls_process_ble_rpa(  const unsigned char   keytable[],
     CRYPTO_DataRead(&device->DATA0, data_register);
     crypto_management_release_preemption(device);
 
-    if ( (data_register[3] & 0xFFFFFF00) == __REV(hash) ) {
+    if ( (data_register[3] & 0xFFFFFF00UL) == __REV(hash) ) {
         return currentindex;
     }
 
@@ -459,28 +457,21 @@ int mbedtls_aes_crypt_ecb_radio(bool                   encrypt,
                                 const unsigned char    input[16],
                                 volatile unsigned char output[16])
 {
-  // Mangling DDATA1 (KEY), DDATA2 (DATA0/DATA1) and DDATA4 (KEYBUF)
-  // SEQ doesn't need saving.
-  CRYPTO_TypeDef *device = crypto_management_acquire_preemption(
-                            CRYPTO_MANAGEMENT_SAVE_DDATA1
-                            | CRYPTO_MANAGEMENT_SAVE_DDATA2
-                            | CRYPTO_MANAGEMENT_SAVE_DDATA4);
+/* process one ore more blocks of data */
+  CRYPTO_TypeDef *device = crypto_management_acquire_preemption(CRYPTO_MANAGEMENT_SAVE_DDATA1
+                                                                | CRYPTO_MANAGEMENT_SAVE_DDATA2
+                                                                | CRYPTO_MANAGEMENT_SAVE_DDATA4);
   device->WAC = 0;
   device->CTRL = 0;
 
-  // Store key
-  CRYPTO_KeyBufWriteUnaligned(device,
-                              key,
-                              (keybits == 128UL ? cryptoKey128Bits :
-                                                  cryptoKey256Bits));
+  CRYPTO_KeyBufWriteUnaligned(device, key, (keybits == 128UL ? cryptoKey128Bits : cryptoKey256Bits));
 
-  // Transform encryption to decryption key if decryption requested
   if (!encrypt) {
+    // Transform encryption to decryption key
     device->CMD = CRYPTO_CMD_INSTR_AESENC;
     device->CMD = CRYPTO_CMD_INSTR_DDATA1TODDATA4;
   }
 
-  // Do block transform
   CRYPTO_DataWriteUnaligned(&device->DATA0, (const uint8_t *)input);
 
   if ( encrypt ) {
@@ -503,22 +494,15 @@ int mbedtls_aes_crypt_ctr_radio(const unsigned char   *key,
                                 volatile unsigned char iv_out[16],
                                 volatile unsigned char output[16])
 {
-  // Mangling DDATA1 (KEY), DDATA2 (DATA0/DATA1) and DDATA4 (KEYBUF)
-  // SEQ doesn't need saving.
-  CRYPTO_TypeDef *device = crypto_management_acquire_preemption(
-                            CRYPTO_MANAGEMENT_SAVE_DDATA1
-                            | CRYPTO_MANAGEMENT_SAVE_DDATA2
-                            | CRYPTO_MANAGEMENT_SAVE_DDATA4);
+  /* process one ore more blocks of data */
+  CRYPTO_TypeDef *device = crypto_management_acquire_preemption(CRYPTO_MANAGEMENT_SAVE_DDATA1
+                                                                | CRYPTO_MANAGEMENT_SAVE_DDATA2
+                                                                | CRYPTO_MANAGEMENT_SAVE_DDATA4);
   device->WAC = 0;
   device->CTRL = 0;
 
-  // Store key
-  CRYPTO_KeyBufWriteUnaligned(device,
-                              key,
-                              (keybits == 128UL ? cryptoKey128Bits :
-                                                  cryptoKey256Bits));
+  CRYPTO_KeyBufWriteUnaligned(device, key, (keybits == 128UL ? cryptoKey128Bits : cryptoKey256Bits));
 
-  // Store IV if we received one, else IV is initialized to all-zero
   if ((uint32_t)iv_in != 0) {
     CRYPTO_DataWriteUnaligned(&device->DATA1, (uint8_t *)iv_in);
   } else {
@@ -526,16 +510,13 @@ int mbedtls_aes_crypt_ctr_radio(const unsigned char   *key,
     CRYPTO_DataWrite(&device->DATA1, iv);
   }
 
-  // Calculate transformation block
   device->CMD = CRYPTO_CMD_INSTR_DATA1TODATA0;
   device->CMD = CRYPTO_CMD_INSTR_AESENC;
   device->CMD = CRYPTO_CMD_INSTR_DATA1INC;
 
-  // Mix transformation block with input to get output (AES-CTR)
   CRYPTO_DataWriteUnaligned(&device->DATA0XOR, (uint8_t *)(input));
   CRYPTO_DataReadUnaligned(&device->DATA0, (uint8_t *)(output));
 
-  // Read out resulting IV if requested
   if ((uint32_t)iv_out != 0) {
     CRYPTO_DataReadUnaligned(&device->DATA1, (uint8_t *)iv_out);
   }

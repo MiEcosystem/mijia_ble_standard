@@ -19,6 +19,11 @@
 #ifndef SHAX_H
 #define SHAX_H
 
+/***************************************************************************//**
+ * \addtogroup sl_crypto_internal
+ * \{
+ ******************************************************************************/
+
 #if (defined(MBEDTLS_SHA256_ALT) && defined(MBEDTLS_SHA256_C)) \
     || (defined(MBEDTLS_SHA1_ALT) && defined(MBEDTLS_SHA1_C)) \
     || (defined(MBEDTLS_SHA512_ALT) && defined(MBEDTLS_SHA512_C))
@@ -112,5 +117,7 @@ int sha_x_finish(SHA_Type_t algo,
 #endif
 
 #endif /* if any of the mbedTLS SHA accelerations are active */
+
+/** \} (end addtogroup sl_crypto_internal) */
 
 #endif /* #ifndef SHAX_H */

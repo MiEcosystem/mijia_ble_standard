@@ -146,4 +146,4 @@ int sha_x_process(SHA_Type_t algo,
 
 #endif /* #if defined(SEMAILBOX_PRESENT) */
 
-#endif /* #if defined(MBEDTLS_SHA256_PROCESS_ALT) || defined(MBEDTLS_SHA1_PROCESS_ALT) || defined(MBEDTLS_SHA512_PROCESS_ALT) */
+#endif /* (SHA1 or SHA256 or SHA512) acceleration active */

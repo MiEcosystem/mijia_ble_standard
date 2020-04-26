@@ -59,7 +59,8 @@ int mbedtls_entropy_rail_poll( mbedtls_entropy_rail_context *ctx,
     return 0;
 }
 
-#if defined(MBEDTLS_ENTROPY_HARDWARE_ALT) && \
+#if defined (MBEDTLS_ENTROPY_C) && \
+  defined(MBEDTLS_ENTROPY_HARDWARE_ALT) && \
   defined(MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL)
 
 int mbedtls_hardware_poll( void *data,
@@ -68,10 +69,11 @@ int mbedtls_hardware_poll( void *data,
                            size_t *olen )
 {
     return mbedtls_entropy_rail_poll((mbedtls_entropy_rail_context*)data,
-				     output, len, olen);
+             output, len, olen);
 }
 
-#endif /* #if defined(MBEDTLS_ENTROPY_HARDWARE_ALT) && ... */
+#endif /* #if defined(MBEDTLS_ENTROPY_C) && ... */
+
 
 #endif /* #if defined(_EFR_DEVICE) */
 

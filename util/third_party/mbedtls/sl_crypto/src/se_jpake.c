@@ -30,7 +30,7 @@
 
 #include "mbedtls/ecjpake.h"
 
-#if defined(MBEDTLS_ECJPAKE_ALT)
+#if defined(MBEDTLS_ECJPAKE_ALT) && defined(MBEDTLS_ECJPAKE_C)
 
 #include "em_device.h"
 
@@ -768,4 +768,4 @@ void mbedtls_ecjpake_free( mbedtls_ecjpake_context *ctx )
 
 #endif /* #if defined(SEMAILBOX_PRESENT) */
 
-#endif /* #if defined(MBEDTLS_ECJPAKE_ALT) */
+#endif /* #if defined(MBEDTLS_ECJPAKE_ALT) && defined(MBEDTLS_ECJPAKE_C) */

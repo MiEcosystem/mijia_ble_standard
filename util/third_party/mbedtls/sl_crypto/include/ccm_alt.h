@@ -25,8 +25,9 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_ccm AES-CCM AEAD cipher
- * \brief Hardware accelerated AES-CCM AEAD cipher.
+ * \addtogroup sl_crypto_ccm Accelerated AES-CCM AEAD Cipher
+ * \brief Accelerated AES-CCM AEAD cipher using the SE peripheral
+ *
  * \{
  ******************************************************************************/
 #if defined(MBEDTLS_CCM_ALT)
@@ -141,5 +142,8 @@ int mbedtls_ccm_auth_decrypt( mbedtls_ccm_context *ctx, size_t length,
 #endif
 
 #endif /* MBEDTLS_CCM_ALT */
+
+/** \} (end addtogroup sl_crypto_ccm) */
+/** \} (end addtogroup sl_crypto) */
 
 #endif /* MBEDTLS_CCM_ALT_H */

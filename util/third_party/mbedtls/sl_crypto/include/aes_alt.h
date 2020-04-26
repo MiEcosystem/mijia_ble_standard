@@ -25,8 +25,9 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_aes AES block cipher
- * \brief Hardware accelerated AES block cipher.
+ * \addtogroup sl_crypto_aes Accelerated AES Block Cipher
+ * \brief Accelerated AES block cipher using the AES, CRYPTO or SE peripheral
+ *
  * \{
  ******************************************************************************/
 

@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief AES-CMAC abstraction based on Secure Element
+ * @brief AES-CMAC abstraction based on CRYPTOACC
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -19,24 +19,29 @@
 
 /*
  * This file includes alternative plugin implementations of various
- * functions in cmac.c using the Secure Element accelerator incorporated
+ * functions in cmac.c using the CRYPTOACC accelerator incorporated
  * in MCU devices from Silicon Laboratories.
  */
 
-#include "mbedtls/cmac.h"
-#include "mbedtls/cipher.h"
-
-#if defined(MBEDTLS_AES_C)
-#if defined (MBEDTLS_CMAC_C) && defined(MBEDTLS_CMAC_ALT)
-
 #include "em_device.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(CRYPTOACC_PRESENT)
 
-#include "em_se.h"
-#include "em_core.h"
-#include "se_management.h"
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
+
+#if defined(MBEDTLS_AES_C)
+#if defined (MBEDTLS_CMAC_ALT) && defined(MBEDTLS_CMAC_C)
+#include "cryptoacc_management.h"
+#include "sx_aes.h"
+#include "sx_errors.h"
+#include "cryptolib_def.h"
 #include <string.h>
+#include "mbedtls/cmac.h"
+#include "mbedtls/cipher.h"
 
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"
@@ -367,6 +372,12 @@ int mbedtls_cipher_cmac( const mbedtls_cipher_info_t *cipher_info,
                          const unsigned char *input, size_t ilen,
                          unsigned char *output )
 {
+    int status;
+    uint32_t sx_ret;
+    block_t _key;
+    block_t data_in;
+    block_t tag_out;
+
     if( cipher_info == NULL || key == NULL || input == NULL || output == NULL )
         return( MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA );
 
@@ -384,29 +395,19 @@ int mbedtls_cipher_cmac( const mbedtls_cipher_info_t *cipher_info,
             return( MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA );
     }
 
-    SE_Command_t command = SE_COMMAND_DEFAULT(SE_COMMAND_AES_CMAC);
-    SE_DataTransfer_t in_key = SE_DATATRANSFER_DEFAULT((void*)key, keylen / 8);
-    SE_DataTransfer_t in_data = SE_DATATRANSFER_DEFAULT((void*)input, ilen);
-    SE_DataTransfer_t out_tag = SE_DATATRANSFER_DEFAULT(output, 16);
+    _key = block_t_convert(key, keylen / 8);
+    data_in = block_t_convert(input, ilen);
+    tag_out = block_t_convert(output, 16);
 
-    SE_addDataInput(&command, &in_key);
-    SE_addDataInput(&command, &in_data);
-    SE_addDataOutput(&command, &out_tag);
-
-    SE_addParameter(&command, keylen / 8);
-    SE_addParameter(&command, ilen);
-
-    int status = se_management_acquire();
+    status = cryptoacc_management_acquire();
     if (status != 0) {
         return status;
     }
+    sx_ret = sx_aes_blk(CMAC, ENC, CTX_WHOLE, _key, NULL_blk, NULL_blk, data_in,
+			NULL_blk, NULL_blk, tag_out, NULL_blk, NULL_blk);
+    cryptoacc_management_release();
 
-    SE_executeCommand(&command);
-    SE_Response_t command_status = SE_readCommandResponse();
-
-    se_management_release();
-
-    if ( command_status != SE_RESPONSE_OK ) {
+    if (sx_ret != CRYPTOLIB_SUCCESS) {
         return MBEDTLS_ERR_CIPHER_HW_ACCEL_FAILED;
     }
 
@@ -460,8 +461,8 @@ exit:
     return( ret );
 }
 
-#endif /* SEMAILBOX_PRESENT */
-
-#endif /* MBEDTLS_CMAC_C && MBEDTLS_CMAC_ALT */
+#endif /* MBEDTLS_CMAC_ALT && MBEDTLS_CMAC_C */
 
 #endif /* MBEDTLS_AES_C */
+
+#endif /* CRYPTOACC_PRESENT */

@@ -159,11 +159,15 @@ enum radioaesDmaEngineSelect {
 
 typedef struct {
 	uint32_t FETCHADDR; 	/**< Fetcher Address   	*/
+#if defined(_AES_FETCHDESCR_MASK)
 	uint32_t FETCHDESCR;	/**< Fetcher Descriptor	*/
+#endif
 	uint32_t FETCHLEN;  	/**< Fetcher Length    	*/
 	uint32_t FETCHTAG;  	/**< Fetcher Tag       	*/
 	uint32_t PUSHADDR;  	/**< Pusher Address    	*/
+#if defined(_AES_PUSHDESCR_MASK)
 	uint32_t PUSHDESCR; 	/**< Pusher Descriptor 	*/
+#endif
 	uint32_t PUSHLEN;   	/**< Pusher Length     	*/
 	uint32_t CTRL;      	/**< Control register  	*/
 } radioaes_state_t;

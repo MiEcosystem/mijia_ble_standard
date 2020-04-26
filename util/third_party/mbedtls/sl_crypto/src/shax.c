@@ -575,4 +575,4 @@ void mbedtls_sha1_finish( mbedtls_sha1_context *ctx,
 #endif /* !DEPRECATED_REMOVED */
 #endif /* SHA1 acceleration active */
 
-#endif /* #if defined(MBEDTLS_SHA256_PROCESS_ALT) || defined(MBEDTLS_SHA1_PROCESS_ALT) || defined(MBEDTLS_SHA512_PROCESS_ALT) */
+#endif /* (SHA1 or SHA256 or SHA512) acceleration active */

@@ -237,6 +237,28 @@ static void stdio_rx_handler(uint8_t* data, uint8_t len)
     MI_ERR_CHECK(errno);
 }
 
+#include "gatt_dfu/mible_dfu_main.h"
+static void dfu_callback(mible_dfu_state_t state, mible_dfu_param_t *param)
+{
+    switch (state) {
+    case MIBLE_DFU_STATE_START:
+        MI_LOG_INFO("Start DFU procedure. frag size is %d bytes\n", param->start.fragment_size);
+        break;
+    case MIBLE_DFU_STATE_VERIFY:
+        MI_LOG_INFO("Verify result is %d \n", param->verify.value);
+        break;
+    case MIBLE_DFU_STATE_SWITCH:
+        MI_LOG_INFO("Activate new firmware.\n");
+        break;
+    case MIBLE_DFU_STATE_CANCEL:
+        MI_LOG_INFO("Cancel DFU procedure.\n");
+        break;
+    default:
+        MI_LOG_INFO("state of DFU is unknown.\n");
+        break;
+    }
+}
+
 static void process_system_boot(struct gecko_cmd_packet *evt)
 {
     struct gecko_msg_system_boot_evt_t boot_info = evt->data.evt_system_boot;
@@ -249,6 +271,7 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
 
     mi_scheduler_init(10, mi_schd_event_handler, NULL);
     mi_scheduler_start(SYS_KEY_RESTORE);
+    mible_dfu_callback_register(dfu_callback);
 
     /* Start general advertising and enable connections. */
     advertising_init(0);

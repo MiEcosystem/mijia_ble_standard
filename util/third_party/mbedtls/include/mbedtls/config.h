@@ -30,14 +30,13 @@
 
 #define MBEDTLS_CIPHER_MODE_CTR 1
 
-
 #define MSC_CIPHER_CRT_DER      1
 #define MSC_CIPHER_PEM          0
 #define MSC_CIPHER_SHA          1
 #define MSC_CIPHER_HKDF         1
 #define MSC_CIPHER_AES          1
-#define MSC_CIPHER_ECDH         1
-#define MSC_CIPHER_ECDSA        1
+#define MSC_CIPHER_ECDH         0
+#define MSC_CIPHER_ECDSA        0
 
 #if (MSC_CIPHER_CRT_DER == 1)
 #define MBEDTLS_ASN1_PARSE_C
@@ -48,27 +47,27 @@
 #if defined (MSC_CIPHER_SHA) || defined (MSC_CIPHER_HKDF)
 #define MBEDTLS_SHA256_C
 #endif
-#if defined (MSC_CIPHER_HKDF)
+#if (MSC_CIPHER_HKDF)
 #define MBEDTLS_MD_C
 #endif
 
-#if defined (MSC_CIPHER_AES)
+#if (MSC_CIPHER_AES)
 #define MBEDTLS_CIPHER_C
 #define MBEDTLS_AES_C
 #define MBEDTLS_CCM_C
 #endif
 
-#if defined (MSC_CIPHER_ECDSA) || defined (MSC_CIPHER_ECDH)
+#if (MSC_CIPHER_ECDSA) || (MSC_CIPHER_ECDH)
 #define MBEDTLS_ECP_C
 #define MBEDTLS_ECP_DP_SECP256R1_ENABLED
 #define MBEDTLS_BIGNUM_C
 #endif
 
-#if defined (MSC_CIPHER_ECDH)
+#if (MSC_CIPHER_ECDH)
 #define MBEDTLS_ECDH_C
 #endif
 
-#if defined (MSC_CIPHER_ECDSA)
+#if (MSC_CIPHER_ECDSA)
 #ifndef MBEDTLS_ASN1_PARSE_C
 #define MBEDTLS_ASN1_PARSE_C
 #endif

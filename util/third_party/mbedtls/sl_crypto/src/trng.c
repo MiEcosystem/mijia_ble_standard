@@ -23,13 +23,6 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#if defined(MBEDTLS_SELF_TEST) && defined(MBEDTLS_PLATFORM_C)
-#include "mbedtls/platform.h"
-#else
-#include <stdio.h>
-#define mbedtls_printf     printf
-#endif
-
 #if defined(MBEDTLS_TRNG_C)
 
 #include "trng.h"
@@ -40,8 +33,8 @@
 
 #if defined(TRNG_PRESENT)
 
-#define FIFO_LEVEL_RETRY   (1100)
-#define TEST_WORDS_MIN      (257)
+#define FIFO_LEVEL_RETRY   (10000)
+#define TEST_WORDS_MIN       (257)
 
 #define TEST_VECTOR_CONDITIONING_KEY_SIZE  (4)
 static const uint32_t
@@ -188,9 +181,6 @@ int mbedtls_trng_check_conditioning( mbedtls_trng_context *ctx )
         /* Compare with expected test vector. */
         if (val32 != test_vector_conditioning_output[i])
         {
-            mbedtls_printf("Conditioning test failed. "
-                           "Test output word %d 0x%lx. Expected 0x%lx\n",
-                           i, val32, test_vector_conditioning_output[i]);
             ret = MBEDTLS_ERR_TRNG_CONDITIONING_TEST_FAILED;
         }
     }
@@ -384,23 +374,37 @@ void mbedtls_trng_test_error_callback_set( mbedtls_trng_context *ctx,
     ctx->test_error_callback_user_arg = user_arg;
 }
 
-#if defined(MBEDTLS_ENTROPY_HARDWARE_ALT)
+#if defined(MBEDTLS_ENTROPY_HARDWARE_ALT) && defined(MBEDTLS_ENTROPY_C)
+
 static bool initialized = false;
 static mbedtls_trng_context trng_ctx;
 
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_89)
+#include "em_system.h"
+#endif
 int mbedtls_hardware_poll( void *data,
                            unsigned char *output,
                            size_t len,
                            size_t *olen ) {
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_89)
+    SYSTEM_ChipRevision_TypeDef rev;
+    SYSTEM_ChipRevisionGet(&rev);
+    // TRNG entropy on xG13 is only supported for >= Rev A3
+    if ((rev.major == 1) && (rev.minor < 3)) {
+        while (true) {
+            EFM_ASSERT(false);
+        }
+    }
+#endif
     (void)data;
     if(!initialized) {
         mbedtls_trng_init(&trng_ctx);
         initialized = true;
     }
 
-
     return mbedtls_trng_poll(&trng_ctx, output, len, olen);
 }
-#endif /* MBEDTLS_ENTROPY_HARDWARE_ALT */
-#endif /* TRNG_PRESENT */
-#endif /* MBEDTLS_TRNG_C */
+
+#endif // MBEDTLS_ENTROPY_HARDWARE_ALT && MBEDTLS_ENTROPY_C
+#endif // TRNG_PRESENT
+#endif // MBEDTLS_TRNG_C

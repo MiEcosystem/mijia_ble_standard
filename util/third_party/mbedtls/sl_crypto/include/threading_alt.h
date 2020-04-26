@@ -26,16 +26,16 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_threading Threading primitives
+ * \addtogroup sl_crypto_threading Threading Primitives
  * \brief Threading primitive implementation for mbed TLS
  *
- * This file contains the 'glue logic' between the mbed TLS threading API and
- * three RTOS'es, being Micrium uC/OS III, Micrium OS, and FreeRTOS. If adding a
- * custom RTOS, see the implementations given for reference.
+ * This file contains the glue logic between the mbed TLS threading API and
+ * two RTOS'es supported, being Micrium OS and FreeRTOS. 
  *
- * In order to use the Silicon Labs Hardware Acceleration implementation, you
- * have to call THREADING_setup() as soon as you have brought up your RTOS, and
- * before calling any mbed TLS function.
+ * \note
+ * In order to use the Silicon Labs Hardware Acceleration plugins in multi-threaded applications, 
+ * define @ref MBEDTLS_THREADING_C in your build setup and call @ref THREADING_setup() <b>after</b> 
+ * the RTOS is initialized and before <b>before</b> calling any mbed TLS function.
  *
  * \{
  ******************************************************************************/
@@ -43,12 +43,12 @@
 #include "mbedtls/threading.h"
 #if defined (MBEDTLS_THREADING_ALT) && defined (MBEDTLS_THREADING_C)
 
-#if defined (MBEDTLS_MICRIUM)
+#if defined (MBEDTLS_MICRIUM) || defined (MBEDTLS_MICRIUMOS)
 
 #define SL_THREADING_ALT
 
 #include "em_assert.h"
-#include  <kernel/include/os.h>
+#include <kernel/include/os.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -136,7 +136,7 @@ static inline int THREADING_GiveMutex( mbedtls_threading_mutex_t *mutex )
 }
 #endif
 
-#endif /* MBEDTLS_MICRIUM */
+#endif /* MBEDTLS_MICRIUM || MBEDTLS_MICRIUMOS */
 
 #if defined (MBEDTLS_FREERTOS)
 
@@ -201,70 +201,6 @@ static inline int THREADING_GiveMutex( mbedtls_threading_mutex_t *mutex )
 #endif
 
 #endif /* MBEDTLS_FREERTOS */
-
-#if defined (MBEDTLS_MICRIUMOS)
-
-#define SL_THREADING_ALT
-
-#include "em_assert.h"
-#include <kernel/include/os.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef OS_MUTEX mbedtls_threading_mutex_t;
-
-static inline void THREADING_InitMutex( mbedtls_threading_mutex_t *mutex )
-{
-  RTOS_ERR err;
-  OSMutexCreate(mutex, "dynamic", &err);
-  EFM_ASSERT(err.Code == RTOS_ERR_NONE);
-}
-
-static inline void THREADING_FreeMutex( mbedtls_threading_mutex_t *mutex )
-{
-  RTOS_ERR err;
-  OSMutexDel(mutex, OS_OPT_DEL_ALWAYS, &err);
-  EFM_ASSERT(err.Code == RTOS_ERR_NONE);
-}
-
-static inline int THREADING_TakeMutexBlocking( mbedtls_threading_mutex_t *mutex )
-{
-  RTOS_ERR err;
-  OSMutexPend(mutex,
-              0,
-              OS_OPT_PEND_BLOCKING,
-              NULL,
-              &err);
-  EFM_ASSERT(err.Code == RTOS_ERR_NONE);
-  return (err.Code == RTOS_ERR_NONE ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
-}
-
-static inline int THREADING_TakeMutexNonBlocking( mbedtls_threading_mutex_t *mutex )
-{
-  RTOS_ERR err;
-  OSMutexPend(mutex,
-              0,
-              OS_OPT_PEND_NON_BLOCKING,
-              NULL,
-              &err);
-  return (err.Code == RTOS_ERR_NONE ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
-}
-
-static inline int THREADING_GiveMutex( mbedtls_threading_mutex_t *mutex )
-{
-  RTOS_ERR err;
-  OSMutexPost(mutex, OS_OPT_POST_NONE, &err);
-  EFM_ASSERT(err.Code == RTOS_ERR_NONE);
-  return (err.Code == RTOS_ERR_NONE ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
-}
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* MBEDTLS_MICRIUMOS */
 
 #ifdef __cplusplus
 extern "C" {

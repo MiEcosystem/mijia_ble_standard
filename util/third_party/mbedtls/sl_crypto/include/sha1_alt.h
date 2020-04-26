@@ -25,8 +25,9 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_sha1 SHA-1 cryptographic hash function
- * \brief CRYPTO hardware accelerated SHA-1 cryptographic hash function.
+ * \addtogroup sl_crypto_sha1 Accelerated SHA-1 Hash Function
+ * \brief Accelerated SHA-1 cryptographic hash function using the CRYPTO peripheral
+ *
  * \{
  ******************************************************************************/
 

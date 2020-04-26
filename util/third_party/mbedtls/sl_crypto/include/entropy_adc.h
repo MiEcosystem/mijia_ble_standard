@@ -41,14 +41,15 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_crypto_entropy_adc Silicon Labs ADC Entropy Source Plugin
- * \brief Collect entropy from the ADC on Silicon Labs devices.
+ * \addtogroup sl_entropy_adc ADC Entropy Source Plugin
+ * \brief Collect entropy from the ADC on Silicon Labs devices
  *
- * \details The ADC entropy module implements an entropy source plugin module
+ * The ADC entropy module implements an entropy source plugin module
  * for mbedTLS that can be used in applications needing random numbers or
  * indirectly using mbedTLS modules that depend on the random number generation
  * interfaces of mbed TLS. The configuration #define @ref MBEDTLS_ENTROPY_ADC_C
- * will compile the this module.
+ * will compile this module. Note that the IADC peripheral is not currently 
+ * supported.
  *
  * \{
  ******************************************************************************/

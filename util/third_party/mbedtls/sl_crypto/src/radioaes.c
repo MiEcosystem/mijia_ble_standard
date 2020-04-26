@@ -35,6 +35,9 @@ static volatile bool                radioaes_lock_initialized = false;
 
 int radioaes_acquire ( void )
 {
+#if defined (_CMU_CLKEN0_MASK)
+  CMU->CLKEN0 |= CMU_CLKEN0_RADIOAES;
+#endif
   CMU->RADIOCLKCTRL = CMU_RADIOCLKCTRL_EN;
   if ((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0U) {
     // IRQ: need to store & restore RADIOAES registers
@@ -92,11 +95,15 @@ int radioaes_saveState (radioaes_state_t *ctx)
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
   ctx->FETCHADDR = RADIOAES->FETCHADDR;
+#if defined(_AES_FETCHDESCR_MASK)
   ctx->FETCHDESCR = RADIOAES->FETCHDESCR;
+#endif
   ctx->FETCHLEN = RADIOAES->FETCHLEN;
   ctx->FETCHTAG = RADIOAES->FETCHTAG;
   ctx->PUSHADDR = RADIOAES->PUSHADDR;
+#if defined(_AES_PUSHDESCR_MASK)
   ctx->PUSHDESCR = RADIOAES->PUSHDESCR;
+#endif
   ctx->PUSHLEN = RADIOAES->PUSHLEN;
   ctx->CTRL = RADIOAES->CTRL;
   CORE_EXIT_CRITICAL();
@@ -108,11 +115,15 @@ int radioaes_restoreState (radioaes_state_t *ctx)
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
   RADIOAES->FETCHADDR = ctx->FETCHADDR;
+#if defined(_AES_FETCHDESCR_MASK)
   RADIOAES->FETCHDESCR = ctx->FETCHDESCR;
+#endif
   RADIOAES->FETCHLEN = ctx->FETCHLEN;
   RADIOAES->FETCHTAG = ctx->FETCHTAG;
   RADIOAES->PUSHADDR = ctx->PUSHADDR;
+#if defined(_AES_PUSHDESCR_MASK)
   RADIOAES->PUSHDESCR = ctx->PUSHDESCR;
+#endif
   RADIOAES->PUSHLEN = ctx->PUSHLEN;
   RADIOAES->CTRL = ctx->CTRL;
   CORE_EXIT_CRITICAL();

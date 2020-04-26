@@ -16,18 +16,18 @@
  * sections applicable to open source software.
  *
  ******************************************************************************/
+
 /*
  * This file includes an alternative implementation of the standard
  * mbedtls/libary/sha[1][256].c using the CRYPTO hardware accelerator
  * incorporated in MCU devices from Silicon Laboratories.
  */
+ 
 /*
  *  The SHA-1 standard was published by NIST in 1993.
- *
  *  http://www.itl.nist.gov/fipspubs/fip180-1.htm
  *
  *  The SHA-256 Secure Hash Standard was published by NIST in 2002.
- *
  *  http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
  */
 
