@@ -94,7 +94,7 @@ static gecko_configuration_t stack_config = {
                                                         * Do not modify if you are using a module                  */
   .gattdb = &bg_gattdb_data,                           /* Pointer to GATT database */
   .pa.config_enable = 1,                               /* Set this to be a valid PA config */
-  .pa.pa_mode       = 2,
+  .pa.pa_mode       = 1,
 #if defined(FEATURE_PA_INPUT_FROM_VBAT)
   .pa.input = GECKO_RADIO_PA_INPUT_VBAT,               /* Configure PA input to VBAT */
 #else
