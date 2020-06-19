@@ -115,7 +115,7 @@ static void initMcu_clocks(void)
     CMU_ClockSelectSet(cmuClock_WDOG0, cmuSelect_LFXO);
 #else
     CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
-
+    CMU_LFRCOSetPrecision(cmuPrecisionHigh);
     // Set LFRCO if selected as LFCLK
     CMU_ClockSelectSet(cmuClock_RTCC, cmuSelect_LFRCO);
     CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFRCO);
