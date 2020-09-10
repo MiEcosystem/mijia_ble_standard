@@ -38,7 +38,7 @@
 /**
  * @note Device side has RESET button or not.
  */
-#define HAVE_RESET_BUTTON      1
+#define HAVE_RESET_BUTTON      0
 
 
 /**
@@ -59,7 +59,7 @@
 
 /* DEBUG */
 #ifndef DEBUG_MIBLE
-#define DEBUG_MIBLE            0
+#define DEBUG_MIBLE            1
 #define TIME_PROFILE           0
 #endif
 

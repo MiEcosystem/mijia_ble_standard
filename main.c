@@ -92,24 +92,34 @@
 #include "mijia_profiles/stdio_service_server.h"
 #include "mi_config.h"
 
+#include "mible_beacon_internal.h"
+#include "mible_beacon.h"
+
 #define DEVICE_NAME                     "stand_demo"                            /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "Xiaomi Inc."                           /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO           3                                       /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG            1                                       /**< A tag identifying the SoftDevice BLE configuration. */
 
-#define MIN_CONN_INTERVAL               MSEC_TO_UNITS(15, UNIT_1_25_MS)         /**< Minimum acceptable connection interval (15 ms). */
-#define MAX_CONN_INTERVAL               MSEC_TO_UNITS(30, UNIT_1_25_MS)         /**< Maximum acceptable connection interval (30 ms). */
+#define MIN_CONN_INTERVAL               MSEC_TO_UNITS(15, UNIT_1_25_MS) //zl 老 MSEC_TO_UNITS(100, UNIT_1_25_MS)	        /**< Minimum acceptable connection interval (15 ms). */
+#define MAX_CONN_INTERVAL               MSEC_TO_UNITS(30, UNIT_1_25_MS) //zl 老 MSEC_TO_UNITS(200, UNIT_1_25_MS)       /**< Maximum acceptable connection interval (30 ms). */
 #define SLAVE_LATENCY                   0                                       /**< Slave latency. */
-#define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(900,  UNIT_10_MS)         /**< Connection supervisory timeout (0.9 s). */
+#define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(900,  UNIT_10_MS) //zl 老 MSEC_TO_UNITS(4000, UNIT_10_MS)         /**< Connection supervisory timeout (0.9 s). */
 
-#define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(30000)                  /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
-#define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(60000)                  /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
+#define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(30000)		//zl 老 APP_TIMER_TICKS(20000)                  /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
+#define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(60000)		//zl 老 APP_TIMER_TICKS(30000)               /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                       /**< Number of attempts before giving up the connection parameter negotiation. */
 
 #define DEAD_BEEF                       0xDEADBEEF                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 
+#define ADV_FAST_PAIR_TIME 5000
+#define ADV_OBJECTS_TIME 500
+
+static void* button_timer;
+static void* fastpair_timer;
+
+//static uint8_t counter = 0;
 NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                                         /**< Context for the Queued Write module.*/
 APP_TIMER_DEF(m_poll_timer);
@@ -181,7 +191,7 @@ static void gap_params_init(void)
     ble_gap_conn_params_t   gap_conn_params;
     ble_gap_conn_sec_mode_t sec_mode;
 
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode); //安全模式设置，1：无安全要求
 
     err_code = sd_ble_gap_device_name_set(&sec_mode,
                                           (const uint8_t *)DEVICE_NAME,
@@ -194,10 +204,10 @@ static void gap_params_init(void)
 
     memset(&gap_conn_params, 0, sizeof(gap_conn_params));
 
-    gap_conn_params.min_conn_interval = MIN_CONN_INTERVAL;
+    gap_conn_params.min_conn_interval = MIN_CONN_INTERVAL; //0.5sec 连接间隔时间，指定一个最大值和最小值，以供Master 建立连接
     gap_conn_params.max_conn_interval = MAX_CONN_INTERVAL;
-    gap_conn_params.slave_latency     = SLAVE_LATENCY;
-    gap_conn_params.conn_sup_timeout  = CONN_SUP_TIMEOUT;
+    gap_conn_params.slave_latency     = SLAVE_LATENCY;     //从机潜伏，允许设备跳过的最大连接次数，为0，能快速收到Master发送过来的数据
+    gap_conn_params.conn_sup_timeout  = CONN_SUP_TIMEOUT;  //监督超时时间，超时没有收到数据则认为连接断开
 
     err_code = sd_ble_gap_ppcp_set(&gap_conn_params);
     APP_ERROR_CHECK(err_code);
@@ -208,6 +218,7 @@ static void gap_params_init(void)
  */
 static void gatt_init(void)
 {
+	//一从 对 多主 模式初始化
     ret_code_t err_code = nrf_ble_gatt_init(&m_gatt, NULL);
     APP_ERROR_CHECK(err_code);
 }
@@ -256,6 +267,8 @@ static void on_yys_evt(ble_yy_service_t     * p_yy_service,
  */
 static void services_init(void)
 {
+
+//只搭建了一个框架，还没有建立蓝牙服务。
     ret_code_t         err_code;
     nrf_ble_qwr_init_t qwr_init = {0};
 
@@ -394,11 +407,13 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     {
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("Disconnected.");
+			NRF_LOG_INFO("[zl] Disconnected.");
             // LED indication will be changed when advertising starts.
             break;
 
         case BLE_GAP_EVT_CONNECTED:
             NRF_LOG_INFO("Connected.");
+			NRF_LOG_INFO("[zl] Connected.");
             err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
             APP_ERROR_CHECK(err_code);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
@@ -446,10 +461,25 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     }
 
     mible_on_ble_evt(p_ble_evt);
-
 }
 
-
+void mible_gap_address_set(void)
+{
+    uint32_t errno;
+    ble_gap_addr_t gap_addr;	
+    #if (NRF_SD_BLE_API_VERSION >= 3)
+	    errno = sd_ble_gap_addr_get(&gap_addr);
+	    gap_addr.addr_type = BLE_GAP_ADDR_TYPE_PUBLIC;
+	    gap_addr.addr_id_peer = 0;
+	    //gap_addr.addr[5] &= 0x7F; //Public Device Address
+        errno = sd_ble_gap_addr_set(&gap_addr);
+    #else
+        errno = sd_ble_gap_address_get(&gap_addr);
+    #endif
+    
+    MI_LOG_DEBUG("\nmible_gap_address_set %d\n", errno);
+    return;// err_code_convert(errno);
+}
 /**@brief Function for initializing the BLE stack.
  *
  * @details Initializes the SoftDevice and the BLE event interrupt.
@@ -473,6 +503,9 @@ static void ble_stack_init(void)
 
     // Register a handler for BLE events.
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
+	
+	// This is a demo. A real product must has a valid public address.
+    mible_gap_address_set();  //zl
 }
 
 static void enqueue_new_objs()
@@ -483,6 +516,110 @@ static void enqueue_new_objs()
     mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery, 0);
 }
 
+static void ble_fastpair_event(void)
+{
+    mible_timer_stop(fastpair_timer);
+    
+    MI_LOG_INFO("ble_fastpair advertising init...\n");
+    mibeacon_frame_ctrl_t frame_ctrl = {
+        .is_encrypt = 0,
+        .mac_include = 1,
+        .cap_include = 1,
+        .obj_include = 1,
+        .solicite = 0,
+        .version = 0x03,
+    };
+    mibeacon_capability_t cap = {.connectable = 1,
+                                 .encryptable = 1,
+                                 .bondAbility = 1};
+
+    mible_addr_t dev_mac;
+    mible_gap_address_get(dev_mac);
+                                                                
+    mibeacon_obj_t fastpair_obj = {.type = MI_EVT_SIMPLE_PAIR,
+                                   .len = 2,
+                                   .val[0] = 0x01,
+                                   .val[1] = 0x10,};
+    
+    mibeacon_config_t mibeacon_cfg = {
+        .frame_ctrl = frame_ctrl,
+        .pid = PRODUCT_ID,
+        .p_mac = (mible_addr_t*)dev_mac, 
+        .p_capability = &cap,
+        .p_obj = (mibeacon_obj_t*)&fastpair_obj,
+        .obj_num = 1,
+    };
+    
+    uint8_t service_data[31];
+    uint8_t service_data_len = 0;
+    
+//    if(MI_SUCCESS != mible_service_data_set(&mibeacon_cfg, service_data, &service_data_len)){
+//        MI_LOG_ERROR("mibeacon_data_set failed. \r\n");
+//        return;
+//    }
+
+	if(MI_SUCCESS != fastpair_mible_service_data_set(&mibeacon_cfg, service_data, &service_data_len)){
+        MI_LOG_ERROR("mibeacon_data_set failed. \r\n");
+        return;
+    }
+	
+	
+    uint8_t adv_data[23]={0};
+    uint8_t adv_len=0;
+    // add flags
+    adv_data[0] = 0x02;
+    adv_data[1] = 0x01;
+    adv_data[2] = 0x06;
+    
+    memcpy(adv_data+3, service_data, service_data_len);
+    adv_len = service_data_len + 3;
+    
+    mible_gap_adv_data_set(adv_data,adv_len,NULL,0);
+    
+    MI_LOG_INFO("fastpair adv data:");
+    MI_LOG_HEXDUMP(adv_data, adv_len);
+    MI_PRINTF("\r\n");
+        
+    mible_timer_start(fastpair_timer, ADV_FAST_PAIR_TIME, NULL);
+        
+    return;
+}
+
+static void push_key_mibeacon(uint8_t key)
+{
+    mible_timer_stop(button_timer);
+    
+    mibeacon_obj_t pushObj = {.type = MI_STA_BUTTON,
+                              .len = 3,
+                              .val[0] = 0x00,
+                              .val[1] = 0x00,
+                              .val[2] = key,};
+            
+    uint32_t errno;
+
+    uint8_t adv_data[31];
+    uint8_t adv_dlen = 0;
+
+    mibeacon_config_t beacon_cfg = {
+            .frame_ctrl.version = 5,
+            .frame_ctrl.is_encrypt = 1,
+            .pid = PRODUCT_ID, //156, //beacon_nonce.pid,
+            .p_obj = &pushObj,
+            .obj_num = 1,
+        };
+
+    //mible_manu_data_set(&beacon_cfg, adv_data, &adv_dlen);
+    fastpair_mible_service_data_set(&beacon_cfg, adv_data, &adv_dlen);
+	//mible_service_data_set(&beacon_cfg, adv_data, &adv_dlen);
+	MI_LOG_INFO("mibeacon event adv ...\n");
+    MI_LOG_HEXDUMP(adv_data, adv_dlen);
+    
+    errno = mible_gap_adv_data_set( adv_data, adv_dlen, NULL, 0);
+    MI_ERR_CHECK(errno);
+
+    mible_timer_start(button_timer, ADV_OBJECTS_TIME, NULL);
+}
+
 /**@brief Function for handling events from the BSP module.
  *
  * @param[in]   event   Event generated when button is pressed.
@@ -490,14 +627,16 @@ static void enqueue_new_objs()
 static void bsp_event_handler(bsp_event_t event)
 {
     ret_code_t err_code;
-
+	//char buf[3] = {0x00,0x00,0x00};
     switch (event)
     {
         case BSP_EVENT_SLEEP:
+		MI_LOG_INFO("\n BSP_EVENT_SLEEP\n"); 
             sleep_mode_enter();
             break; // BSP_EVENT_SLEEP
 
         case BSP_EVENT_DISCONNECT:
+		MI_LOG_INFO("\n BSP_EVENT_DISCONNECT\n"); 
             err_code = sd_ble_gap_disconnect(m_conn_handle,
                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
             if (err_code != NRF_ERROR_INVALID_STATE)
@@ -507,21 +646,37 @@ static void bsp_event_handler(bsp_event_t event)
             break; // BSP_EVENT_DISCONNECT
 
         case BSP_EVENT_KEY_0:
-            app_timer_start(m_solicited_timer, APP_TIMER_TICKS(5000), NULL);
-            advertising_init(1);
+		MI_LOG_INFO("\n BSP_EVENT_KEY_0\n");    
+            //app_timer_start(m_solicited_timer, APP_TIMER_TICKS(5000), NULL);
+            //advertising_init(1);
+			mi_scheduler_start(SYS_KEY_DELETE);
+			advertising_init(1);
             break;
 
         case BSP_EVENT_KEY_1:
-            if (get_mi_reg_stat()) {
-                enqueue_new_objs();
-            }
+//            if (get_mi_reg_stat()) {
+//                enqueue_new_objs();
+//            }
+		
+		MI_LOG_INFO("\n BSP_EVENT_KEY_1\n");    
+                    //push_key_mibeacon(1);
+                    ble_fastpair_event();
             break;
 
         case BSP_EVENT_KEY_2:
-            mi_scheduler_start(SYS_KEY_DELETE);
-            advertising_init(0);
+			MI_LOG_INFO("\n BSP_EVENT_KEY_2\n");    
+//            mi_scheduler_start(SYS_KEY_DELETE);
+//            advertising_init(0);
+			push_key_mibeacon(2);
+//			buf[2] = 0x02;
+//			mibeacon_obj_enque(MI_STA_BUTTON, 3, buf, 1);
             break;
-
+		case BSP_EVENT_KEY_3:
+			MI_LOG_INFO("\n BSP_EVENT_KEY_3\n");    
+			push_key_mibeacon(3);
+//			buf[2] = 0x03;
+//			mibeacon_obj_enque(MI_STA_BUTTON, 3, buf, 1);
+            break;
         default:
             break;
     }
@@ -532,16 +687,76 @@ static void bsp_event_handler(bsp_event_t event)
  */
 static void advertising_init(bool solicite_bind)
 {
-    MI_LOG_INFO("advertising init...\n");
+//	solicite_bind = 1;
+//    MI_LOG_INFO("advertising init...\n");
 
-    uint8_t user_data[31], user_dlen;
-    user_data[0] = 1 + strlen(DEVICE_NAME);
-    user_data[1] = 9;  // complete local name
-    strcpy((char*)&user_data[2], DEVICE_NAME);
-    user_dlen = 2 + strlen(DEVICE_NAME);
-    if (MI_SUCCESS != mibeacon_adv_data_set(solicite_bind, 0, user_data, user_dlen)) {
-        MI_LOG_ERROR("encode mibeacon data failed. \r\n");
+//    uint8_t user_data[31], user_dlen;
+//    user_data[0] = 1 + strlen(DEVICE_NAME);
+//    user_data[1] = 9;  // complete local name
+//    strcpy((char*)&user_data[2], DEVICE_NAME);
+//    user_dlen = 2 + strlen(DEVICE_NAME);
+//    if (MI_SUCCESS != mibeacon_adv_data_set(solicite_bind, 0, user_data, user_dlen)) {
+//        MI_LOG_ERROR("encode mibeacon data failed. \r\n");
+//    }
+//    return;
+/////////////////////////////////////////////////////////////////////////////////////////
+	MI_LOG_INFO("advertising init...\n");
+    mibeacon_frame_ctrl_t frame_ctrl = {
+        .is_encrypt = 0,
+        .mac_include = 1,
+        .cap_include = 1,
+        .obj_include = 0,
+        .solicite = 0,
+        .version = 0x05,
+    };
+    mibeacon_capability_t cap = {.connectable = 1,
+                                 .encryptable = 1,
+                                 .bondAbility = 1};
+
+    mible_addr_t dev_mac;
+    mible_gap_address_get(dev_mac);
+    
+    mibeacon_config_t mibeacon_cfg = {
+        .frame_ctrl = frame_ctrl,
+        .pid =PRODUCT_ID,
+		//.frame_counter = ((counter + 4) % 512),
+        .p_mac = (mible_addr_t*)dev_mac, 
+        .p_capability = &cap,
+        .p_obj = NULL,
+    };
+    
+//	counter += 4;
+//	if(counter >= 504)
+//	{
+//		counter = 0;
+//	}
+//	
+    uint8_t service_data[31];
+    uint8_t service_data_len=0;
+    
+    if(MI_SUCCESS != fastpair_mible_service_data_set(&mibeacon_cfg, service_data, &service_data_len)){
+        MI_LOG_ERROR("mibeacon_data_set failed. \r\n");
+        return;
     }
+    
+    uint8_t adv_data[23] = {0};
+    uint8_t adv_len = 0;
+    // add flags
+    adv_data[0] = 0x02;
+    adv_data[1] = 0x01;
+    adv_data[2] = 0x06;
+    
+    memcpy(adv_data+3, service_data, service_data_len);
+    adv_len = service_data_len + 3;
+    
+    mible_gap_adv_data_set(adv_data,adv_len,NULL,0);
+    
+    MI_LOG_INFO("adv mi service data:");
+    MI_LOG_HEXDUMP(adv_data, adv_len);
+    MI_PRINTF("\r\n");
+    return;	
+	
+	
 }
 
 /**@brief Function for initializing buttons and leds.
@@ -570,6 +785,10 @@ static void buttons_leds_init()
     err_code = bsp_event_to_button_action_assign(2,
                                              BSP_BUTTON_ACTION_LONG_PUSH,
                                              BSP_EVENT_KEY_2);
+	/* BUTTON4 */								 
+	err_code = bsp_event_to_button_action_assign(3,
+                                             BSP_BUTTON_ACTION_LONG_PUSH,
+                                             BSP_EVENT_KEY_3);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -612,7 +831,7 @@ static void idle_state_handle(void)
  */
 static void advertising_start(void)
 {
-    uint32_t errno = mibeacon_adv_start(300);
+    uint32_t errno = mibeacon_adv_start(30);
     MI_ERR_CHECK(errno);
 }
 
@@ -627,7 +846,7 @@ static void solicited_timeout(void * p_context)
 static void poll_timer_handler(void * p_context)
 {
     time_t utc_time = time(NULL);
-    MI_LOG_INFO("%s", ctime(&utc_time));
+    MI_LOG_INFO("[zl] %s", ctime(&utc_time));
 
     // if device has been registered, it will advertise the mibeacon contains object.
     if (get_mi_reg_stat()) {
@@ -660,6 +879,7 @@ void mi_schd_event_handler(schd_evt_t *p_event)
         break;
 
     case SCHD_EVT_KEY_DEL_SUCC:
+		MI_LOG_INFO("[zl] mi_schd_event_handler SCHD_EVT_KEY_DEL_SUCC(%x) \n", SCHD_EVT_KEY_DEL_SUCC);
         // device has been reset, restart adv mibeacon contains IO cap.
         advertising_init(0);
         break;
@@ -687,17 +907,19 @@ void stdio_rx_handler(uint8_t* p, uint8_t l)
 int main(void)
 {
     // Initialize.
+	uint8_t ret;
+	
     log_init();
     MI_LOG_INFO(RTT_CTRL_CLEAR);
     MI_LOG_INFO("Compiled  %s %s\n", (uint32_t)__DATE__, (uint32_t)__TIME__);
     timers_init();
     buttons_leds_init();
-    power_management_init();
-    ble_stack_init();
+    power_management_init(); //有一个关机的标志位
+    ble_stack_init(); 		 //注册蓝牙处理调度事件  ble_evt_handler
     gap_params_init();
     gatt_init();
     services_init();
-    conn_params_init();
+    conn_params_init(); //连接参数
     time_init(NULL);
 
     /* <!> mi_scheduler_init() must be called after ble_stack_init(). */
@@ -713,10 +935,43 @@ int main(void)
     advertising_start();
     application_timers_start();
     
+
+//	mible_status_t ret = mible_timer_create(&button_timer, (mible_handler_t)advertising_init, MIBLE_TIMER_SINGLE_SHOT);
+//    if(ret != MI_SUCCESS){
+//        MI_LOG_ERROR("button_timer_create failed. code = %x .\r\n",ret);
+//    }else{
+//        MI_LOG_DEBUG("button_timer_create success. \r\n");
+//    }      		
+
+    ret = mible_timer_create(&fastpair_timer, (mible_handler_t)advertising_init, MIBLE_TIMER_SINGLE_SHOT);
+    if(ret != MI_SUCCESS){
+        MI_LOG_ERROR("fastpair_timer_create failed. code = %x .\r\n",ret);
+    }else{
+        MI_LOG_DEBUG("fastpair_timer_create success. \r\n");
+    }	
+	
+	ret = mible_timer_create(&button_timer, (mible_handler_t)advertising_init, MIBLE_TIMER_SINGLE_SHOT);
+    if(ret != MI_SUCCESS){
+        MI_LOG_ERROR("button_timer_create failed. code = %x .\r\n",ret);
+    }else{
+        MI_LOG_DEBUG("button_timer_create success. \r\n");
+    }  
+	
+	MI_LOG_INFO("[zl] enter main loop!\n");
     // Enter main loop.
-    for (;;) {
+	
+//	char buf[10];
+//	char ret = mible_record_write(0x20, "12345", 6);
+//	MI_LOG_INFO("ret = %d\n", ret);
+//	ret=mible_record_read(0x20, buf, 6);
+//	MI_LOG_INFO("ret = %d buf = %s\n", ret, buf);
+//	
+		
+    for (;;) 
+	{
 #if (MI_SCHD_PROCESS_IN_MAIN_LOOP==1)
         // Process mi scheduler
+		//MI_LOG_INFO("main\n");
         mi_schd_process();
 #endif
         // Enter Sleep mode
