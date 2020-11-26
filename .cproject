@@ -165,6 +165,7 @@
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/platform/radio/rail_lib/autogen/librail_release/librail_efr32xg22_gcc_release.a}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/platform/emdrv/nvm3/lib/libnvm3_CM33_gcc.a}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/protocol/bluetooth/lib/EFR32XG22/GCC/binapploader.o}"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/mijia_ble_libs/standard_auth/stand-auth-cortex-m33f.a}"/>
 								</option>
 								<option id="gnu.c.link.option.ldflags.548137105" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-Wl,--undefined,sl_app_properties,--undefined,__Vectors,--undefined,__aeabi_uldivmod,--undefined,ceil,--undefined,__nvm3Base" valueType="string"/>
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type.710851280" name="Floating-Point ABI" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type" value="floatingpoint.type.hard" valueType="enumerated"/>
@@ -829,6 +830,7 @@
 		<configuration configurationName="GNU ARM v7.2.1 - Release">
 			<resource resourceType="PROJECT" workspacePath="/release_bg22"/>
 		</configuration>
+		<configuration configurationName="GNU ARM v7.2.1 - Default - EFR32BG22C224F512GM32"/>
 		<configuration configurationName="GNU ARM v7.2.1 - Default">
 			<resource resourceType="PROJECT" workspacePath="/release_bg22"/>
 		</configuration>

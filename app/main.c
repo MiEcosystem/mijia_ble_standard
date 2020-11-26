@@ -243,19 +243,15 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     MI_LOG_INFO("system stack %d.%0d.%0d-%d, heap %d bytes\n", boot_info.major, boot_info.minor, boot_info.patch, boot_info.build,sizeof(bluetooth_stack_heap));
 
     gecko_cmd_system_set_tx_power(0);
-    MI_LOG_INFO("1\n");
+
     mi_service_init();
-    MI_LOG_INFO("2\n");
     stdio_service_init(stdio_rx_handler);
-    MI_LOG_INFO("3\n");
+
     mi_scheduler_init(10, mi_schd_event_handler, NULL);
-    MI_LOG_INFO("4\n");
     mi_scheduler_start(SYS_KEY_RESTORE);
 
     /* Start general advertising and enable connections. */
-    MI_LOG_INFO("5\n");
     advertising_init(0);
-    MI_LOG_INFO("6\n");
     advertising_start();
 
     // start periodic advertise objects.
