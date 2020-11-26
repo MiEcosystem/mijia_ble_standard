@@ -5,7 +5,7 @@
 
 * [silicon labs BG13](https://github.com/MiEcosystem/mijia_ble_standard/tree/silabs)
 * [silicon labs BG21](https://github.com/MiEcosystem/mijia_ble_standard/tree/silabs_xG2)
-* [silicon labs BG22](https://github.com/MiEcosystem/mijia_ble_standard/tree/silabs_xG22)
+* [silicon labs BG22](https://github.com/MiEcosystem/mijia_ble_standard/tree/silabs_BG22)
 * [nordic 51 series](https://github.com/MiEcosystem/mijia_ble_standard/tree/nordic_legacy)
 * [nordic 52 series](https://github.com/MiEcosystem/mijia_ble_standard/tree/nordic)
 * [telink](https://github.com/MiEcosystem/mijia_ble_standard/tree/telink)
