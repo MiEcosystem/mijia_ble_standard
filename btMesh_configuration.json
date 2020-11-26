@@ -1,0 +1,58 @@
+{
+  "COMMENT": "",
+  "Composition Data": {
+    "CID": "0x038F",
+    "PID": "0x0379",
+    "VID": "0x0002",
+    "CRPL": "0x10",
+    "Features": "0x0000",
+    "Elements": [
+      {
+        "Name": "Primary Element",
+        "Loc": "0x0000",
+        "NumS": "3",
+        "NumV": "2",
+        "SIG Models": [
+          "0x0000",
+          "Configuration Server",
+          "0x0002",
+          "Health Server",
+          "0x1000",
+          "Generic OnOff Server"]
+        ,
+        "Vendor Models": [
+          "0x0000038F",
+          "MIOT Spec Server",
+          "0x0002038F",
+          "Mijia Vendor Model Server"]
+        
+      }]
+    
+  },
+  "Memory configuration": {
+    "MAX_ELEMENTS": "1",
+    "MAX_MODELS": "5",
+    "MAX_APP_BINDS": "4",
+    "MAX_SUBSCRIPTIONS": "4",
+    "MAX_NETKEYS": "1",
+    "MAX_APPKEYS": "2",
+    "NET_CACHE_SIZE": "16",
+    "RPL_SIZE": "16",
+    "MAX_SEND_SEGS": "2",
+    "MAX_RECV_SEGS": "2",
+    "MAX_VAS": "1",
+    "MAX_PROV_SESSIONS": "1",
+    "MAX_PROV_BEARERS": "1",
+    "MAX_GATT_CONNECTIONS": "0",
+    "GATT_TXQ_SIZE": "0",
+    "MAX_PROVISIONED_DEVICES": "0",
+    "MAX_PROVISIONED_DEVICE_NETKEYS": "0",
+    "MAX_PROVISIONED_DEVICE_APPKEYS": "0",
+    "MAX_FOUNDATION_CLIENT_CMDS": "0",
+    "MAX_FRIENDSHIPS": "0",
+    "FRIEND_MAX_SUBS_LIST": "0",
+    "FRIEND_MAX_TOTAL_CACHE": "0",
+    "FRIEND_MAX_SINGLE_CACHE": "0",
+    "MAX_APP_SEND_QUEUE": "5"
+  }
+}
