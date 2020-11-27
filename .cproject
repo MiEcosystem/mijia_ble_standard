@@ -223,7 +223,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="peripheral|app/mijia_mesh_app.c|mijia_ble_libs/mesh_auth|mijia_ble_libs/secure_auth|protocol/bluetooth/bt_mesh|create_bl_files.bat" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="app/mijia_mesh_app.c|mijia_ble_libs/mesh_auth|mijia_ble_libs/secure_auth|protocol/bluetooth/bt_mesh|create_bl_files.bat" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -449,7 +449,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="peripheral|app/mijia_mesh_app.c|mijia_ble_libs/mesh_auth|mijia_ble_libs/secure_auth|protocol/bluetooth/bt_mesh|create_bl_files.bat" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="app/mijia_mesh_app.c|mijia_ble_libs/mesh_auth|mijia_ble_libs/secure_auth|protocol/bluetooth/bt_mesh|create_bl_files.bat" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -814,7 +814,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="peripheral|app/mijia_mesh_app.c|mijia_ble_libs/mesh_auth|mijia_ble_libs/secure_auth|protocol/bluetooth/bt_mesh" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="app/mijia_mesh_app.c|mijia_ble_libs/mesh_auth|mijia_ble_libs/secure_auth|protocol/bluetooth/bt_mesh" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

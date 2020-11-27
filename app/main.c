@@ -59,6 +59,8 @@
 
 #include "mi_config.h"
 
+#include "key.h"
+
 
 #define DEVICE_NAME                    "stand_demo"
 #ifndef MAX_CONNECTIONS
@@ -133,7 +135,7 @@ void flush_keyboard_buffer(void)
     while(SEGGER_RTT_ReadNoLock(0, tmp, 16));
 }
 
-#if 0
+
 void gpio_irq_handler(uint8_t pin)
 {
     uint32_t t_diff;
@@ -152,7 +154,7 @@ void gpio_irq_handler(uint8_t pin)
             }
         }
     }
-
+#if 0
     if (pin == BSP_BUTTON1_PIN) {
         if (GPIO_PinInGet(BSP_BUTTON0_PORT, BSP_BUTTON1_PIN) == 0) {
             // PB0 pressed - record RTCC timestamp
@@ -167,9 +169,10 @@ void gpio_irq_handler(uint8_t pin)
             }
         }
     }
+#endif
 }
 
-
+#if 0
 void button_init(void)
 {
     // configure pushbutton PB0 and PB1 as inputs, with pull-up enabled
@@ -346,7 +349,7 @@ int main()
     gecko_bgapi_class_hardware_init();
     gecko_bgapi_class_flash_init();
 
-    //button_init();
+    button_init();
     //time_init(NULL);
 
 

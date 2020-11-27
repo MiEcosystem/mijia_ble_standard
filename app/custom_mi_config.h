@@ -31,12 +31,12 @@
 /**
  * @note Device side has RESET button or not.
  */
-#define HAVE_RESET_BUTTON      0
+#define HAVE_RESET_BUTTON      1
 
 /**
  * @note Device side has bind confirm button.
  */
-#define HAVE_CONFIRM_BUTTON    0
+#define HAVE_CONFIRM_BUTTON    1
 
 #define OBJ_QUEUE_SIZE         8
 

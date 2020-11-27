@@ -502,7 +502,7 @@
 // For using the selected feature you may need additional drivers. Check an appropriate SDK example for reference.
 
 // #define FEATURE_LCD_SUPPORT
-// #define FEATURE_LED_BUTTON_ON_SAME_PIN
+#define FEATURE_LED_BUTTON_ON_SAME_PIN
 // #define FEATURE_SPI_FLASH
 // #define FEATURE_IOEXPANDER
 // #define FEATURE_PA_INPUT_FROM_VBAT
@@ -513,8 +513,8 @@
 // #define FEATURE_I2C_SENSOR
 // #define FEATURE_LFXO
 // #define FEATURE_EFP
-// #define FEATURE_ONE_LED
-// #define FEATURE_ONE_BUTTON
+#define FEATURE_ONE_LED
+#define FEATURE_ONE_BUTTON
 // #define FEATURE_BOARD_DETECTED
 #endif
 
