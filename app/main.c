@@ -82,7 +82,7 @@
 #define LONG_PRESS_TIME_TICKS           (32768)
 #define EXT_SIGNAL_PB0_SHORT_PRESS      (1<<0)
 #define EXT_SIGNAL_PB0_LONG_PRESS       (1<<1)
-#define EXT_SIGNAL_PB1_SHORT_PRESS      (1<<2)
+//#define EXT_SIGNAL_PB1_SHORT_PRESS      (1<<2)
 
 static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 
@@ -115,7 +115,7 @@ static gecko_configuration_t config = {
 };
 
 /// button press timestamp for very long/long/short Push Button 0 press detection
-static uint32 pb0_press, pb1_press;
+static uint32 pb0_press;
 
 extern void time_init(struct tm * time_ptr);
 static void advertising_init(uint8_t solicite_bind);
@@ -154,49 +154,39 @@ void gpio_irq_handler(uint8_t pin)
             }
         }
     }
-#if 0
-    if (pin == BSP_BUTTON1_PIN) {
-        if (GPIO_PinInGet(BSP_BUTTON0_PORT, BSP_BUTTON1_PIN) == 0) {
-            // PB0 pressed - record RTCC timestamp
-            pb1_press = RTCC_CounterGet();
-        } else {
-            // PB0 released - check if it was short or long press
-            t_diff = RTCC_CounterGet() - pb1_press;
-            if (t_diff < LONG_PRESS_TIME_TICKS) {
-                gecko_external_signal(EXT_SIGNAL_PB1_SHORT_PRESS);
-            } else {
-
-            }
-        }
-    }
-#endif
 }
 
-#if 0
-void button_init(void)
-{
-    // configure pushbutton PB0 and PB1 as inputs, with pull-up enabled
-    GPIO_PinModeSet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN, gpioModeInputPull, 1);
-    //GPIO_PinModeSet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN, gpioModeInputPull, 1);
-
-    GPIOINT_Init();
-
-    /* configure interrupt for PB0 and PB1, both falling and rising edges */
-    GPIO_ExtIntConfig(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN, BSP_BUTTON0_PIN, true, true, true);
-    //GPIO_ExtIntConfig(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN, BSP_BUTTON1_PIN, true, true, true);
-
-    /* register the callback function that is invoked when interrupt occurs */
-    GPIOINT_CallbackRegister(BSP_BUTTON0_PIN, gpio_irq_handler);
-    //GPIOINT_CallbackRegister(BSP_BUTTON1_PIN, gpio_irq_handler);
-}
-#endif
 
 static void enqueue_new_objs()
 {
+#if 0
     static int8_t  battery;
 
     battery = battery < 100 ? battery + 1 : 0;
     mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery, 0);
+#else
+
+    static float t1 = 10.0;
+    static uint8_t t2 = 20;
+
+    if(t1 < 40.0)
+        t1 = t1 + 1.0;
+    else
+        t1 = 10.0;
+
+    if(t2 < 80)
+        t2 = t2 + 1;
+    else
+        t2 = 20;
+
+    MI_LOG_DEBUG("t1 = %d\n", (int)t1);
+    MI_LOG_DEBUG("t2 = %d\n", t2);
+
+    miot_spec_property_changed(2, 1001, 4, &t1, 0);
+    miot_spec_property_changed(2, 1002, 1, &t2, 0);
+    miot_spec_property_changed(3, 1003, 1, &t2, 0);
+    miot_spec_event_occurred(3, 1001, 0, NULL, 0);
+#endif
 }
 
 
@@ -295,9 +285,9 @@ static void process_external_signal(struct gecko_cmd_packet *evt)
         gecko_cmd_hardware_set_soft_timer(0, TIMER_ID_OBJ_PERIOD_ADV, 0);
     }
 
-    if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB1_SHORT_PRESS) {
+    //if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB1_SHORT_PRESS) {
         // TODO
-    }
+    //}
 }
 
 static void user_stack_event_handler(struct gecko_cmd_packet* evt)
@@ -351,8 +341,6 @@ int main()
 
     button_init();
     //time_init(NULL);
-
-
 
 
     /* Event pointer for handling events */

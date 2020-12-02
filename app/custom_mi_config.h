@@ -10,12 +10,12 @@
  * @note Device firmware version. It'll be filled in Version character appended to
  * mijia ble libs version.
  */
-#define DEVELOPER_VERSION      0115
+#define DEVELOPER_VERSION      0001
 
 /**
  * @note Product identification got from xiaomi IoT developer platform.
  */
-#define PRODUCT_ID             156                 // xiaomi BLE devboard
+#define PRODUCT_ID             4209               // miot.sensor_ht.mars01  // 156 ----  xiaomi BLE devboard
 #define MODEL_NAME             "xiaomi.dev.ble"   //"yeelink.light.dnlight2"
 
 /**
@@ -23,7 +23,7 @@
  */
 //#define MI_MESH_ENABLED        0
 
-#define USE_GATT_SPEC          0
+#define USE_GATT_SPEC          1
 #define USE_MIBLE_OTA          0
 
 #define USE_MCU_OTA            0
