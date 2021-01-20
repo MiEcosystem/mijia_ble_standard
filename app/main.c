@@ -94,11 +94,8 @@ static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 /* Bluetooth stack configuration parameters (see "UG136: Silicon Labs Bluetooth C Application Developer's Guide" for details on each parameter) */
 static gecko_configuration_t config = {
   .config_flags = 0,                                   /* Check flag options from UG136 */
-#if BSP_CLK_LFXO_PRESENT
   .sleep.flags = SLEEP_FLAGS_DEEP_SLEEP_ENABLE,        /* Sleep is enabled */
-#else
   .sleep.flags = 0,
-#endif // LFXO
   .bluetooth.max_connections = MAX_CONNECTIONS,        /* Maximum number of simultaneous connections */
   .bluetooth.max_advertisers = MAX_ADVERTISERS,        /* Maximum number of advertisement sets */
   .bluetooth.heap = bluetooth_stack_heap,              /* Bluetooth stack memory for connection management */
