@@ -53,6 +53,10 @@
 #include "mijia_profiles/mi_service_server.h"
 #include "mijia_profiles/stdio_service_server.h"
 
+#include "ble_spec/gatt_spec.h"
+
+#include "third_party/SEGGER_RTT/SEGGER_RTT.h"
+
 #undef  MI_LOG_MODULE_NAME
 #define MI_LOG_MODULE_NAME __FILE__
 #include "mible_log.h"
@@ -61,8 +65,11 @@
 
 #include "key.h"
 
+#include "miio_user_api.h"
 
-#define DEVICE_NAME                    "stand_demo"
+#define TEST_GATT_SPEC  1
+
+#define DEVICE_NAME                    "stand_demo666"
 #ifndef MAX_CONNECTIONS
 #define MAX_CONNECTIONS                1
 #endif
@@ -72,17 +79,15 @@
 #endif
 
 #define MSEC_TO_UNITS(TIME, RESOLUTION) (((TIME) * 1000) / (RESOLUTION))
-#define MS_2_TIMERTICK(ms)             ((TIMER_CLK_FREQ * (uint32)(ms)) / 1000)
-#define SEC_2_TIMERTICK(sec)           ((TIMER_CLK_FREQ * (sec)))
 
-#define TIMER_ID_OBJ_PERIOD_ADV        11
-#define TIMER_ID_CLEAR_BIND_CFM        12
+/// Number of ticks after which press is considered to be long (3s)
+#define LONG_PRESS_TIME_TICKS           (32768*3)
 
-/// Number of ticks after which press is considered to be long (1s)
-#define LONG_PRESS_TIME_TICKS           (32768)
-#define EXT_SIGNAL_PB0_SHORT_PRESS      (1<<0)
-#define EXT_SIGNAL_PB0_LONG_PRESS       (1<<1)
-//#define EXT_SIGNAL_PB1_SHORT_PRESS      (1<<2)
+#define SOFT_TIMER_TIMEOUT  60
+
+#define BIND_INIT            0
+#define BIND_CONFIRMED       1
+
 
 static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 
@@ -111,15 +116,19 @@ static gecko_configuration_t config = {
 #endif // (HAL_PA_ENABLE)
   .rf.flags = GECKO_RF_CONFIG_ANTENNA,                 /* Enable antenna configuration. */
   .rf.antenna = GECKO_RF_ANTENNA,                      /* Select antenna path! */
-  .max_timers = 8,
+  .max_timers = 10,
 };
 
 /// button press timestamp for very long/long/short Push Button 0 press detection
 static uint32 pb0_press;
 
-extern void time_init(struct tm * time_ptr);
-static void advertising_init(uint8_t solicite_bind);
-static void advertising_start(void);
+static void * mibeacon_period_adv_timer = NULL;
+static void * mibeacon_bind_confirm_timer = NULL;
+
+//extern void time_init(struct tm * time_ptr);
+
+//static void spec_recv_event_handler(mible_spec_command_t evt, uint16_t tid,
+//	uint8_t p_num, spec_property_t *param);
 
 int scan_keyboard(uint8_t *pdata, uint8_t len)
 {
@@ -156,40 +165,35 @@ void gpio_irq_handler(uint8_t pin)
     }
 }
 
-
-static void enqueue_new_objs()
+static void enqueue_new_objs(void)
 {
+	MI_LOG_INFO("\n enqueue_new_objs \n");
 #if 0
+	//Battery ---- siid 6
     static int8_t  battery;
-
     battery = battery < 100 ? battery + 1 : 0;
-    mibeacon_obj_enque(MI_STA_BATTERY, sizeof(battery), &battery, 0);
+
+    miio_ble_property_changed(3, 1101, property_value_new_float(battery), 0);
 #else
+    //static uint16_t tem = 50;
+    //miio_ble_property_changed(2, 1001, property_value_new_float(tem), 0);
+    //tem = tem < 1000 ? tem + 50 : 50;
 
-    static float t1 = 10.0;
-    static uint8_t t2 = 20;
+    //static uint16_t hum = 50;
+    //miio_ble_property_changed(2, 1002, property_value_new_uchar(hum), 0);
+    //hum = hum < 1000 ? hum + 50 : 50;
 
-    if(t1 < 40.0)
-        t1 = t1 + 1.0;
-    else
-        t1 = 10.0;
-
-    if(t2 < 80)
-        t2 = t2 + 1;
-    else
-        t2 = 20;
-
-    MI_LOG_DEBUG("t1 = %d\n", (int)t1);
-    MI_LOG_DEBUG("t2 = %d\n", t2);
-
-    miot_spec_property_changed(2, 1001, 4, &t1, 0);
-    miot_spec_property_changed(2, 1002, 1, &t2, 0);
-    miot_spec_property_changed(3, 1003, 1, &t2, 0);
-    miot_spec_event_occurred(3, 1001, 0, NULL, 0);
+    static uint8_t buff[3] = {0};
+    static uint32_t time = 0;
+    miio_ble_obj_enque(0x0003, 0, NULL, 0);
+    miio_ble_obj_enque(0x0004, 0, NULL, 1);
+    miio_ble_obj_enque(0x000f, 3, buff, 0);
+    miio_ble_obj_enque(0x1017, 4, &time, 1);
+    time += 2;
 #endif
 }
 
-
+#include "standard_auth/mible_standard_auth.h"
 static void mi_schd_event_handler(schd_evt_t *p_event)
 {
     MI_LOG_INFO("USER CUSTOM CALLBACK RECV EVT ID %d\n", p_event->id);
@@ -203,14 +207,11 @@ static void mi_schd_event_handler(schd_evt_t *p_event)
         break;
 
     case SCHD_EVT_REG_SUCCESS:
-        // set register bit.
-        advertising_init(0);
-        gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(600), TIMER_ID_OBJ_PERIOD_ADV, 0);
+    	miio_system_reboot();
         break;
 
     case SCHD_EVT_KEY_DEL_SUCC:
-        // clear register bit.
-        advertising_init(0);
+    	miio_system_reboot();
         break;
 
     default:
@@ -230,6 +231,41 @@ static void stdio_rx_handler(uint8_t* data, uint8_t len)
     MI_ERR_CHECK(errno);
 }
 
+static void mibeacon_period_adv_handler(void * p_context)
+{
+	enqueue_new_objs();
+}
+
+static void mibeacon_bind_confirm_handler(void * p_context)
+{
+	MI_LOG_INFO("clear bind confirm bit !\n");
+	miio_ble_user_adv_init(BIND_INIT);
+	miio_timer_stop(mibeacon_bind_confirm_timer);
+}
+
+#if TEST_GATT_SPEC
+void on_property_set(property_operation_t *o)
+{
+    MI_LOG_INFO("[on_property_set] siid %d, piid %d\n", o->siid, o->piid);
+
+    if (o->value == NULL)
+    {
+        MI_LOG_ERROR("value is NULL\n");
+        return;
+    }
+    o->code = 0;
+}
+void on_property_get(property_operation_t *o)
+{
+    MI_LOG_INFO("[on_property_get] siid %d, piid %d\n", o->siid, o->piid);
+    o->value = property_value_new_float(888.88);
+}
+void on_action_invoke(action_operation_t *o)
+{
+    MI_LOG_INFO("[on_action_invoke] siid %d, aiid %d\n", o->siid, o->aiid);
+    o->code = 0;
+}
+#endif
 static void process_system_boot(struct gecko_cmd_packet *evt)
 {
     struct gecko_msg_system_boot_evt_t boot_info = evt->data.evt_system_boot;
@@ -243,46 +279,72 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
     mi_scheduler_init(10, mi_schd_event_handler, NULL);
     mi_scheduler_start(SYS_KEY_RESTORE);
 
+    mible_gap_scan_stop();
+
     /* Start general advertising and enable connections. */
-    advertising_init(0);
-    advertising_start();
+    miio_ble_user_adv_init(BIND_INIT);
 
-    // start periodic advertise objects.
-    gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(600), TIMER_ID_OBJ_PERIOD_ADV, 0);
-}
+    miio_timer_create(&mibeacon_bind_confirm_timer, mibeacon_bind_confirm_handler, MIBLE_TIMER_SINGLE_SHOT);
 
+    if(miio_ble_get_registered_state())
+    {
+    	MI_LOG_INFO("reg 1\n");
+    	//miio_ble_user_adv_stop();
+    	miio_ble_user_adv_start(500);
 
-static void process_softtimer(struct gecko_cmd_packet *evt)
-{
-    switch (evt->data.evt_hardware_soft_timer.handle) {
-    case TIMER_ID_OBJ_PERIOD_ADV:
-        MI_LOG_WARNING("systime %d\n", gecko_cmd_hardware_get_time()->seconds);
-        enqueue_new_objs();
-        break;
-
-    case TIMER_ID_CLEAR_BIND_CFM:
-        advertising_init(0);
-        break;
+        // start periodic advertise objects.
+    	miio_timer_create(&mibeacon_period_adv_timer, mibeacon_period_adv_handler, MIBLE_TIMER_REPEATED);
+    	mible_timer_start(mibeacon_period_adv_timer, 60*1000*2, NULL);
     }
+    else
+    {
+    	MI_LOG_INFO("reg 0\n");
+    	miio_ble_user_adv_start(500);
+    	mibeacon_set_adv_timeout(1000*60*30);
+    }
+
+#if TEST_GATT_SPEC
+    miio_gatt_spec_init(on_property_set, on_property_get, on_action_invoke, 0);
+#endif
+
 }
 
+void gatt_prop()
+{
+    miio_gatt_properties_changed(1, 2, property_value_new_boolean(1));
+    miio_gatt_properties_changed(2, 4, property_value_new_string("properties_changed test 2.4!!!"));
+    miio_gatt_properties_changed(3, 6, property_value_new_float(123.456));
+}
+void gatt_event()
+{
+    miio_gatt_event_occurred(6, 1, NULL);
 
+    arguments_t *newArgs = arguments_new();
+    newArgs->size = 2;
+    newArgs->arguments[0].piid = 1;
+    newArgs->arguments[0].value = property_value_new_ulong(2);
+    newArgs->arguments[1].piid = 2;
+    newArgs->arguments[1].value = property_value_new_longlong(-99999);
+    miio_gatt_event_occurred(6, 2, newArgs);
+}
 static void process_external_signal(struct gecko_cmd_packet *evt)
 {
     if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB0_SHORT_PRESS) {
         if(get_mi_reg_stat()) {
-            enqueue_new_objs();
+            //enqueue_new_objs();
+        	//miio_ble_user_adv_start(500);
+        	//gatt_prop();
         } else {
             MI_LOG_DEBUG("Set bind confirm bit in mibeacon.\n");
-            advertising_init(1);
-            gecko_cmd_hardware_set_soft_timer(SEC_2_TIMERTICK(10), TIMER_ID_CLEAR_BIND_CFM, 1);
+            miio_ble_user_adv_init(BIND_CONFIRMED);
+            miio_timer_start(mibeacon_bind_confirm_timer, 10*1000, NULL);
         }
     }
 
     if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB0_LONG_PRESS) {
         MI_LOG_DEBUG("Factory reset.\n");
-        mi_scheduler_start(SYS_KEY_DELETE);
-        gecko_cmd_hardware_set_soft_timer(0, TIMER_ID_OBJ_PERIOD_ADV, 0);
+        miio_system_restore();
+    	//gatt_event();
     }
 
     //if (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_PB1_SHORT_PRESS) {
@@ -302,7 +364,7 @@ static void user_stack_event_handler(struct gecko_cmd_packet* evt)
         break;
 
     case gecko_evt_hardware_soft_timer_id:
-        process_softtimer(evt);
+        //process_softtimer(evt);
         break;
 
     case gecko_evt_system_external_signal_id:
@@ -326,7 +388,7 @@ int main()
     // Setup SWD for code correlation
     //BSP_TraceSwoSetup();
 
-    MI_LOG_INFO(RTT_CTRL_CLEAR"\n");
+    MI_LOG_INFO("%s \n", RTT_CTRL_CLEAR);
     MI_LOG_INFO("Compiled %s %s\n", __DATE__, __TIME__);
     MI_LOG_INFO("system clock %d Hz\n", SystemCoreClockGet());
 
@@ -366,28 +428,5 @@ int main()
         gecko_sleep_for_ms(gecko_can_sleep_ms());
 #endif
     }
-}
-
-static void advertising_init(uint8_t solicite_bind)
-{
-    MI_LOG_INFO("advertising init...\n");
-
-    // add user customized adv struct : complete local name
-    uint8_t user_data[31], user_dlen;
-    user_data[0] = 1 + strlen(DEVICE_NAME);
-    user_data[1] = 9;  // complete local name
-    strcpy((char*)&user_data[2], DEVICE_NAME);
-    user_dlen = 2 + strlen(DEVICE_NAME);
-
-    if(MI_SUCCESS != mibeacon_adv_data_set(solicite_bind, 0, user_data, user_dlen)){
-        MI_LOG_ERROR("mibeacon_data_set failed. \r\n");
-    }
-}
-
-
-static void advertising_start(void)
-{
-    MI_LOG_INFO("advertising start...\n");
-    mibeacon_adv_start(300);
 }
 

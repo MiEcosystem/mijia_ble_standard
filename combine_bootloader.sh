@@ -26,3 +26,4 @@ echo " "
 echo "Add bootloader to image (${FILENAME}-with-btl.hex)"
 echo " "
 "${COMMANDER}" convert "${BTL}" "${FILENAME}.hex" -o "${FILENAME}-with-btl.hex"
+"${COMMANDER}" gbl create "${FILENAME}-ota.gbl" --app "${FILENAME}.s37" --compress lzma

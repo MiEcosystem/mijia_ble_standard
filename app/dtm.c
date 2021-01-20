@@ -392,7 +392,7 @@ static void process_setup_command(enum cmd_type cmd_type,
             snprintf(szBuf, 64, "PRODUCT_ID : %d \r\n", PRODUCT_ID);
             UartSendStr(szBuf);
 
-            snprintf(szBuf, 64, "FW_VERSION : %s \r\n", MIBLE_LIB_AND_DEVELOPER_VERSION);
+            //snprintf(szBuf, 64, "FW_VERSION : %s \r\n", MIBLE_LIB_AND_DEVELOPER_VERSION);
             UartSendStr(szBuf);
 
             bt_address = gecko_cmd_system_get_bt_address();

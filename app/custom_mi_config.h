@@ -15,8 +15,8 @@
 /**
  * @note Product identification got from xiaomi IoT developer platform.
  */
-#define PRODUCT_ID             4209               // miot.sensor_ht.mars01  // 156 ----  xiaomi BLE devboard
-#define MODEL_NAME             "xiaomi.dev.ble"   //"yeelink.light.dnlight2"
+#define PRODUCT_ID             156
+#define MODEL_NAME             "xiaomi.dev.ble"
 
 /**
  * @note Device access method : BLE or Mesh.
@@ -24,7 +24,7 @@
 //#define MI_MESH_ENABLED        0
 
 #define USE_GATT_SPEC          1
-#define USE_MIBLE_OTA          0
+#define USE_MIBLE_OTA          1
 
 #define USE_MCU_OTA            0
 #define MCU_OTA_DEMO           0
@@ -38,8 +38,6 @@
  */
 #define HAVE_CONFIRM_BUTTON    1
 
-#define OBJ_QUEUE_SIZE         8
-
 /**
  * @note Process mi scheduler in main loop (non-interrupt context).
  */
@@ -47,7 +45,6 @@
 
 #define DFU_NVM_START           (288 * 1024UL)                         // 16KB loader + 272KB app
 #define DFU_NVM_SIZE            (192 * 1024UL)                         // 192KB OTA download cache
-#define MAX_ATT_MTU             247
 
 /* DEBUG */
 #define DEBUG_MIBLE            0
