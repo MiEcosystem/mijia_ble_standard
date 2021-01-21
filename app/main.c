@@ -93,14 +93,13 @@ static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 
 /* Bluetooth stack configuration parameters (see "UG136: Silicon Labs Bluetooth C Application Developer's Guide" for details on each parameter) */
 static gecko_configuration_t config = {
-  .config_flags = 0,                                   /* Check flag options from UG136 */
+  //.config_flags = 0,                                   /* Check flag options from UG136 */
   .sleep.flags = SLEEP_FLAGS_DEEP_SLEEP_ENABLE,        /* Sleep is enabled */
-  .sleep.flags = 0,
   .bluetooth.max_connections = MAX_CONNECTIONS,        /* Maximum number of simultaneous connections */
   .bluetooth.max_advertisers = MAX_ADVERTISERS,        /* Maximum number of advertisement sets */
   .bluetooth.heap = bluetooth_stack_heap,              /* Bluetooth stack memory for connection management */
   .bluetooth.heap_size = sizeof(bluetooth_stack_heap), /* Bluetooth stack memory for connection management */
-  .bluetooth.sleep_clock_accuracy = 100,               /* Accuracy of the Low Frequency Crystal Oscillator in ppm. *
+  .bluetooth.sleep_clock_accuracy = 500,               /* Accuracy of the Low Frequency Crystal Oscillator in ppm. *
                                                         * Do not modify if you are using a module                  */
   .gattdb = &bg_gattdb_data,                           /* Pointer to GATT database */
 #if (HAL_PA_ENABLE)
@@ -111,8 +110,8 @@ static gecko_configuration_t config = {
   .pa.input = GECKO_RADIO_PA_INPUT_DCDC,               /* Configure PA input to DCDC */
 #endif // defined(FEATURE_PA_INPUT_FROM_VBAT)
 #endif // (HAL_PA_ENABLE)
-  .rf.flags = GECKO_RF_CONFIG_ANTENNA,                 /* Enable antenna configuration. */
-  .rf.antenna = GECKO_RF_ANTENNA,                      /* Select antenna path! */
+  //.rf.flags = GECKO_RF_CONFIG_ANTENNA,                 /* Enable antenna configuration. */
+  //.rf.antenna = GECKO_RF_ANTENNA,                      /* Select antenna path! */
   .max_timers = 10,
 };
 
@@ -408,7 +407,7 @@ int main()
     while (1) {
         /* Process stack event */
         do {
-            evt = gecko_peek_event();
+            evt = gecko_wait_event();
             if (evt != NULL) {
                 mible_stack_event_handler(evt);
 

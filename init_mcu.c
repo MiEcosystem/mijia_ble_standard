@@ -58,6 +58,13 @@ void initMcu(void)
   // Device errata
   CHIP_Init();
 
+  // Set up DC-DC converter
+  EMU_DCDCInit_TypeDef dcdcInit = EMU_DCDCINIT_DEFAULT;
+  #if HAL_DCDC_BYPASS
+  dcdcInit.dcdcMode = emuDcdcMode_Bypass;
+  #endif
+  EMU_DCDCInit(&dcdcInit);
+
   // Set up clocks
   initMcu_clocks();
 
@@ -103,6 +110,13 @@ void initMcu(void)
 
 }
 
+void setMcu_PLL(void)
+{
+    CMU_DPLLInit_TypeDef dpllInit = CMU_DPLL_HFXO_TO_76_8MHZ;
+    CMU_DPLLLock(&dpllInit);
+    CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
+}
+
 static void initMcu_clocks(void)
 {
   // Initialize HFXO
@@ -110,24 +124,36 @@ static void initMcu_clocks(void)
 
   // Set system HFXO frequency
   SystemHFXOClockSet(BSP_CLK_HFXO_FREQ);
-
+#if USE_HFXO_AS_SYSCLK
   CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFXO);
+#else
+  CMU_DPLLInit_TypeDef dpllInit = CMU_DPLL_HFXO_TO_76_8MHZ;
+  CMU_DPLLLock(&dpllInit);
+  CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
+#endif
 
-  #warning "WARNING: Use the CMU_LFXOInit() function only if the LFXO hardware is actually present!"
+#if BSP_CLK_LFXO_PRESENT
   // Initialize LFXO
-  //CMU_LFXOInit_TypeDef lfxoInit = BSP_CLK_LFXO_INIT;
-  //lfxoInit.capTune = BSP_CLK_LFXO_CTUNE;
-  //CMU_LFXOInit(&lfxoInit);
+  CMU_LFXOInit_TypeDef lfxoInit = BSP_CLK_LFXO_INIT;
+  lfxoInit.capTune = BSP_CLK_LFXO_CTUNE;
+  CMU_LFXOInit(&lfxoInit);
   // Set system LFXO frequency
-  //SystemLFXOClockSet(BSP_CLK_LFXO_FREQ);
+  SystemLFXOClockSet(BSP_CLK_LFXO_FREQ);
 
-  // Select LFRCO as low frequency clock source
-  // When using LFRCO, be sure to have .bluetooth.sleep_clock_accuracy set to 500 (ppm)
+  // Select LFXO as low frequency clock source
+  CMU_ClockSelectSet(cmuClock_RTCC, cmuSelect_LFXO);
+  CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFXO);
+  CMU_ClockSelectSet(cmuClock_EM4GRPACLK, cmuSelect_LFXO);
+  CMU_ClockSelectSet(cmuClock_WDOG0, cmuSelect_LFXO);
+#else
+  CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
+  CMU_LFRCOSetPrecision(cmuPrecisionHigh);
+  // Set LFRCO if selected as LFCLK
   CMU_ClockSelectSet(cmuClock_RTCC, cmuSelect_LFRCO);
   CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFRCO);
   CMU_ClockSelectSet(cmuClock_EM4GRPACLK, cmuSelect_LFRCO);
   CMU_ClockSelectSet(cmuClock_WDOG0, cmuSelect_LFRCO);
-  CMU_LFRCOSetPrecision(cmuPrecisionHigh);
+#endif
 
 }
 
