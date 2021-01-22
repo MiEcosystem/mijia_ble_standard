@@ -88,6 +88,10 @@
 #define BIND_INIT            0
 #define BIND_CONFIRMED       1
 
+#define BIND_CONFIRM_TIMEOUT (10*1000)
+#define MIBEACON_ADV_TIMEOUT (30*60*1000)
+#define MIBEACON_OBJ_PERIOD  (2*60*1000)
+
 
 static uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS)];
 
@@ -290,13 +294,13 @@ static void process_system_boot(struct gecko_cmd_packet *evt)
 
         // start periodic advertise objects.
     	miio_timer_create(&mibeacon_period_adv_timer, mibeacon_period_adv_handler, MIBLE_TIMER_REPEATED);
-    	mible_timer_start(mibeacon_period_adv_timer, 60*1000*2, NULL);
+    	miio_timer_start(mibeacon_period_adv_timer, MIBEACON_OBJ_PERIOD, NULL);
     }
     else
     {
     	MI_LOG_INFO("reg 0\n");
     	miio_ble_user_adv_start(500);
-    	mibeacon_set_adv_timeout(1000*60*30);
+    	miio_ble_set_adv_timeout(MIBEACON_ADV_TIMEOUT);
     }
 
 #if TEST_GATT_SPEC
@@ -333,7 +337,7 @@ static void process_external_signal(struct gecko_cmd_packet *evt)
         } else {
             MI_LOG_DEBUG("Set bind confirm bit in mibeacon.\n");
             miio_ble_user_adv_init(BIND_CONFIRMED);
-            miio_timer_start(mibeacon_bind_confirm_timer, 10*1000, NULL);
+            miio_timer_start(mibeacon_bind_confirm_timer, BIND_CONFIRM_TIMEOUT, NULL);
         }
     }
 
