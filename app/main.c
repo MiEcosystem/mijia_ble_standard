@@ -381,7 +381,7 @@ int main()
     // Initialize device
     initMcu();
     // Initialize board
-    initBoard();
+    //initBoard();
     // Initialize application
     initApp();
 
@@ -410,15 +410,13 @@ int main()
 
     while (1) {
         /* Process stack event */
-        do {
-            evt = gecko_wait_event();
-            if (evt != NULL) {
-                mible_stack_event_handler(evt);
+        evt = gecko_wait_event();
+        if (evt != NULL) {
+            mible_stack_event_handler(evt);
 
-                /* customized event handler can be added here. */
-                user_stack_event_handler(evt);
-            }
-        } while (evt != NULL);
+            /* customized event handler can be added here. */
+            user_stack_event_handler(evt);
+        }
 
         /* Process mi scheduler */
         mi_schd_process();
